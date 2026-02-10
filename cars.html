@@ -17,7 +17,31 @@
     .card { background:#d9d9d9; border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:8px; }
     .card h3 { margin:0; font-size:18px; }
     .muted { color:#333; font-size:14px; }
-    .link { text-decoration:none; color:black; background:#bdbdbd; padding:8px 10px; border-radius:12px; width:fit-content; }
+
+    .actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    .link {
+      text-decoration:none;
+      color:black;
+      background:#bdbdbd;
+      padding:8px 10px;
+      border-radius:12px;
+      width:fit-content;
+      cursor:pointer;
+      border: none;
+      font-size: 14px;
+    }
+
+    /* NEW: blue "Book" link/button */
+    .book {
+      background: transparent;
+      color: #2563eb;
+      text-decoration: underline;
+      padding: 0;
+      border-radius: 0;
+    }
+    .book:hover { color:#1d4ed8; }
+
     #status { margin:10px 0; color:#444; }
   </style>
 </head>
@@ -42,7 +66,6 @@
     <div id="carGrid" class="grid"></div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/cars.js"></script>
+  <script src="cars.js"></script>
 </body>
 </html>

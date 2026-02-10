@@ -1,11 +1,15 @@
+const API_BASE = "https://server-side-zqaz.onrender.com";
+
 function requireLogin() {
-  const userStr = localStorage.getItem("user");
-  if (!userStr) window.location.href = "index.html";
+  const email = localStorage.getItem("userEmail");
+  if (!email) window.location.href = "index.html";
+  return email;
 }
-requireLogin();
+const userEmail = requireLogin();
 
 document.getElementById("logout").addEventListener("click", () => {
-  localStorage.removeItem("user");
+  localStorage.removeItem("userEmail");
+  localStorage.removeItem("isAdmin");
   window.location.href = "index.html";
 });
 
@@ -20,11 +24,13 @@ document.getElementById("pillDropoff").textContent = `Drop Off: ${dropoff || "(a
 
 function normalizeCar(car) {
   return {
-    id: car.id ?? car.vehicleId ?? car.vehicle_id ?? car["Vehicle ID"],
+    id: car.vehicleId ?? car.id ?? car["Vehicle ID"],
     manufacturer: car.manufacturer ?? car.Manufacturer ?? car["Manufacturer"] ?? "Unknown",
     model: car.model ?? car.Model ?? car["Model"] ?? "",
-    type: car.vehicle_type ?? car.vehicleType ?? car["Vehicle Type"] ?? "—",
-    availability: car.availability ?? car.Availability ?? car["Availability"]
+    type: car.vehicleType ?? car.vehicle_type ?? car["Vehicle Type"] ?? "—",
+    drivetrain: car.drivetrain ?? car.Drivetrain ?? car["Drivetrain"] ?? "—",
+    price: car.price ?? car.Price ?? car["Price"] ?? null,
+    availability: car.availability ?? car.Availability ?? car["Availability"],
   };
 }
 
@@ -34,27 +40,71 @@ async function loadCars() {
 
   try {
     const res = await fetch(`${API_BASE}/cars`);
-    const data = await res.json();
+    const data = await res.json().catch(() => []);
     if (!res.ok) throw new Error(data.error || "Could not load cars");
 
-    const cars = data.map(normalizeCar);
+    const cars = Array.isArray(data) ? data.map(normalizeCar) : [];
 
     grid.innerHTML = "";
-    status.textContent = `${cars.length} cars found`;
+    status.textContent = `${cars.length} available cars found`;
 
-    cars.forEach(raw => {
+    cars.forEach((raw) => {
       const c = normalizeCar(raw);
+
       const card = document.createElement("div");
       card.className = "card";
+
+      const priceText =
+        c.price === null || c.price === undefined || c.price === ""
+          ? "—"
+          : `$${Number(c.price).toLocaleString()}`;
+
       card.innerHTML = `
         <h3>${c.manufacturer} ${c.model}</h3>
         <div class="muted">Type: ${c.type}</div>
-        <div class="muted">Available: ${c.availability ? "Yes" : "No"}</div>
-        <a class="link" href="car.html?id=${encodeURIComponent(c.id)}">View Details</a>
+        <div class="muted">Drivetrain: ${c.drivetrain}</div>
+        <div class="muted">Price: ${priceText}</div>
+        <div class="actions">
+          <button class="link book" data-book="${encodeURIComponent(c.id)}">Book</button>
+        </div>
       `;
+
       grid.appendChild(card);
     });
 
+    // Wire up all Book buttons
+    grid.querySelectorAll("[data-book]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const vehicleId = btn.getAttribute("data-book");
+        await bookCar(vehicleId);
+      });
+    });
+  } catch (err) {
+    status.textContent = `Error: ${err.message}`;
+  }
+}
+
+async function bookCar(vehicleId) {
+  const status = document.getElementById("status");
+
+  try {
+    status.textContent = "Booking car…";
+
+    const res = await fetch(`${API_BASE}/cars/${vehicleId}/book`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Email": userEmail, // behind-the-scenes link to your user row
+      },
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Booking failed");
+
+    status.textContent = `Booked! Sale ID #${data.saleId} — Vehicle #${data.vehicleId} — Price $${Number(data.priceSoldAt).toLocaleString()}`;
+
+    // Refresh list so booked car disappears
+    await loadCars();
   } catch (err) {
     status.textContent = `Error: ${err.message}`;
   }
