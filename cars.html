@@ -259,7 +259,7 @@ function renderCars(cars){
     const vehicleId = getField(car, "vehicle_id", "vehicleId", "VehicleID", "id");
     const manufacturer = getField(car, "manufacturer", "Manufacturer", "make", "Make") ?? "Unknown";
     const model = getField(car, "model", "Model") ?? "Model";
-    const year = getField(car, "year", "Year"); // optional
+    const year = getField(car, "year", "Year"); 
     const priceRaw = getField(car, "price", "Price", "price_per_day", "pricePerDay") ?? 0;
     const availabilityRaw = getField(car, "availability", "Availability", "available", "is_available") ?? 0;
     const vehicleType = getField(car, "vehicle_type", "VehicleType", "type", "Type");
