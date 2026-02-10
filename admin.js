@@ -1,45 +1,7 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
-const SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
 
-function requireSession() {
-  const email = localStorage.getItem("userEmail");
-  const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
-  const isAdmin = Number(localStorage.getItem("isAdmin") || "0");
-
-  if (!email || !loggedInAt) {
-    window.location.replace("index.html");
-    throw new Error("No session");
-  }
-  if (Date.now() - loggedInAt > SESSION_MS) {
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("loggedInAt");
-    localStorage.removeItem("isAdmin");
-    window.location.replace("index.html");
-    throw new Error("Session expired");
-  }
-  if (isAdmin !== 1) {
-    window.location.replace("home.html");
-    throw new Error("Not an admin");
-  }
-  return email;
-}
-const userEmail = requireSession();
-
-function $(id) { return document.getElementById(id) || null; }
-function warnMissing(id) { console.error(`admin.js: Missing element id="${id}" in admin.html`); }
-function elOrWarn(id) { const el = $(id); if (!el) warnMissing(id); return el; }
-function safeShow(el, display = "block") { if (el) el.style.display = display; }
-function safeSetText(el, txt) { if (el) el.textContent = txt; }
-function safeSetHTML(el, html) { if (el) el.innerHTML = html; }
-
-const statusEl = elOrWarn("status");
-const adminArea = elOrWarn("adminArea");
-const tableLinksEl = elOrWarn("tableLinks");
-const tableTitleEl = elOrWarn("tableTitle");
-const tableContainerEl = elOrWarn("tableContainer");
-const saveBtn = elOrWarn("saveBtn");
-const createBtn = elOrWarn("createBtn");
-const logoutBtn = elOrWarn("logoutBtn");
+// NOTE: admin page relies on localStorage email (set during login flow)
+let userEmail = localStorage.getItem("userEmail") || "";
 
 let currentTableKey = null;
 let currentRows = [];
@@ -47,28 +9,55 @@ let currentColumns = [];
 let editingRowId = null;
 let creating = false;
 
+const statusEl = document.getElementById("status");
+const adminArea = document.getElementById("adminArea");
+const tableLinksEl = document.getElementById("tableLinks");
+const tableTitleEl = document.getElementById("tableTitle");
+const tableContainerEl = document.getElementById("tableContainer");
+const saveBtn = document.getElementById("saveBtn");
+const createBtn = document.getElementById("createBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// ---------- small helpers ----------
 function normalizeCol(col) {
   return String(col || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
+
+// lock these from editing (auto-increment IDs)
 function isLockedIdColumn(col) {
   const c = normalizeCol(col);
-  return c === "user id" || c === "vehicle id" || c === "sale id" ||
-         c === "userid" || c === "vehicleid" || c === "saleid";
-}
-function escapeHtml(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return c === "user id" || c === "vehicle id" || c === "sale id";
 }
 
+// keep button state consistent everywhere
 function updateButtons() {
-  if (createBtn) {
-    createBtn.disabled = !currentTableKey || creating;
-    createBtn.title = creating ? "Finish creating the current entry first" : "";
-  }
-  if (saveBtn) saveBtn.disabled = !(creating || editingRowId !== null);
+  createBtn.disabled = !currentTableKey || creating;
+  createBtn.title = creating ? "Finish creating the current entry first" : "";
+  saveBtn.disabled = !(creating || editingRowId !== null);
 }
 
+logoutBtn?.addEventListener("click", () => {
+  localStorage.removeItem("userEmail");
+  userEmail = "";
+
+  // reset UI
+  adminArea && (adminArea.style.display = "none");
+  logoutBtn && (logoutBtn.style.display = "none");
+  tableLinksEl && (tableLinksEl.innerHTML = "");
+  tableTitleEl && (tableTitleEl.textContent = "Select a table above.");
+  tableContainerEl && (tableContainerEl.innerHTML = "");
+
+  currentTableKey = null;
+  currentRows = [];
+  currentColumns = [];
+  editingRowId = null;
+  creating = false;
+
+  updateButtons();
+  statusEl && (statusEl.textContent = "Logged out.");
+});
+
+// ---------- API ----------
 async function api(path, opts = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     ...opts,
@@ -83,112 +72,101 @@ async function api(path, opts = {}) {
   console.log("API RESPONSE:", path, { status: res.status, data });
 
   if (!res.ok) {
-    const err = new Error(data.error || `Request failed: ${res.status}`);
+    const err = new Error(data.error || data.reason || `Request failed: ${res.status}`);
     err.status = res.status;
     err.data = data;
-    err.path = path;
     throw err;
   }
+
   return data;
 }
 
 async function getDeleteInfo(tableKey, id) {
+  // this endpoint now blocks EDIT too (same rules)
   return await api(`/admin/${tableKey}/${id}/can-delete`, { method: "GET" });
 }
 
 function formatDeleteWarning(info, fallbackId = null) {
-  if (!info) return "Could not check delete rules (server has no can-delete endpoint yet).";
-  if (info.canDelete) return "OK to delete.";
+  if (!info) return "Could not check rules.";
+  if (info.canDelete) return "OK.";
 
-  const parts = [info.reason || "Cannot delete."];
+  const parts = [info.reason || info.error || "Blocked."];
   if (Array.isArray(info.mustDeleteFirst) && info.mustDeleteFirst.length) {
     const pretty = info.mustDeleteFirst
       .map((b) => `${b.tableKey}: [${(b.ids || []).join(", ")}]`)
       .join(" | ");
     parts.push(`Delete these first → ${pretty}`);
   } else if (fallbackId) {
-    parts.push(`(Tip) This row is protected. Resolve linked rows first.`);
+    parts.push(`(Tip) Hover delete for ID ${fallbackId} for details.`);
   }
   return parts.join(" ");
 }
 
-// Deterministic PK names per table
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// deterministic PK names by tableKey
 function pkForTable(tableKey, columns, rows) {
   const map = {
-    users: ["User ID", "userId", "UserID"],
-    vehicles: ["Vehicle ID", "vehicleId", "VehicleID"],
-    sales: ["Sale ID", "saleId", "SaleID"],
+    users: ["User ID"],
+    vehicles: ["Vehicle ID"],
+    sales: ["Sale ID"],
   };
 
   const candidates = map[tableKey] || ["id", "ID"];
   const keys = columns?.length ? columns : (rows?.[0] ? Object.keys(rows[0]) : []);
-
-  for (const c of candidates) {
-    if (keys.includes(c)) return c;
-  }
-  return keys[0] || null;
+  return candidates.find((k) => keys.includes(k)) || keys[0] || null;
 }
 
-function findRowByRowId(rowId) {
-  if (!rowId || rowId === "new") return null;
-  const pk = pkForTable(currentTableKey, currentColumns, currentRows);
-  if (!pk) return null;
-  const numId = Number(rowId);
-  return currentRows.find(r => String(r[pk]) === String(numId)) || null;
-}
-
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("loggedInAt");
-    localStorage.removeItem("isAdmin");
-    window.location.href = "index.html";
-  });
-}
-
+// ---------- admin meta ----------
 async function loadAdminMeta() {
   const meta = await api("/admin/meta", { method: "GET" });
 
-  if (tableLinksEl) tableLinksEl.innerHTML = "";
+  tableLinksEl.innerHTML = "";
   meta.forEach((t) => {
-    if (!tableLinksEl) return;
     const link = document.createElement("a");
     link.textContent = t.label;
     link.href = "#";
-    link.onclick = (e) => { e.preventDefault(); loadTable(t.key, t.label); };
+    link.onclick = (e) => {
+      e.preventDefault();
+      loadTable(t.key, t.label);
+    };
     tableLinksEl.appendChild(link);
   });
 
   currentTableKey = null;
-  currentRows = [];
-  currentColumns = [];
-  editingRowId = null;
   creating = false;
+  editingRowId = null;
 
-  safeSetText(tableTitleEl, "Select a table above.");
-  safeSetHTML(tableContainerEl, "");
-  safeSetText(statusEl, "Admin session active.");
+  tableTitleEl.textContent = "Select a table above.";
+  tableContainerEl.innerHTML = "";
+
   updateButtons();
 }
 
+// ---------- load table ----------
 async function loadTable(key, label) {
   currentTableKey = key;
   creating = false;
   editingRowId = null;
 
-  safeSetText(tableTitleEl, label);
-  safeSetText(statusEl, "Loading…");
+  tableTitleEl.textContent = label;
 
   const data = await api(`/admin/${key}`, { method: "GET" });
 
   currentRows = Array.isArray(data.rows) ? data.rows : [];
   currentColumns = currentRows[0] ? Object.keys(currentRows[0]) : [];
 
-  safeSetText(statusEl, `${currentRows.length} row(s) loaded.`);
   updateButtons();
   renderTable();
 }
 
+// ---------- render ----------
 function rowHtml(row, cols, pkName) {
   const isNew = row.__new === true;
   const isEditing = !isNew && editingRowId !== null && row[pkName] == editingRowId;
@@ -198,6 +176,7 @@ function rowHtml(row, cols, pkName) {
 
   cols.forEach((col) => {
     const val = isNew ? "" : (row[col] ?? "");
+
     if (isNew || isEditing) {
       if (isLockedIdColumn(col)) {
         tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}" disabled style="background:#f3f3f3;color:#666;"></td>`;
@@ -210,28 +189,16 @@ function rowHtml(row, cols, pkName) {
   });
 
   tr += `<td>`;
-  if (isNew) tr += `<a href="#" data-action="cancelCreate">cancel</a>`;
-  else if (isEditing) tr += `<a href="#" data-action="cancelEdit">cancel</a>`;
-  else tr += `<a href="#" data-action="edit">edit</a> | <a href="#" data-action="delete" title="Hover to see delete rules">delete</a>`;
+  if (isNew) tr += `<a data-action="cancelCreate" href="#">cancel</a>`;
+  else if (isEditing) tr += `<a data-action="cancelEdit" href="#">cancel</a>`;
+  else tr += `<a data-action="edit" href="#">edit</a> | <a data-action="delete" href="#">delete</a>`;
   tr += `</td></tr>`;
+
   return tr;
 }
 
-function paintDeleteLink(a, infoOrNull) {
-  // yellow highlight if blocked or unknown
-  if (!infoOrNull || infoOrNull.canDelete === false) {
-    a.style.background = "#fef08a";
-    a.style.borderRadius = "6px";
-    a.style.padding = "2px 4px";
-  } else {
-    a.style.background = "transparent";
-    a.style.padding = "";
-    a.style.borderRadius = "";
-  }
-}
-
-function attachDeleteHoverTooltips() {
-  const deleteLinks = document.querySelectorAll('a[data-action="delete"]');
+function attachDeleteHoverWarnings() {
+  const deleteLinks = tableContainerEl.querySelectorAll('a[data-action="delete"]');
   deleteLinks.forEach((a) => {
     let checked = false;
 
@@ -243,28 +210,33 @@ function attachDeleteHoverTooltips() {
       if (checked && !window.event?.shiftKey) return;
       checked = true;
 
-      const tr = a.closest("tr");
-      const rowId = tr?.getAttribute("data-rowid");
-      if (!rowId || rowId === "new") { a.title = "Not applicable."; return; }
-
       try {
+        const tr = a.closest("tr");
+        const rowId = tr?.getAttribute("data-rowid");
+        if (!rowId || rowId === "new") {
+          a.title = "Not applicable.";
+          return;
+        }
+
         const info = await getDeleteInfo(currentTableKey, rowId);
         a.title = formatDeleteWarning(info, rowId);
-        paintDeleteLink(a, info);
-      } catch (err) {
-        // ✅ KEY FIX: even if /can-delete doesn't exist, show yellow + useful hint
-        a.title = `Cannot check delete rules yet (missing /can-delete on server for ${currentTableKey}). Try deleting linked sales first if this row is referenced.`;
-        paintDeleteLink(a, null);
-        console.warn("Hover can-delete check failed:", err?.status, err?.message);
+
+        if (!info.canDelete) {
+          a.style.background = "#fef08a";
+          a.style.borderRadius = "6px";
+          a.style.padding = "2px 4px";
+        }
+      } catch {
+        a.title = "Could not check rules.";
       }
     });
   });
 }
 
 function renderTable() {
-  if (!currentTableKey || !tableContainerEl) return;
+  if (!currentTableKey) return;
 
-  if (!currentRows.length && !creating) {
+  if (!currentRows.length) {
     tableContainerEl.innerHTML = `
       <div class="muted" style="margin-top:10px;">
         This table currently has no rows. Click <b>Create</b> to add a new entry.
@@ -287,65 +259,73 @@ function renderTable() {
   html += `</tbody></table>`;
   tableContainerEl.innerHTML = html;
 
-  document.querySelectorAll("[data-action]").forEach((el) => {
+  // wire actions
+  tableContainerEl.querySelectorAll("[data-action]").forEach((el) => {
     el.addEventListener("click", onActionClick);
   });
 
-  attachDeleteHoverTooltips();
+  // yellow warnings on delete hover
+  attachDeleteHoverWarnings();
+
   updateButtons();
 }
 
-if (createBtn) {
-  createBtn.addEventListener("click", () => {
-    if (!currentTableKey) return;
-    if (!currentRows.length) {
-      alert("This table is empty. Add at least one row using phpMyAdmin once, or ask to add a schema/meta endpoint so Create works on empty tables.");
-      return;
-    }
-    if (creating) return;
+// ---------- create/save ----------
+createBtn?.addEventListener("click", () => {
+  if (!currentTableKey) return;
+  if (!currentRows.length) {
+    alert("This table is empty. Add a first row in phpMyAdmin or add a meta endpoint for empty-table creates.");
+    return;
+  }
+  if (creating) return;
 
-    creating = true;
+  creating = true;
+  editingRowId = null;
+  updateButtons();
+  renderTable();
+});
+
+saveBtn?.addEventListener("click", async () => {
+  try {
+    if (!currentTableKey) return;
+
+    const pkName = pkForTable(currentTableKey, currentColumns, currentRows);
+    const rowSelector = creating ? `tr[data-rowid="new"]` : `tr[data-rowid="${editingRowId}"]`;
+    const tr = tableContainerEl.querySelector(rowSelector);
+    if (!tr) return;
+
+    const inputs = [...tr.querySelectorAll("input[data-col]")];
+    const payload = {};
+
+    inputs.forEach((inp) => {
+      const col = inp.getAttribute("data-col");
+      if (isLockedIdColumn(col)) return; // never send auto increment IDs
+      payload[col] = inp.value;
+    });
+
+    if (creating) {
+      await api(`/admin/${currentTableKey}`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    } else {
+      await api(`/admin/${currentTableKey}/${editingRowId}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+    }
+
+    creating = false;
     editingRowId = null;
     updateButtons();
-    renderTable();
-  });
-}
+    await loadTable(currentTableKey, tableTitleEl.textContent || "");
+  } catch (e) {
+    console.error("SAVE ERROR:", e);
+    alert(`Save failed: ${e.message}`);
+  }
+});
 
-if (saveBtn) {
-  saveBtn.addEventListener("click", async () => {
-    try {
-      if (!currentTableKey) return;
-
-      const rowSelector = creating ? `tr[data-rowid="new"]` : `tr[data-rowid="${editingRowId}"]`;
-      const tr = document.querySelector(rowSelector);
-      if (!tr) return;
-
-      const inputs = [...tr.querySelectorAll("input[data-col]")];
-      const payload = {};
-      inputs.forEach((inp) => {
-        const col = inp.getAttribute("data-col");
-        if (isLockedIdColumn(col)) return;
-        payload[col] = inp.value;
-      });
-
-      if (creating) {
-        await api(`/admin/${currentTableKey}`, { method: "POST", body: JSON.stringify(payload) });
-      } else {
-        await api(`/admin/${currentTableKey}/${editingRowId}`, { method: "PUT", body: JSON.stringify(payload) });
-      }
-
-      creating = false;
-      editingRowId = null;
-
-      updateButtons();
-      await loadTable(currentTableKey, tableTitleEl?.textContent || "");
-    } catch (e) {
-      alert(`Save failed: ${e.message}`);
-      console.error("SAVE ERROR:", e);
-    }
-  });
-}
-
+// ---------- actions ----------
 async function onActionClick(e) {
   e.preventDefault();
 
@@ -355,6 +335,36 @@ async function onActionClick(e) {
 
   try {
     if (action === "edit") {
+      if (!rowid) return;
+
+      // Keep sales immutable
+      if (currentTableKey === "sales") {
+        alert("Sales are not editable. Delete the sale and create a new one instead.");
+        return;
+      }
+
+      // ✅ NEW: Block EDIT the same way we block DELETE
+      const info = await getDeleteInfo(currentTableKey, rowid);
+      if (!info.canDelete) {
+        const msg = formatDeleteWarning(info, rowid);
+        alert(msg);
+
+        // Also highlight delete link yellow so the user sees the hover hint too
+        const delLink = tr?.querySelector('a[data-action="delete"]');
+        if (delLink) {
+          delLink.style.background = "#fef08a";
+          delLink.style.borderRadius = "6px";
+          delLink.style.padding = "2px 4px";
+          delLink.title = msg;
+          setTimeout(() => {
+            delLink.style.background = "transparent";
+            delLink.style.borderRadius = "";
+            delLink.style.padding = "";
+          }, 2500);
+        }
+        return;
+      }
+
       creating = false;
       editingRowId = Number(rowid);
       updateButtons();
@@ -379,24 +389,8 @@ async function onActionClick(e) {
     if (action === "delete") {
       if (!rowid) return;
 
-      // ✅ attempt can-delete check; if missing, still allow a clearer message
-      let info = null;
-      try {
-        info = await getDeleteInfo(currentTableKey, rowid);
-      } catch (err) {
-        // If the server doesn't have can-delete for this table, show guidance instead of "wrong ID column"
-        if (err?.status === 404) {
-          alert(
-            `Delete rules check is missing on the server for "${currentTableKey}".\n\n` +
-            `If this row is involved in a sale, delete the sale first.\n` +
-            `Then try deleting the vehicle/user again.`
-          );
-          return;
-        }
-        throw err;
-      }
-
-      if (info && info.canDelete === false) {
+      const info = await getDeleteInfo(currentTableKey, rowid);
+      if (!info.canDelete) {
         alert(formatDeleteWarning(info, rowid));
         return;
       }
@@ -405,49 +399,43 @@ async function onActionClick(e) {
 
       await api(`/admin/${currentTableKey}/${rowid}`, { method: "DELETE" });
       await loadTable(currentTableKey, tableTitleEl?.textContent || "");
+      return;
     }
   } catch (err) {
     console.error("ACTION ERROR:", err);
 
-    // ✅ FIX: do NOT assume "wrong id column" just because 404 happened.
-    // Only show that message if we cannot find this row locally by PK.
-    if (err?.status === 404 && action === "delete") {
-      const localRow = findRowByRowId(rowid);
-      if (!localRow) {
-        alert(
-          `Delete failed: ${err.message}\n\n` +
-          `This row isn't found in the table data the UI loaded.\n` +
-          `Hard refresh (Cmd+Shift+R) and try again.`
-        );
-      } else {
-        alert(
-          `Delete failed: ${err.message}\n\n` +
-          `The server says it can't find this row, even though the UI has it.\n` +
-          `This usually means the server route is different than the UI expects.\n` +
-          `Check that your server has DELETE /admin/${currentTableKey}/${rowid}.`
-        );
-      }
+    // show structured guidance if provided
+    if (err?.data?.mustDeleteFirst || err?.data?.reason) {
+      alert(formatDeleteWarning(err.data, rowid));
       return;
     }
 
-    if (err?.status === 409) {
-      alert(err?.data?.error || err.message || "Cannot delete due to references. Hover delete for details.");
-      return;
-    }
-
-    alert(`Error: ${err.message || "Request failed"}`);
+    alert(`Action failed: ${err.message}`);
   }
 }
 
+// ---------- boot ----------
 (async function boot() {
+  updateButtons();
+
+  if (!userEmail) {
+    statusEl && (statusEl.textContent = "No session found. Please sign in first.");
+    return;
+  }
+
   try {
-    updateButtons();
-    safeShow(adminArea, "block");
-    safeShow(logoutBtn, "inline-block");
-    safeSetText(statusEl, "Loading admin dashboard…");
+    statusEl && (statusEl.textContent = "Checking admin access...");
     await loadAdminMeta();
+
+    adminArea && (adminArea.style.display = "block");
+    logoutBtn && (logoutBtn.style.display = "inline-block");
+    statusEl && (statusEl.textContent = "Admin session active. Select a table above.");
   } catch (e) {
-    console.error("BOOT ERROR:", e);
-    safeSetText(statusEl, `Error: ${e.message}`);
+    console.log("BOOT ERROR:", e);
+    statusEl && (statusEl.textContent = `Error: ${e.message}`);
+    adminArea && (adminArea.style.display = "none");
+    logoutBtn && (logoutBtn.style.display = "none");
+  } finally {
+    updateButtons();
   }
 })();
