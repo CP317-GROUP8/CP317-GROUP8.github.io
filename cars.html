@@ -1,71 +1,294 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cars</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cars</title>
 
-  <style>
-    body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background:#eeeeee; }
-    .wrap { min-height:100vh; padding:20px; box-sizing:border-box; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-    .title { font-size:28px; font-weight:700; }
-    .btn { border:none; border-radius:12px; padding:10px 14px; background:#999; cursor:pointer; }
-    .btn:hover { filter: brightness(0.95); }
-    .filters { margin:14px 0; display:flex; gap:12px; flex-wrap:wrap; }
-    .pill { background:#fff; border-radius:999px; padding:8px 12px; font-size:13px; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
-    .card { background:#d9d9d9; border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:8px; }
-    .card h3 { margin:0; font-size:18px; }
-    .muted { color:#333; font-size:14px; }
-    .actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-    .link {
-      text-decoration:none;
-      color:black;
-      background:#bdbdbd;
-      padding:8px 10px;
-      border-radius:12px;
-      width:fit-content;
-      cursor:pointer;
-      border: none;
-      font-size: 14px;
-    }
+<style>
+*{ box-sizing:border-box; font-family:Inter,system-ui; }
 
-    .book {
-      background: transparent;
-      color: #2563eb;
-      text-decoration: underline;
-      padding: 0;
-      border-radius: 0;
-    }
-    .book:hover { color:#1d4ed8; }
+body{
+  margin:0;
+  background:linear-gradient(180deg,#eef2ff,#f8fafc);
+}
 
-    #status { margin:10px 0; color:#444; }
-  </style>
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:40px 40px;
+}
+
+/* Header */
+header{
+  position:relative;
+  z-index:2;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:26px;
+}
+
+h1{
+  margin:0;
+  font-size:44px;
+}
+
+.sub{
+  margin-top:6px;
+  color:#555;
+}
+
+/* Top actions */
+.topRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  margin:26px 0 18px;
+}
+
+.leftActions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+button{
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.primary{
+  background:#4f46e5;
+  color:white;
+}
+
+.secondary{
+  background:white;
+  border:1px solid #ccc;
+}
+
+.searchBox{
+  height:46px;
+  border-radius:14px;
+  border:1px solid #ddd;
+  padding:0 14px;
+  font-size:15px;
+  width:320px;
+  max-width:50vw;
+}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:24px;
+}
+
+.card{
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+  display:flex;
+  flex-direction:column;
+}
+
+.card img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  background:#ddd;
+}
+
+.cardBody{
+  padding:18px 18px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  flex:1;
+}
+
+.titleRow{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.carTitle{
+  font-size:18px;
+  font-weight:600;
+  margin:0;
+}
+
+.price{
+  font-weight:600;
+  color:#111;
+  white-space:nowrap;
+}
+
+.meta{
+  color:#555;
+  font-size:14px;
+  margin:0;
+}
+
+.tag{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  width:fit-content;
+}
+
+.available{
+  background:rgba(34,197,94,.12);
+  color:#166534;
+  border:1px solid rgba(34,197,94,.25);
+}
+
+.unavailable{
+  background:rgba(239,68,68,.10);
+  color:#991b1b;
+  border:1px solid rgba(239,68,68,.25);
+}
+
+.cardActions{
+  display:flex;
+  gap:12px;
+  margin-top:auto;
+}
+
+.linkBtn{
+  flex:1;
+  text-align:center;
+  text-decoration:none;
+  padding:12px 14px;
+  border-radius:14px;
+  font-weight:600;
+  font-size:14px;
+  display:inline-block;
+}
+
+.viewBtn{
+  background:#4f46e5;
+  color:white;
+}
+
+.bookBtn{
+  background:white;
+  border:1px solid #ccc;
+  color:#111;
+}
+
+/* Responsive */
+@media(max-width:1000px){
+  .grid{ grid-template-columns:1fr 1fr; }
+}
+
+@media(max-width:700px){
+  .container{ padding:28px 18px; }
+  .grid{ grid-template-columns:1fr; }
+  h1{ font-size:34px; }
+  .searchBox{ width:100%; max-width:100%; }
+  .topRow{ flex-direction:column; align-items:stretch; }
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="title">Available Cars</div>
-      <div style="display:flex; gap:10px;">
-        <button class="btn" onclick="window.location.href='home.html'">Home</button>
-        <button class="btn" id="signInBtn" onclick="window.location.href='index.html'">Sign In</button>
-        <button class="btn" id="logout">Logout</button>
-      </div>
-    </div>
+<div class="container">
 
-    <div class="filters">
-      <div class="pill" id="pillWhere">Where: (any)</div>
-      <div class="pill" id="pillPickup">Pick Up: (any)</div>
-      <div class="pill" id="pillDropoff">Drop Off: (any)</div>
-    </div>
-
-    <div id="status">Loading cars…</div>
-    <div id="carGrid" class="grid"></div>
+<header>
+  <div>
+    <h1>Cars</h1>
+    <div class="sub">Browse available vehicles (Sprint 1 prototype).</div>
   </div>
 
-  <script src="cars.js"></script>
+  <div style="display:flex; gap:12px;">
+    <button class="secondary" onclick="location.href='home.html'">← Home</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<div class="topRow">
+  <div class="leftActions">
+    <button class="secondary" onclick="showFilter()">Filter</button>
+    <input class="searchBox" placeholder="Search (not functional in Sprint 1)">
+  </div>
+
+  <button class="primary" onclick="alert('Booking flow is Sprint 2')">Start Booking</button>
+</div>
+
+<div class="grid" id="carsGrid"></div>
+
+</div>
+
+<script>
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
+function showFilter(){
+  alert("Filter UI only (Sprint 1). Will be functional in Sprint 2.");
+}
+
+/* Sprint 1 mock data (replace with API fetch later) */
+const cars = [
+  { year: 2022, model: "Toyota Corolla", price: 55, available: true },
+  { year: 2021, model: "Honda Civic", price: 58, available: true },
+  { year: 2020, model: "Mazda 3", price: 52, available: false },
+  { year: 2023, model: "Tesla Model 3", price: 120, available: true },
+  { year: 2019, model: "Hyundai Elantra", price: 49, available: true },
+  { year: 2022, model: "BMW 3 Series", price: 140, available: false }
+];
+
+const grid = document.getElementById("carsGrid");
+
+function renderCars(){
+  grid.innerHTML = "";
+
+  cars.forEach((car, i) => {
+    const tagClass = car.available ? "available" : "unavailable";
+    const tagText = car.available ? "Available" : "Unavailable";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="https://picsum.photos/600/400?random=${i+11}" alt="Car placeholder">
+      <div class="cardBody">
+        <div class="titleRow">
+          <h3 class="carTitle">${car.year} ${car.model}</h3>
+          <div class="price">$${car.price}/day</div>
+        </div>
+
+        <span class="tag ${tagClass}">${tagText}</span>
+
+        <p class="meta">A clean, simple listing card for the Sprint 1 prototype.</p>
+
+        <div class="cardActions">
+          <a class="linkBtn viewBtn" href="#" onclick="event.preventDefault(); alert('Details page in Sprint 2');">View</a>
+          <a class="linkBtn bookBtn" href="#" onclick="event.preventDefault(); alert('Booking in Sprint 2');">Book</a>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+renderCars();
+</script>
 </body>
 </html>
