@@ -18,76 +18,47 @@ body{
 .container{
   max-width:1400px;
   margin:auto;
-  padding:40px 40px;
+  padding:40px;
 }
 
 header{
-  position:relative;
-  z-index:2;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:26px;
 }
 
-h1{
-  margin:0;
-  font-size:44px;
-}
+h1{ font-size:44px; margin:0; }
 
-.sub{
-  margin-top:6px;
-  color:#555;
-}
+.sub{ color:#555; }
 
-/* Top actions */
 .topRow{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  margin:30px 0 20px;
   gap:16px;
-  margin:26px 0 18px;
-}
-
-.leftActions{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  flex-wrap:wrap;
 }
 
 button{
   padding:12px 18px;
   border-radius:14px;
   border:none;
-  font-size:15px;
   cursor:pointer;
 }
 
-.primary{
-  background:#4f46e5;
-  color:white;
-}
-
-.secondary{
-  background:white;
-  border:1px solid #ccc;
-}
+.primary{ background:#4f46e5;color:white; }
+.secondary{ background:white;border:1px solid #ccc; }
 
 .searchBox{
   height:46px;
   border-radius:14px;
   border:1px solid #ddd;
   padding:0 14px;
-  font-size:15px;
-  width:320px;
-  max-width:50vw;
+  width:300px;
 }
 
-/* Grid */
 .grid{
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:24px;
 }
 
@@ -96,8 +67,6 @@ button{
   border-radius:20px;
   overflow:hidden;
   box-shadow:0 12px 30px rgba(0,0,0,.06);
-  display:flex;
-  flex-direction:column;
 }
 
 .card img{
@@ -107,99 +76,48 @@ button{
   background:#ddd;
 }
 
-.cardBody{
-  padding:18px 18px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  flex:1;
-}
+.cardBody{ padding:18px; }
 
 .titleRow{
   display:flex;
   justify-content:space-between;
-  gap:10px;
-  align-items:flex-start;
 }
 
-.carTitle{
-  font-size:18px;
-  font-weight:600;
-  margin:0;
-}
-
-.price{
-  font-weight:600;
-  color:#111;
-  white-space:nowrap;
-}
-
-.meta{
-  color:#555;
-  font-size:14px;
-  margin:0;
-}
+.price{ font-weight:600; }
 
 .tag{
   display:inline-block;
-  padding:6px 10px;
+  padding:6px 12px;
   border-radius:999px;
   font-size:12px;
-  font-weight:600;
-  width:fit-content;
+  margin:8px 0;
 }
 
-.available{
-  background:rgba(34,197,94,.12);
-  color:#166534;
-  border:1px solid rgba(34,197,94,.25);
-}
+.available{ background:#dcfce7;color:#166534; }
+.unavailable{ background:#fee2e2;color:#991b1b; }
 
-.unavailable{
-  background:rgba(239,68,68,.10);
-  color:#991b1b;
-  border:1px solid rgba(239,68,68,.25);
-}
+.meta{ color:#555;font-size:14px; }
 
 .cardActions{
   display:flex;
   gap:12px;
-  margin-top:auto;
+  margin-top:14px;
 }
 
 .linkBtn{
   flex:1;
   text-align:center;
+  padding:10px;
+  border-radius:12px;
   text-decoration:none;
-  padding:12px 14px;
-  border-radius:14px;
   font-weight:600;
-  font-size:14px;
-  display:inline-block;
 }
 
-.viewBtn{
-  background:#4f46e5;
-  color:white;
-}
+.viewBtn{ background:#4f46e5;color:white; }
+.bookBtn{ border:1px solid #ccc;color:black; }
 
-.bookBtn{
-  background:white;
-  border:1px solid #ccc;
-  color:#111;
-}
-
-/* Responsive */
-@media(max-width:1000px){
-  .grid{ grid-template-columns:1fr 1fr; }
-}
-
-@media(max-width:700px){
-  .container{ padding:28px 18px; }
-  .grid{ grid-template-columns:1fr; }
-  h1{ font-size:34px; }
-  .searchBox{ width:100%; max-width:100%; }
-  .topRow{ flex-direction:column; align-items:stretch; }
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -208,24 +126,19 @@ button{
 <div class="container">
 
 <header>
-  <div>
-    <h1>Cars</h1>
-    <div class="sub">Browse available vehicles.</div>
-  </div>
+<div>
+<h1>Cars</h1>
+<div class="sub">Live from SQL database</div>
+</div>
 
-  <div style="display:flex; gap:12px;">
-    <button class="secondary" onclick="location.href='home.html'">← Home</button>
-    <button class="secondary" onclick="logout()">Logout</button>
-  </div>
+<div>
+<button class="secondary" onclick="location.href='home.html'">← Home</button>
+</div>
 </header>
 
 <div class="topRow">
-  <div class="leftActions">
-    <button class="secondary" onclick="showFilter()">Filter</button>
-    <input class="searchBox" placeholder="Search (not functional in Sprint 1)">
-  </div>
-
-  <button class="primary" onclick="alert('Booking flow is Sprint 2')">Start Booking</button>
+<input class="searchBox" placeholder="Search (Sprint 1)">
+<button class="secondary" onclick="alert('Filter Sprint 2')">Filter</button>
 </div>
 
 <div class="grid" id="carsGrid"></div>
@@ -233,105 +146,61 @@ button{
 </div>
 
 <script>
-const API_BASE = "https://server-side-zqaz.onrender.com";
+const API="https://server-side-zqaz.onrender.com";
 
-function logout(){
-  localStorage.clear();
-  location.href="index.html";
-}
+/* Manual image mapping — change filenames anytime */
+const imageMap={
+  "Toyota Corolla":"corolla.png",
+  "Toyota Highlander":"highlander.png",
+  "Dodge Challenger":"challenger.png",
+  "Dodge Charger":"charger.png",
+  "KIA K4":"kia.png",
+  "Honda Civic":"civic.png",
+  "Porsche 911":"porsche.png"
+};
 
-function showFilter(){
-  alert("Filter UI only (Sprint 1). Will be functional in Sprint 2.");
-}
-
-function getField(obj, ...names) {
-  for (const n of names) {
-    if (obj && obj[n] !== undefined && obj[n] !== null) return obj[n];
-  }
-  return undefined;
-}
+fetch(API+"/cars")
+.then(r=>r.json())
+.then(renderCars);
 
 function renderCars(cars){
-  const grid = document.getElementById("carsGrid");
-  grid.innerHTML = "";
+const grid=document.getElementById("carsGrid");
+grid.innerHTML="";
 
-  cars.forEach((car) => {
-    const vehicleId = getField(car, "vehicle_id", "vehicleId", "VehicleID", "id");
-    const manufacturer = getField(car, "manufacturer", "Manufacturer", "make", "Make") ?? "Unknown";
-    const model = getField(car, "model", "Model") ?? "Model";
-    const year = getField(car, "year", "Year"); 
-    const priceRaw = getField(car, "price", "Price", "price_per_day", "pricePerDay") ?? 0;
-    const availabilityRaw = getField(car, "availability", "Availability", "available", "is_available") ?? 0;
-    const vehicleType = getField(car, "vehicle_type", "VehicleType", "type", "Type");
-    const drivetrain = getField(car, "drivetrain", "Drivetrain");
+cars.forEach(car=>{
 
-    const isAvailable = Number(availabilityRaw) === 1 || availabilityRaw === true;
+const name=`${car.manufacturer} ${car.model}`;
+const img=imageMap[name]||"placeholder.png";
+const available=Number(car.availability)===1;
 
-    const tagClass = isAvailable ? "available" : "unavailable";
-    const tagText = isAvailable ? "Available" : "Unavailable";
+grid.innerHTML+=`
+<div class="card">
+<img src="./assets/cars/${img}">
+<div class="cardBody">
 
-    const priceNum = Number(priceRaw);
-    const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+<div class="titleRow">
+<h3>${name}</h3>
+<div class="price">$${car.price}/day</div>
+</div>
 
-    const title = year ? `${year} ${manufacturer} ${model}` : `${manufacturer} ${model}`;
+<span class="tag ${available?"available":"unavailable"}">
+${available?"Available":"Unavailable"}
+</span>
 
-    const imgSeed = vehicleId ?? `${manufacturer}-${model}`.replace(/\s+/g, "-").toLowerCase();
-    const imgUrl = `https://picsum.photos/seed/${encodeURIComponent(imgSeed)}/600/400`;
+<p class="meta">${car.vehicle_type} • ${car.drivetrain}</p>
 
-    const metaParts = [];
-    if (vehicleType) metaParts.push(vehicleType);
-    if (drivetrain) metaParts.push(drivetrain);
-    if (vehicleId !== undefined) metaParts.push(`Vehicle ID: ${vehicleId}`);
+<div class="cardActions">
+<a class="linkBtn viewBtn" href="#">View</a>
+<a class="linkBtn bookBtn" href="#">Book</a>
+</div>
 
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <img src="${imgUrl}" alt="Car placeholder">
-      <div class="cardBody">
-        <div class="titleRow">
-          <h3 class="carTitle">${title}</h3>
-          <div class="price">${priceText}</div>
-        </div>
-
-        <span class="tag ${tagClass}">${tagText}</span>
-
-        <p class="meta">${metaParts.join(" • ")}</p>
-
-        <div class="cardActions">
-          <a class="linkBtn viewBtn" href="#" onclick="event.preventDefault(); alert('Details page in Sprint 2');">View</a>
-          <a class="linkBtn bookBtn" href="#" onclick="event.preventDefault(); alert('Booking in Sprint 2');">Book</a>
-        </div>
-      </div>
-    `;
-
-    grid.appendChild(card);
-  });
+</div>
+</div>
+`;
+});
 }
-
-async function loadCars(){
-  const grid = document.getElementById("carsGrid");
-  grid.innerHTML = "<div style='color:#555;'>Loading cars from database…</div>";
-
-  try {
-    const res = await fetch(`${API_BASE}/cars`);
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Backend error:", data);
-      grid.innerHTML = "<div style='color:#b91c1c;'>Could not load cars (server error).</div>";
-      return;
-    }
-
-    const cars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
-    renderCars(cars);
-  } catch (err) {
-    console.error(err);
-    grid.innerHTML = "<div style='color:#b91c1c;'>Could not load cars (network error).</div>";
-  }
-}
-
-loadCars();
 </script>
+
 </body>
 </html>
+
