@@ -71,7 +71,7 @@ function normalizeCar(row) {
   const priceNum = priceVal === null ? null : Number(priceVal);
 
   return {
-    id,
+    id, // internal only (for booking)
     manufacturer,
     model,
     type,
@@ -80,11 +80,41 @@ function normalizeCar(row) {
   };
 }
 
+/**
+ * IMAGE PLACEHOLDERS:
+ * Put files in: client-side/assets/cars/
+ * You can change these filenames ANYTIME.
+ *
+ * Key format: "Manufacturer Model | Drivetrain"
+ * This solves duplicates like Corolla AWD vs Corolla FWD.
+ */
+const CAR_IMAGES = {
+  "Toyota Corolla | AWD": "corolla-awd.png",
+  "Toyota Corolla | FWD": "corolla-fwd.png",
+  "Toyota Highlander | AWD": "highlander-awd.png",
+  "Toyota Highlander | RWD": "highlander-rwd.png",
+  "Dodge Challenger | AWD": "challenger-awd.png",
+  "KIA K4 | RWD": "kia-k4-rwd.png",
+  "Honda Civic | RWD": "civic-rwd.png",
+  "Porsche 911 | AWD": "porsche-911-awd.png",
+};
+
+function carImageKey(c) {
+  return `${c.manufacturer} ${c.model} | ${c.drivetrain}`.trim();
+}
+
+function getCarImageSrc(c) {
+  const key = carImageKey(c);
+  const file = CAR_IMAGES[key] || "placeholder.png";
+  return `./assets/cars/${file}`;
+}
+
 async function loadCars() {
   const status = document.getElementById("status");
   const grid = document.getElementById("carGrid");
 
   try {
+    status.textContent = "Loading cars…";
     const res = await fetch(`${API_BASE}/cars`);
     const data = await res.json().catch(() => []);
     if (!res.ok) throw new Error(data.error || "Could not load cars");
@@ -95,17 +125,31 @@ async function loadCars() {
     status.textContent = `${cars.length} available cars found`;
 
     cars.forEach((c) => {
-      const priceText = c.price === null ? "—" : `$${c.price.toLocaleString()}`;
+      const priceText =
+        c.price === null ? "—" : `$${c.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/day`;
+
+      const imgSrc = getCarImageSrc(c);
 
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <h3>${c.manufacturer} ${c.model}</h3>
-        <div class="muted">Type: ${c.type}</div>
-        <div class="muted">Drivetrain: ${c.drivetrain}</div>
-        <div class="muted">Price: ${priceText}</div>
-        <div class="actions">
-          <button class="link book" data-book="${encodeURIComponent(c.id)}">Book</button>
+        <div class="cardImg">
+          <img src="${imgSrc}" alt="${c.manufacturer} ${c.model}" onerror="this.src='./assets/cars/placeholder.png'">
+        </div>
+
+        <div class="cardBody">
+          <div class="titleRow">
+            <h3>${c.manufacturer} ${c.model}</h3>
+            <div class="price">${priceText}</div>
+          </div>
+
+          <span class="tag available">Available</span>
+
+          <div class="muted">${c.type} • ${c.drivetrain}</div>
+
+          <div class="actions">
+            <button class="link book" data-book="${encodeURIComponent(c.id)}">Book</button>
+          </div>
         </div>
       `;
       grid.appendChild(card);
@@ -139,8 +183,9 @@ async function bookCar(vehicleId) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Booking failed");
 
+    // ✅ Removed vehicle id from message too (Sprint 2 later)
     status.textContent =
-      `Booked! Sale ID #${data.saleId} — Vehicle #${data.vehicleId} — Price $${Number(data.priceSoldAt).toLocaleString()}`;
+      `Booked successfully! Sale ID #${data.saleId} — Price $${Number(data.priceSoldAt).toLocaleString()}`;
 
     await loadCars();
   } catch (err) {
