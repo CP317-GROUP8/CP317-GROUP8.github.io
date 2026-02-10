@@ -1,61 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Dashboard</title>
+
   <style>
-    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background:#f6f7f9; }
-    header {
-      background: white;
-      padding: 14px 18px;
-      border-bottom: 1px solid #e5e7eb;
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f6f7f9;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
     }
-    .wrap { max-width: 1100px; margin: 18px auto; padding: 0 14px; }
-    .card {
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    #logoutBtn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      background: #e5e7eb;
+    }
+
+    #status {
+      margin: 10px 0;
+      color: #444;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    #tableLinks {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 10px 0 14px;
+    }
+
+    #tableLinks a {
+      color: #2563eb;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .panel {
       background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
-    #tableLinks a { margin-right: 14px; color:#2563eb; cursor:pointer; text-decoration: underline; }
-    table { width:100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; font-size: 14px; }
-    input { width: 100%; box-sizing: border-box; padding: 6px; }
-    .actions { display:flex; gap:10px; margin-top:10px; }
-    .btn {
-      padding: 10px 14px; border-radius: 10px; border: 1px solid #d0d7de;
-      background: #fff; cursor: pointer; text-decoration: none; color: #111; font-size: 14px;
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0 14px;
+      flex-wrap: wrap;
     }
-    .btn.primary { border-color:#2563eb; color:#2563eb; }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    #status { color:#444; font-size: 14px; }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      background: #e5e7eb;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    .muted {
+      color: #666;
+      font-size: 14px;
+    }
   </style>
 </head>
-<body>
-  <header>
-    <div><b>Admin Dashboard</b></div>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <a class="btn" href="index.html">Back</a>
-      <button id="logoutBtn" class="btn">Log out</button>
-    </div>
-  </header>
 
+<body>
   <div class="wrap">
-    <div class="card">
-      <div id="status">Loading...</div>
-      <div style="margin-top:10px;">
-        <div id="tableLinks"></div>
-        <h3 id="tableTitle" style="margin:10px 0 0 0;">Select a table above.</h3>
-        <div class="actions">
-          <button id="createBtn" class="btn" disabled>Create</button>
-          <button id="saveBtn" class="btn primary" disabled>Save</button>
-        </div>
-        <div id="tableContainer"></div>
+
+    <div class="topbar">
+      <h1>Admin Dashboard</h1>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <div id="status">Loading…</div>
+
+    <!-- ✅ REQUIRED wrapper expected by admin.js -->
+    <div id="adminArea" class="panel">
+
+      <div class="muted">
+        Click a table to view entries. Use edit/create/delete to manage records.
       </div>
+
+      <div id="tableLinks" style="margin-top:10px;"></div>
+
+      <h2 id="tableTitle" style="margin: 6px 0 8px;">Select a table above.</h2>
+
+      <div class="controls">
+        <button id="createBtn" disabled>Create</button>
+        <button id="saveBtn" disabled>Save</button>
+      </div>
+
+      <div id="tableContainer"></div>
     </div>
   </div>
 
