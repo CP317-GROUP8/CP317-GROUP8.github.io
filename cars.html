@@ -146,59 +146,99 @@ button{
 </div>
 
 <script>
-const API="https://server-side-zqaz.onrender.com";
+const API = "https://server-side-zqaz.onrender.com";
 
-/* Manual image mapping — change filenames anytime */
-const imageMap={
-  "Toyota Corolla":"corolla.png",
-  "Toyota Highlander":"highlander.png",
-  "Dodge Challenger":"challenger.png",
-  "Dodge Charger":"charger.png",
-  "KIA K4":"kia.png",
-  "Honda Civic":"civic.png",
-  "Porsche 911":"porsche.png"
+/** Safely read a field even if the backend uses different names */
+function getField(obj, ...names) {
+  for (const name of names) {
+    if (obj && obj[name] !== undefined && obj[name] !== null) return obj[name];
+  }
+  return undefined;
+}
+
+/** Your per-car image mapping (you can change these files whenever) */
+const imageMap = {
+  "Toyota Corolla": "corolla.png",
+  "Toyota Highlander": "highlander.png",
+  "Dodge Challenger": "challenger.png",
+  "Dodge Charger": "charger.png",
+  "KIA K4": "kia.png",
+  "Honda Civic": "civic.png",
+  "Porsche 911": "porsche.png"
 };
 
-fetch(API+"/cars")
-.then(r=>r.json())
-.then(renderCars);
+async function loadCars() {
+  const grid = document.getElementById("carsGrid");
+  grid.innerHTML = "<div style='color:#555;'>Loading cars…</div>";
 
-function renderCars(cars){
-const grid=document.getElementById("carsGrid");
-grid.innerHTML="";
+  try {
+    const res = await fetch(`${API}/cars`);
+    const data = await res.json();
 
-cars.forEach(car=>{
-
-const name=`${car.manufacturer} ${car.model}`;
-const img=imageMap[name]||"placeholder.png";
-const available=Number(car.availability)===1;
-
-grid.innerHTML+=`
-<div class="card">
-<img src="./assets/cars/${img}">
-<div class="cardBody">
-
-<div class="titleRow">
-<h3>${name}</h3>
-<div class="price">$${car.price}/day</div>
-</div>
-
-<span class="tag ${available?"available":"unavailable"}">
-${available?"Available":"Unavailable"}
-</span>
-
-<p class="meta">${car.vehicle_type} • ${car.drivetrain}</p>
-
-<div class="cardActions">
-<a class="linkBtn viewBtn" href="#">View</a>
-<a class="linkBtn bookBtn" href="#">Book</a>
-</div>
-
-</div>
-</div>
-`;
-});
+    // Some APIs return {cars:[...]} instead of [...]
+    const cars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
+    renderCars(cars);
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = "<div style='color:#b91c1c;'>Failed to load cars.</div>";
+  }
 }
+
+function renderCars(cars) {
+  const grid = document.getElementById("carsGrid");
+  grid.innerHTML = "";
+
+  cars.forEach((car) => {
+    // Normalize backend fields (handles most naming styles)
+    const manufacturer = getField(car, "manufacturer", "Manufacturer", "make", "Make") ?? "Unknown";
+    const model        = getField(car, "model", "Model") ?? "Unknown";
+    const priceRaw     = getField(car, "price", "Price", "price_per_day", "pricePerDay") ?? 0;
+    const availability = getField(car, "availability", "Availability", "available", "is_available") ?? 0;
+    const vehicleType  = getField(car, "vehicle_type", "VehicleType", "type", "Type") ?? "";
+    const drivetrain   = getField(car, "drivetrain", "Drivetrain") ?? "";
+
+    const name = `${manufacturer} ${model}`.trim();
+
+    const isAvailable = Number(availability) === 1 || availability === true;
+    const tagClass = isAvailable ? "available" : "unavailable";
+    const tagText  = isAvailable ? "Available" : "Unavailable";
+
+    const priceNum = Number(priceRaw);
+    const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+
+    // IMPORTANT: always show a real local placeholder if mapping not found
+    const imgFile = imageMap[name] || "placeholder.png";
+    const imgUrl  = `./assets/cars/${imgFile}`;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${imgUrl}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
+      <div class="cardBody">
+
+        <div class="titleRow">
+          <h3>${name}</h3>
+          <div class="price">${priceText}</div>
+        </div>
+
+        <span class="tag ${tagClass}">${tagText}</span>
+
+        <p class="meta">${[vehicleType, drivetrain].filter(Boolean).join(" • ")}</p>
+
+        <div class="cardActions">
+          <a class="linkBtn viewBtn" href="#" onclick="event.preventDefault(); alert('Details page in Sprint 2');">View</a>
+          <a class="linkBtn bookBtn" href="#" onclick="event.preventDefault(); alert('Booking in Sprint 2');">Book</a>
+        </div>
+
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+loadCars();
 </script>
 
 </body>
