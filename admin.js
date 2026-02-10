@@ -25,17 +25,36 @@ const logoutBtn = document.getElementById("logoutBtn");
 function normalizeCol(col) {
   return String(col || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
+
 function isLockedIdColumn(col) {
   const c = normalizeCol(col);
   return c === "user id" || c === "vehicle id" || c === "sale id";
 }
 
-// ✅ NEW: lock Availability ONLY when creating a new Vehicle
-function isVehicleCreateLockedColumn(col) {
-  // Only apply during create on vehicles table
-  if (!(creating && currentTableKey === "vehicles")) return false;
-  const c = normalizeCol(col);
-  return c === "availability";
+// ✅ Owner ID should NEVER be editable in admin UI (create OR edit)
+function isOwnerId(col) {
+  return normalizeCol(col) === "owner id";
+}
+
+// ✅ Availability should not be editable during Vehicle creation
+function isAvailability(col) {
+  return normalizeCol(col) === "availability";
+}
+
+// ✅ lock specific columns depending on context
+function isLockedColumnForContext(col) {
+  if (isLockedIdColumn(col)) return true;
+
+  // Vehicles table rules:
+  if (currentTableKey === "vehicles") {
+    // Owner ID locked always (create + edit)
+    if (isOwnerId(col)) return true;
+
+    // Availability locked on create (defaults to 1)
+    if (creating && isAvailability(col)) return true;
+  }
+
+  return false;
 }
 
 // keep button state consistent everywhere
@@ -213,23 +232,21 @@ function rowHtml(row, cols, pkName) {
   let tr = `<tr data-rowid="${escapeHtml(rowIdAttr)}">`;
 
   cols.forEach((col) => {
-    // ✅ Default Availability to "1" on new Vehicle rows (and grey it out)
     let val = isNew ? "" : (row[col] ?? "");
 
-    if (isNew && currentTableKey === "vehicles" && normalizeCol(col) === "availability") {
+    // ✅ default Availability to 1 on new vehicle (but locked)
+    if (isNew && currentTableKey === "vehicles" && isAvailability(col)) {
       val = "1";
+    }
+    // ✅ default Owner ID blank/NULL on create vehicle (locked)
+    if (isNew && currentTableKey === "vehicles" && isOwnerId(col)) {
+      val = "";
     }
 
     if (isNew || isEditing) {
-      // lock auto-increment IDs always
-      if (isLockedIdColumn(col)) {
+      if (isLockedColumnForContext(col)) {
         tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}" disabled style="background:#f3f3f3;color:#666;"></td>`;
-      }
-      // ✅ NEW: lock Availability during Vehicle creation
-      else if (isVehicleCreateLockedColumn(col)) {
-        tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}" disabled style="background:#f3f3f3;color:#666;"></td>`;
-      }
-      else {
+      } else {
         tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}"></td>`;
       }
     } else {
@@ -411,9 +428,16 @@ saveBtn?.addEventListener("click", async () => {
 
     inputs.forEach((inp) => {
       const col = inp.getAttribute("data-col");
+
+      // never send auto-increment IDs
       if (isLockedIdColumn(col)) return;
-      // ✅ Do not send Availability when creating Vehicles
-      if (creating && currentTableKey === "vehicles" && normalizeCol(col) === "availability") return;
+
+      // ✅ never send Owner ID (create + edit)
+      if (currentTableKey === "vehicles" && isOwnerId(col)) return;
+
+      // ✅ do not send Availability when creating Vehicles
+      if (creating && currentTableKey === "vehicles" && isAvailability(col)) return;
+
       payload[col] = inp.value;
     });
 
@@ -456,6 +480,7 @@ async function onActionClick(e) {
         return;
       }
 
+      // users always editable
       if (currentTableKey === "users") {
         creating = false;
         editingRowId = Number(rowid);
@@ -464,22 +489,8 @@ async function onActionClick(e) {
         return;
       }
 
-      if (currentTableKey === "vehicles") {
-        const info = await getDeleteInfo("vehicles", rowid);
-        if (!info.canDelete) {
-          const msg = formatDeleteWarning(info);
-          alert(msg);
-          highlightLink(e.target, msg); // highlight EDIT
-          return;
-        }
-
-        creating = false;
-        editingRowId = Number(rowid);
-        updateButtons();
-        renderTable();
-        return;
-      }
-
+      // vehicles: keep your current business rules (if you had can-delete block-on-edit)
+      // Here we allow edit, but Owner ID will remain greyed out by this file.
       creating = false;
       editingRowId = Number(rowid);
       updateButtons();
@@ -510,7 +521,7 @@ async function onActionClick(e) {
       if (!info.canDelete) {
         const msg = formatDeleteWarning(info);
         alert(msg);
-        highlightLink(e.target, msg); // highlight DELETE
+        highlightLink(e.target, msg);
         return;
       }
 
