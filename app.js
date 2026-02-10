@@ -1,6 +1,7 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
 
 let token = localStorage.getItem("token") || null;
+let userEmail = localStorage.getItem("userEmail") || null; // NEW: used for admin header
 
 let currentTableKey = null;
 let currentRows = [];
@@ -39,7 +40,9 @@ function updateButtons() {
 
 logoutBtn.onclick = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("userEmail");
   token = null;
+  userEmail = null;
 
   adminArea.style.display = "none";
   logoutBtn.style.display = "none";
@@ -62,6 +65,11 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function adminHeaders() {
+  // NEW: required by your backend requireAdmin middleware
+  return userEmail ? { "X-User-Email": userEmail } : {};
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     ...opts,
@@ -69,6 +77,7 @@ async function api(path, opts = {}) {
       "Content-Type": "application/json",
       ...(opts.headers || {}),
       ...authHeaders(),
+      ...adminHeaders(), // NEW
     },
   });
 
@@ -120,6 +129,10 @@ async function handleCredentialResponse(response) {
     const last = u.lastName ?? u["Last Name"] ?? "";
     const email = u.email ?? u["Email Address"] ?? "";
     const adminVal = Number(u.administrator ?? u["Administrator"] ?? 0);
+
+    // NEW: store email so /admin/* calls can include X-User-Email
+    userEmail = email || null;
+    if (userEmail) localStorage.setItem("userEmail", userEmail);
 
     const displayName = `${first} ${last}`.trim() || "(name missing)";
     statusEl.textContent = `Welcome, ${displayName}${email ? ` (${email})` : ""}`;
@@ -243,7 +256,6 @@ function renderTable() {
     el.addEventListener("click", onActionClick);
   });
 
-  // keep buttons correct after re-render
   updateButtons();
 }
 
@@ -261,7 +273,7 @@ createBtn.onclick = () => {
   creating = true;
   editingRowId = null;
 
-  updateButtons();
+  updateButtons(); // will grey out Create
   renderTable();
 };
 
@@ -276,8 +288,6 @@ saveBtn.onclick = async () => {
     const tr = document.querySelector(rowSelector);
     if (!tr) return;
 
-    // NOTE: disabled inputs won't appear in querySelectorAll if filtered incorrectly,
-    // but we intentionally skip IDs anyway.
     const inputs = [...tr.querySelectorAll("input[data-col]")];
     const payload = {};
 
@@ -320,7 +330,6 @@ async function onActionClick(e) {
   const rowid = tr?.getAttribute("data-rowid");
 
   if (action === "edit") {
-    // editing an existing row
     creating = false;
     editingRowId = Number(rowid);
 
@@ -340,7 +349,7 @@ async function onActionClick(e) {
   if (action === "cancelCreate") {
     creating = false;
 
-    updateButtons();
+    updateButtons(); // will re-enable Create
     renderTable();
     return;
   }
@@ -368,6 +377,12 @@ async function onActionClick(e) {
 
   try {
     statusEl.textContent = "Token found. Checking admin access...";
+
+    // If we don't know the email yet, admin endpoints can't work.
+    if (!userEmail) {
+      throw new Error("Missing userEmail. Please sign in again.");
+    }
+
     await loadAdminMeta();
 
     adminArea.style.display = "block";
@@ -376,7 +391,9 @@ async function onActionClick(e) {
   } catch (e) {
     console.log("BOOT ERROR:", e);
     localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
     token = null;
+    userEmail = null;
     adminArea.style.display = "none";
     logoutBtn.style.display = "none";
     statusEl.textContent = "Session expired or not admin. Please sign in again.";
