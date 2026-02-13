@@ -148,6 +148,7 @@ async function loadCars() {
           <div class="muted">${c.type} • ${c.drivetrain}</div>
 
           <div class="actions">
+            <button class="link view" data-view="${encodeURIComponent(c.id)}">View</button>
             <button class="link book" data-book="${encodeURIComponent(c.id)}">Book</button>
           </div>
         </div>
@@ -161,6 +162,13 @@ async function loadCars() {
         await bookCar(vehicleId);
       });
     });
+    grid.querySelectorAll("[data-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-view");
+        window.location.href = `car-details.html?id=${encodeURIComponent(id)}`;
+      });
+    });
+    
   } catch (err) {
     document.getElementById("status").textContent = `Error: ${err.message}`;
   }

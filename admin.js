@@ -221,7 +221,7 @@ async function loadTable(key, label) {
 // ---------- render ----------
 function rowHtml(row, cols, pkName) {
   const isNew = row.__new === true;
-  const isEditing = !isNew && editingRowId !== null && row[pkName] == editingRowId;
+  const isEditing = !isNew && editingRowId !== null && String(row[pkName]) === String(editingRowId);
 
   const rowIdAttr = isNew ? "new" : (pkName ? row[pkName] : "");
   let tr = `<tr data-rowid="${escapeHtml(rowIdAttr)}">`;
@@ -286,7 +286,7 @@ function attachDeleteHoverWarnings() {
 function renderTable() {
   if (!currentTableKey) return;
 
-  if (!currentRows.length) {
+  if (!currentRows.length && !creating) {
     tableContainerEl.innerHTML = `
       <div class="muted" style="margin-top:10px;">
         This table currently has no rows. Click <b>Create</b> to add a new entry.
@@ -295,9 +295,12 @@ function renderTable() {
     updateButtons();
     return;
   }
+  
 
   const pkName = pkForTable(currentTableKey, currentColumns, currentRows);
-  const cols = currentColumns;
+  const cols = currentColumns.length
+  ? currentColumns
+  : (currentRows[0] ? Object.keys(currentRows[0]) : []);
 
   let html = `<table><thead><tr>`;
   cols.forEach((c) => (html += `<th>${escapeHtml(c)}</th>`));
@@ -383,7 +386,7 @@ async function onActionClick(e) {
   try {
     if (action === "edit") {
       creating = false;
-      editingRowId = Number(rowid);
+      editingRowId = String(rowid);
       updateButtons();
       renderTable();
       return;
