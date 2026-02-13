@@ -1,60 +1,151 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
+const SESSION_MS = 12 * 60 * 60 * 1000;
 
 function requireSession() {
   const email = localStorage.getItem("userEmail");
   const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+
   if (!email || !loggedInAt) {
     window.location.replace("index.html");
     throw new Error("No session");
   }
+  if (Date.now() - loggedInAt > SESSION_MS) {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("loggedInAt");
+    localStorage.removeItem("isAdmin");
+    window.location.replace("index.html");
+    throw new Error("Session expired");
+  }
   return email;
 }
+
 const userEmail = requireSession();
 
-const id = new URLSearchParams(location.search).get("id");
-if (!id) {
-  document.getElementById("status").textContent = "Missing car id.";
-  throw new Error("Missing id");
+const params = new URLSearchParams(location.search);
+const id = params.get("id");
+
+const loadingState = document.getElementById("loadingState");
+const detailsUI = document.getElementById("detailsUI");
+
+const carName = document.getElementById("carName");
+const carPrice = document.getElementById("carPrice");
+const carType = document.getElementById("carType");
+const carDrive = document.getElementById("carDrive");
+const carAvail = document.getElementById("carAvail");
+const carImg = document.getElementById("carImg");
+
+const fromDateEl = document.getElementById("fromDate");
+const toDateEl = document.getElementById("toDate");
+const bookBtn = document.getElementById("bookBtn");
+const statusText = document.getElementById("statusText");
+
+// reuse same image map logic if you want
+function getCarImage(manufacturer, model, drivetrain) {
+  const key = `${manufacturer} ${model} | ${drivetrain}`.trim();
+  const map = {
+    "Toyota Corolla | AWD": "corolla-awd.png",
+    "Toyota Corolla | FWD": "corolla-fwd.png",
+    "Toyota Highlander | AWD": "highlander-awd.png",
+    "Toyota Highlander | RWD": "highlander-rwd.png",
+    "Dodge Challenger | AWD": "challenger-awd.png",
+    "KIA K4 | RWD": "kia-k4-rwd.png",
+    "Honda Civic | RWD": "civic-rwd.png",
+    "Porsche 911 | AWD": "porsche-911-awd.png",
+  };
+  return `./assets/cars/${map[key] || "placeholder.png"}`;
 }
 
-async function loadDetails() {
-  const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}`);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Failed to load details");
-
-  document.getElementById("title").textContent = `${data["Manufacturer"]} ${data["Model"]}`;
-  document.getElementById("info").innerHTML = `
-    <div>Type: ${data["Vehicle Type"]}</div>
-    <div>Drivetrain: ${data["Drivetrain"]}</div>
-    <div>Price: $${Number(data["Price"]).toFixed(2)}/day</div>
-    <div>Availability: ${Number(data["Availability"]) === 1 ? "Available" : "Unavailable"}</div>
-  `;
-}
-
-async function book() {
-  const fromDate = document.getElementById("fromDate").value;
-  const toDate = document.getElementById("toDate").value;
-
-  const status = document.getElementById("status");
-  status.textContent = "Booking…";
-
-  const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}/book`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-User-Email": userEmail,
-    },
-    body: JSON.stringify({ fromDate, toDate }),
-  });
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    status.textContent = `Error: ${data.error || "Booking failed"}`;
+async function loadCarDetails() {
+  if (!id) {
+    loadingState.textContent = "Missing car id in URL.";
     return;
   }
 
-  status.textContent = `Booked! Sale ID #${data.saleId}`;
+  try {
+    // ✅ easiest for now: fetch /cars and find the one car
+    // (no new server route required)
+    const res = await fetch(`${API_BASE}/cars`);
+    const data = await res.json().catch(() => []);
+    if (!res.ok) throw new Error(data.error || "Could not load cars");
+
+    const car = (Array.isArray(data) ? data : []).find(
+      (r) => String(r["Vehicle ID"]) === String(id)
+    );
+
+    if (!car) throw new Error("Car not found (maybe not available anymore).");
+
+    const manufacturer = car["Manufacturer"];
+    const model = car["Model"];
+    const type = car["Vehicle Type"];
+    const drivetrain = car["Drivetrain"];
+    const price = Number(car["Price"]);
+    const availability = Number(car["Availability"]);
+
+    carName.textContent = `${manufacturer} ${model}`;
+    carPrice.textContent = Number.isFinite(price) ? `$${price.toFixed(2)}/day` : "—";
+    carType.textContent = `Type: ${type || "—"}`;
+    carDrive.textContent = `Drivetrain: ${drivetrain || "—"}`;
+
+    if (availability === 1) {
+      carAvail.textContent = "Available";
+      carAvail.className = "pill ok";
+      bookBtn.disabled = false;
+    } else {
+      carAvail.textContent = "Unavailable";
+      carAvail.className = "pill bad";
+      bookBtn.disabled = true;
+    }
+
+    carImg.src = getCarImage(manufacturer, model, drivetrain);
+    carImg.onerror = () => (carImg.src = "./assets/cars/placeholder.png");
+
+    loadingState.style.display = "none";
+    detailsUI.style.display = "block";
+  } catch (err) {
+    loadingState.textContent = `Failed to load details: ${err.message}`;
+  }
 }
 
-document.getElementById("bookBtn").addEventListener("click", book);
-loadDetails().catch((e) => (document.getElementById("status").textContent = e.message));
+async function bookCar() {
+  try {
+    statusText.className = "status";
+    statusText.textContent = "Booking…";
+
+    const fromDate = fromDateEl.value;
+    const toDate = toDateEl.value;
+
+    if (!fromDate || !toDate) {
+      statusText.className = "status error";
+      statusText.textContent = "Please select both From and To dates.";
+      return;
+    }
+    if (toDate < fromDate) {
+      statusText.className = "status error";
+      statusText.textContent = "To date must be after From date.";
+      return;
+    }
+
+    const res = await fetch(`${API_BASE}/cars/${id}/book`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-Email": userEmail,
+      },
+      body: JSON.stringify({ fromDate, toDate }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Booking failed");
+
+    statusText.className = "status ok";
+    statusText.textContent = `Booked ✅ Sale ID #${data.saleId}`;
+    bookBtn.disabled = true;
+  } catch (err) {
+    statusText.className = "status error";
+    statusText.textContent = `Error: ${err.message}`;
+  }
+}
+
+bookBtn.addEventListener("click", bookCar);
+loadCarDetails();
+
