@@ -20,13 +20,15 @@ function requireSession() {
 
   return email;
 }
+
 function prettyDate(d) {
   if (!d) return "—";
-  return d.slice(0, 10); // yyyy-mm-dd
+  return String(d).slice(0, 10);
 }
 
 function getBookingImage(manufacturer, model) {
-  const key = `${manufacturer} ${model}`;
+  const key = `${manufacturer} ${model}`.trim();
+
   const map = {
     "KIA K4": "kia.png",
     "Dodge Challenger": "challenger.png",
@@ -36,67 +38,18 @@ function getBookingImage(manufacturer, model) {
     "Porsche 911": "porsche.png",
   };
 
-  return map[key] || "car1.png";
+  return map[key] || "car1.png"; // this exists in /assets
 }
 
 const userEmail = requireSession();
 
-const params = new URLSearchParams(window.location.search);
-const vehicleId = params.get("id"); // bookings.html?id=12
-
-// --- elements (make sure your bookings.html has these IDs) ---
 const statusEl = document.getElementById("status");
 const listEl = document.getElementById("list");
-
-// booking form elements (these must exist on bookings.html)
-const fromEl = document.getElementById("fromDate");
-const toEl = document.getElementById("toDate");
-const bookBtn = document.getElementById("bookBtn");
 
 function setStatus(msg, isError = false) {
   if (!statusEl) return;
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#b91c1c" : "#111827";
-}
-
-async function createBooking() {
-  if (!vehicleId) {
-    setStatus("Missing car id in URL. Go back and click Book again.", true);
-    return;
-  }
-
-  const fromDate = fromEl?.value;
-  const toDate = toEl?.value;
-
-  if (!fromDate || !toDate) {
-    setStatus("Please select both From and To dates.", true);
-    return;
-  }
-  if (toDate < fromDate) {
-    setStatus("To date must be after From date.", true);
-    return;
-  }
-
-  try {
-    setStatus("Booking…");
-
-    const res = await fetch(`${API_BASE}/cars/${vehicleId}/book`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-User-Email": userEmail,
-      },
-      body: JSON.stringify({ fromDate, toDate }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Booking failed");
-
-    setStatus(`Booked! Sale ID #${data.saleId}`);
-    await loadMyBookings(); // refresh list
-  } catch (err) {
-    setStatus(`Error: ${err.message}`, true);
-  }
 }
 
 async function loadMyBookings() {
@@ -115,50 +68,42 @@ async function loadMyBookings() {
     const rows = Array.isArray(data.rows) ? data.rows : [];
     setStatus(`${rows.length} booking(s)`);
 
-    listEl.innerHTML = rows.map((r) => `
-    <div class="bookingCard">
-      <div style="display:flex; gap:16px; align-items:center;">
-        
-        <img 
-          src="./assets/cars/${getBookingImage(r.manufacturer, r.model)}"
-          onerror="this.src='./assets/car1.png'"
-          style="width:110px;height:70px;object-fit:cover;border-radius:12px;"
-        />
-  
-        <div style="flex:1">
-          <div class="bookingTitle">
-            <b>${r.manufacturer} ${r.model}</b>
-            <span class="pill">$${Number(r.priceSoldAt).toFixed(2)}</span>
+    listEl.innerHTML = rows.map((r) => {
+      const imgFile = getBookingImage(r.manufacturer, r.model);
+      return `
+        <div class="bookingCard">
+          <div class="row">
+            <img class="thumb"
+              src="./assets/cars/${imgFile}"
+              onerror="this.onerror=null;this.src='./assets/car1.png';"
+              alt="${r.manufacturer} ${r.model}"
+            />
+
+            <div style="flex:1">
+              <div class="bookingTitle">
+                <b>${r.manufacturer} ${r.model}</b>
+                <span class="pill">$${Number(r.priceSoldAt).toFixed(2)}</span>
+              </div>
+
+              <div class="pillRow">
+                <span class="pill">${r.vehicleType || "—"}</span>
+                <span class="pill">${r.drivetrain || "—"}</span>
+                <span class="pill">Sale ID: ${r.saleId}</span>
+              </div>
+
+              <div class="meta">
+                <b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}
+              </div>
+
+              <div class="muted">Booked successfully ✅</div>
+            </div>
           </div>
-  
-          <div class="pillRow">
-            <span class="pill">${r.vehicleType || "—"}</span>
-            <span class="pill">${r.drivetrain || "—"}</span>
-            <span class="pill">Sale ID: ${r.saleId}</span>
-          </div>
-  
-          <div class="meta">
-            <b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}
-          </div>
-  
-          <div class="muted">Booked successfully ✅</div>
         </div>
-  
-      </div>
-    </div>
-  `).join("");
-  
-  
+      `;
+    }).join("");
   } catch (err) {
     setStatus(`Error: ${err.message}`, true);
   }
 }
 
-// Hook button
-if (bookBtn) bookBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  createBooking();
-});
-
-// Initial load
 loadMyBookings();
