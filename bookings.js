@@ -20,6 +20,11 @@ function requireSession() {
 
   return email;
 }
+function prettyDate(d) {
+  if (!d) return "—";
+  return d.slice(0, 10); // yyyy-mm-dd
+}
+
 
 const userEmail = requireSession();
 
@@ -81,14 +86,6 @@ async function createBooking() {
   }
 }
 
-function formatDate(d){
-  if(!d) return "—";
-  // Handles "2026-02-20T00:00:00.000Z" and "2026-02-20"
-  const dateOnly = String(d).slice(0, 10);
-  return dateOnly;
-}
-
-
 async function loadMyBookings() {
   if (!listEl) return;
 
@@ -106,25 +103,26 @@ async function loadMyBookings() {
     setStatus(`${rows.length} booking(s)`);
 
     listEl.innerHTML = rows.map((r) => `
-  <div class="bookingCard">
-    <div class="bookingTitle">
-      <b>${r.manufacturer} ${r.model}</b>
-      <span class="pill">$${Number(r.priceSoldAt).toFixed(2)}</span>
+    <div class="bookingCard">
+      <div class="bookingTitle">
+        <b>${r.manufacturer || ""} ${r.model || ""}</b>
+        <span class="pill">${money(r.priceSoldAt)}</span>
+      </div>
+  
+      <div class="pillRow">
+        <span class="pill">${r.vehicleType || "—"}</span>
+        <span class="pill">${r.drivetrain || "—"}</span>
+        <span class="pill">Sale ID: ${r.saleId ?? "—"}</span>
+      </div>
+  
+      <div class="meta">
+        <div><b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}</div>
+      </div>
+  
+      <div class="muted">Booked successfully ✅</div>
     </div>
-
-    <div class="pillRow">
-      <span class="pill">${r.vehicleType || "—"}</span>
-      <span class="pill">${r.drivetrain || "—"}</span>
-      <span class="pill">Sale ID: ${r.saleId}</span>
-    </div>
-
-    <div class="meta">
-      <div><b>Dates:</b> ${formatDate(r.fromDate)} → ${formatDate(r.toDate)}</div>
-    </div>
-
-    <div class="muted">Booked successfully ✅</div>
-  </div>
-`).join("");
+  `).join("");
+  
   } catch (err) {
     setStatus(`Error: ${err.message}`, true);
   }
