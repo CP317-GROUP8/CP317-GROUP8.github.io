@@ -95,10 +95,15 @@ async function loadCarDetails() {
       carAvail.className = "pill bad";
       bookBtn.disabled = true;
     }
-    carImg.src = getCarImage(manufacturer, model, drivetrain);
+    const imgSrc = getCarImage(manufacturer, model, drivetrain);
+    console.log("Loading image:", imgSrc);
+
+    carImg.src = imgSrc;
     carImg.onerror = () => {
+      console.warn("Image failed, using fallback");
       carImg.src = "./assets/car1.png";
     };
+
 
     loadingState.style.display = "none";
     detailsUI.style.display = "block";
