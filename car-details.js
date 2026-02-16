@@ -96,9 +96,11 @@ async function loadCarDetails() {
       bookBtn.disabled = true;
     }
 
-    carImg.src = getCarImage(manufacturer, model, drivetrain);
-    carImg.onerror = () => (carImg.src = "./assets/cars/placeholder.png");
-
+    carImg.src = `./assets/cars/${id}.png`;
+    carImg.onerror = () => {
+      carImg.onerror = () => (carImg.src = "./assets/cars/placeholder.png"); // final fallback
+      carImg.src = getCarImage(manufacturer, model, drivetrain);
+    };
     loadingState.style.display = "none";
     detailsUI.style.display = "block";
   } catch (err) {
