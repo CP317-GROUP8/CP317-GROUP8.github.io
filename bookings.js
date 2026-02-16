@@ -25,6 +25,19 @@ function prettyDate(d) {
   return d.slice(0, 10); // yyyy-mm-dd
 }
 
+function getBookingImage(manufacturer, model) {
+  const key = `${manufacturer} ${model}`;
+  const map = {
+    "KIA K4": "kia.png",
+    "Dodge Challenger": "challenger.png",
+    "Honda Civic": "civic.png",
+    "Toyota Corolla": "corolla-fwd.png",
+    "Toyota Highlander": "highlander-awd.png",
+    "Porsche 911": "porsche.png",
+  };
+
+  return map[key] || "car1.png";
+}
 
 const userEmail = requireSession();
 
