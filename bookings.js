@@ -104,24 +104,37 @@ async function loadMyBookings() {
 
     listEl.innerHTML = rows.map((r) => `
     <div class="bookingCard">
-      <div class="bookingTitle">
-        <b>${r.manufacturer || ""} ${r.model || ""}</b>
-        <span class="pill">${money(r.priceSoldAt)}</span>
-      </div>
+      <div style="display:flex; gap:16px; align-items:center;">
+        
+        <img 
+          src="./assets/cars/${getBookingImage(r.manufacturer, r.model)}"
+          onerror="this.src='./assets/car1.png'"
+          style="width:110px;height:70px;object-fit:cover;border-radius:12px;"
+        />
   
-      <div class="pillRow">
-        <span class="pill">${r.vehicleType || "—"}</span>
-        <span class="pill">${r.drivetrain || "—"}</span>
-        <span class="pill">Sale ID: ${r.saleId ?? "—"}</span>
-      </div>
+        <div style="flex:1">
+          <div class="bookingTitle">
+            <b>${r.manufacturer} ${r.model}</b>
+            <span class="pill">$${Number(r.priceSoldAt).toFixed(2)}</span>
+          </div>
   
-      <div class="meta">
-        <div><b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}</div>
-      </div>
+          <div class="pillRow">
+            <span class="pill">${r.vehicleType || "—"}</span>
+            <span class="pill">${r.drivetrain || "—"}</span>
+            <span class="pill">Sale ID: ${r.saleId}</span>
+          </div>
   
-      <div class="muted">Booked successfully ✅</div>
+          <div class="meta">
+            <b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}
+          </div>
+  
+          <div class="muted">Booked successfully ✅</div>
+        </div>
+  
+      </div>
     </div>
   `).join("");
+  
   
   } catch (err) {
     setStatus(`Error: ${err.message}`, true);
