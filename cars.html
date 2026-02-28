@@ -84,23 +84,12 @@ button{
   border-radius: 999px;
   border: 1px solid rgba(148,163,184,0.45);
   background: rgba(255,255,255,0.9);
-
-  display: flex;                
+  display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 0;                
-  line-height: 1;               
-
+  padding: 0;
   cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-}
-
-.heartBtn .heart{
-  font-size: 20px;             
-  display: block;
-  line-height: 1;
-  transform: translateY(1px);   
 }
 
 .heartBtn:hover{
@@ -109,14 +98,23 @@ button{
   border-color: rgba(79,70,229,0.35);
 }
 
+.heartIcon{
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 1.8;
+}
+
 .heartBtn.saved{
   border-color: rgba(239,68,68,0.45);
 }
 
-.heartBtn.saved .heart{
-  opacity: 1;
+.heartBtn.saved .heartIcon{
+  fill: #ef4444;
+  stroke: #ef4444;
 }
-
 .titleRow{
   display:flex;
   justify-content:space-between;
@@ -454,7 +452,9 @@ function renderCars(cars) {
                     type="button"
                     data-favkey="${encodeURIComponent(car.favKey)}"
                     aria-label="Toggle favourite">
-              <span class="heart">${isSaved ? "♥" : "♡"}</span>
+              <svg class="heartIcon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -487,7 +487,6 @@ function renderCars(cars) {
       saveFavsSet(favs);
 
       btn.classList.toggle("saved", !isSaved);
-      btn.querySelector(".heart").textContent = !isSaved ? "♥" : "♡";
     });
   });
 }

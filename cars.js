@@ -1,6 +1,6 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
 
-const SESSION_MS = 12 * 60 * 60 * 1000; // 12 hours
+const SESSION_MS = 12 * 60 * 60 * 1000; 
 
 function requireSession() {
   const email = localStorage.getItem("userEmail");
@@ -71,7 +71,7 @@ function normalizeCar(row) {
   const priceNum = priceVal === null ? null : Number(priceVal);
 
   return {
-    id, // internal only (for booking)
+    id,
     manufacturer,
     model,
     type,
@@ -80,14 +80,6 @@ function normalizeCar(row) {
   };
 }
 
-/**
- * IMAGE PLACEHOLDERS:
- * Put files in: client-side/assets/cars/
- * You can change these filenames ANYTIME.
- *
- * Key format: "Manufacturer Model | Drivetrain"
- * This solves duplicates like Corolla AWD vs Corolla FWD.
- */
 const CAR_IMAGES = {
   "Toyota Corolla | AWD": "corolla-awd.png",
   "Toyota Corolla | FWD": "corolla-fwd.png",
