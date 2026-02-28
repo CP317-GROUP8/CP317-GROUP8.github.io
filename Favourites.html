@@ -87,7 +87,6 @@ button{
 <script>
 const API = "https://server-side-zqaz.onrender.com";
 
-/* session */
 const SESSION_MS = 12 * 60 * 60 * 1000;
 function requireSession() {
   const email = localStorage.getItem("userEmail");
@@ -107,7 +106,6 @@ function requireSession() {
 }
 const userEmail = requireSession();
 
-/* fav storage */
 function favStorageKey(){ return `favs:${userEmail}`; }
 function loadFavsSet(){
   const raw = localStorage.getItem(favStorageKey());
@@ -118,14 +116,12 @@ function saveFavsSet(set){
   localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
 }
 
-/* same carKey rule as cars page */
 function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
   const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
   return `${manufacturer}|${model}|${drivetrain}|${p}`;
 }
 function safeStr(v){ return (v ?? "").toString().trim(); }
 
-/* If you want images here too, keep same imageMap */
 const imageMap = {
   "Dodge Challenger | AWD": "challenger.png",
   "KIA K4 | RWD": "kia.png",
@@ -172,8 +168,6 @@ async function loadFavouriteCars(){
   status.textContent = "Loading favourites…";
   grid.innerHTML = "";
 
-  // We pull the current cars list from API, then filter to the saved fav keys.
-  // (If a car is removed from DB later, it simply won’t show here.)
   const res = await fetch(`${API}/cars`);
   const data = await res.json().catch(() => []);
   const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
