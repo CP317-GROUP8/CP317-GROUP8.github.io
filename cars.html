@@ -78,43 +78,53 @@ button{
 
 .cardBody{ padding:18px; }
 
+.headerRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;   
+  gap:16px;
+}
+
+.headerLeft h3{
+  margin:0;
+  line-height:1.2;
+}
+
+.headerLeft .meta{
+  margin-top:4px;
+}
+
 .heartBtn{
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  border: 1px solid rgba(148,163,184,0.45);
-  background: rgba(255,255,255,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.55);
+  background:#ffffff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0;
+  cursor:pointer;
+  transition: all .15s ease;
 }
 
 .heartBtn:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(15,23,42,0.08);
-  border-color: rgba(79,70,229,0.35);
+  border-color:#4f46e5;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
 }
 
-.heartIcon{
-  width: 20px;
-  height: 20px;
-  display: block;
-  fill: none;
-  stroke: #64748b;
-  stroke-width: 1.8;
+.heartBtn svg{
+  width:20px;
+  height:20px;
+  display:block;
 }
 
 .heartBtn.saved{
-  border-color: rgba(239,68,68,0.45);
+  border-color:#ef4444;
 }
 
-.heartBtn.saved .heartIcon{
-  fill: #ef4444;
-  stroke: #ef4444;
-}
 .titleRow{
   display:flex;
   justify-content:space-between;
@@ -439,27 +449,33 @@ function renderCars(cars) {
            onerror="this.src='./assets/cars/placeholder.png'">
 
       <div class="cardBody">
-        <div class="titleRow" style="align-items:center; gap:10px;">
-          <div>
-            <h3 style="margin:0 0 4px 0;">${name}</h3>
+
+        <div class="headerRow">
+          <div class="headerLeft">
+            <h3>${name}</h3>
             <div class="meta">${car.type} • ${car.drivetrain}</div>
           </div>
 
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
-            <div class="price">${car.priceText}</div>
+          <button class="heartBtn ${isSaved ? "saved" : ""}"
+                  type="button"
+                  data-favkey="${encodeURIComponent(car.favKey)}"
+                  aria-label="Toggle favourite">
 
-            <button class="heartBtn ${isSaved ? "saved" : ""}"
-                    type="button"
-                    data-favkey="${encodeURIComponent(car.favKey)}"
-                    aria-label="Toggle favourite">
-              <svg class="heartIcon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"/>
-              </svg>
-            </button>
-          </div>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
+                fill="${isSaved ? "#ef4444" : "none"}"
+                stroke="${isSaved ? "#ef4444" : "#64748b"}"
+                stroke-width="1.8"/>
+            </svg>
+
+          </button>
         </div>
 
-        <span class="tag ${tagClass}">${tagText}</span>
+        <div class="price" style="margin-top:8px;">${car.priceText}</div>
+
+        <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">
+          ${tagText}
+        </span>
 
         <div class="cardActions">
           <a class="linkBtn viewBtn" href="#"
@@ -467,6 +483,7 @@ function renderCars(cars) {
           <a class="linkBtn bookBtn" href="#"
              onclick="event.preventDefault(); alert('Booking in Sprint 2');">Book</a>
         </div>
+
       </div>
     `;
 
@@ -487,6 +504,12 @@ function renderCars(cars) {
       saveFavsSet(favs);
 
       btn.classList.toggle("saved", !isSaved);
+
+      const path = btn.querySelector("path");
+      if (path) {
+        path.setAttribute("fill", !isSaved ? "#ef4444" : "none");
+        path.setAttribute("stroke", !isSaved ? "#ef4444" : "#64748b");
+      }
     });
   });
 }
