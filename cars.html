@@ -78,29 +78,35 @@ button{
 
 .cardBody{ padding:18px; }
 
-/* Heart favourite button */
 .heartBtn{
   width: 42px;
   height: 42px;
   border-radius: 999px;
   border: 1px solid rgba(148,163,184,0.45);
   background: rgba(255,255,255,0.9);
-  display: grid;
-  place-items: center;
+
+  display: flex;                
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;                
+  line-height: 1;               
+
   cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.heartBtn .heart{
+  font-size: 20px;             
+  display: block;
+  line-height: 1;
+  transform: translateY(1px);   
 }
 
 .heartBtn:hover{
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(15,23,42,0.08);
   border-color: rgba(79,70,229,0.35);
-}
-
-.heartBtn .heart{
-  font-size: 18px;
-  line-height: 1;
-  opacity: 0.65;
 }
 
 .heartBtn.saved{
@@ -300,7 +306,6 @@ button{
 <script>
 const API = "https://server-side-zqaz.onrender.com";
 
-/* --- session (same style you use elsewhere) --- */
 const SESSION_MS = 12 * 60 * 60 * 1000;
 function requireSession() {
   const email = localStorage.getItem("userEmail");
@@ -320,7 +325,6 @@ function requireSession() {
 }
 const userEmail = requireSession();
 
-/* --- favourites storage (per user) --- */
 function favStorageKey() {
   return `favs:${userEmail}`;
 }
@@ -333,7 +337,6 @@ function saveFavsSet(set) {
   localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
 }
 
-/* --- Your image map --- */
 const imageMap = {
   "Dodge Challenger | AWD": "challenger.png",
   "KIA K4 | RWD": "kia.png",
@@ -350,7 +353,6 @@ let filteredCars = [];
 
 function safeStr(v){ return (v ?? "").toString().trim(); }
 
-/* Unique car key so duplicates (Highlander AWD vs RWD) can have different images/favs */
 function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
   const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
   return `${manufacturer}|${model}|${drivetrain}|${p}`;
@@ -398,7 +400,6 @@ async function loadCars() {
     const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
     allCars = rawCars.map(normalizeCar);
 
-    // slider max based on data
     const prices = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
     const maxPrice = prices.length ? Math.max(...prices) : 2000;
     const slider = document.getElementById("filterPrice");
@@ -472,7 +473,6 @@ function renderCars(cars) {
     grid.appendChild(card);
   });
 
-  // heart click handlers
   grid.querySelectorAll(".heartBtn").forEach(btn => {
     btn.addEventListener("click", () => {
       const key = decodeURIComponent(btn.getAttribute("data-favkey") || "");
@@ -486,14 +486,12 @@ function renderCars(cars) {
 
       saveFavsSet(favs);
 
-      // update button UI instantly
       btn.classList.toggle("saved", !isSaved);
       btn.querySelector(".heart").textContent = !isSaved ? "♥" : "♡";
     });
   });
 }
 
-/* ---------- Search + Filters (your existing logic) ---------- */
 function getSearchQuery() {
   const input = document.getElementById("searchInput");
   return (input?.value || "").trim().toLowerCase();
