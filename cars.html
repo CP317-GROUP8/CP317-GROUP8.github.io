@@ -78,6 +78,39 @@ button{
 
 .cardBody{ padding:18px; }
 
+/* Heart favourite button */
+.heartBtn{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.45);
+  background: rgba(255,255,255,0.9);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.heartBtn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+  border-color: rgba(79,70,229,0.35);
+}
+
+.heartBtn .heart{
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.heartBtn.saved{
+  border-color: rgba(239,68,68,0.45);
+}
+
+.heartBtn.saved .heart{
+  opacity: 1;
+}
+
 .titleRow{
   display:flex;
   justify-content:space-between;
@@ -267,6 +300,40 @@ button{
 <script>
 const API = "https://server-side-zqaz.onrender.com";
 
+/* --- session (same style you use elsewhere) --- */
+const SESSION_MS = 12 * 60 * 60 * 1000;
+function requireSession() {
+  const email = localStorage.getItem("userEmail");
+  const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+  if (!email || !loggedInAt) {
+    window.location.replace("index.html");
+    throw new Error("No session");
+  }
+  if (Date.now() - loggedInAt > SESSION_MS) {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("loggedInAt");
+    localStorage.removeItem("isAdmin");
+    window.location.replace("index.html");
+    throw new Error("Session expired");
+  }
+  return email;
+}
+const userEmail = requireSession();
+
+/* --- favourites storage (per user) --- */
+function favStorageKey() {
+  return `favs:${userEmail}`;
+}
+function loadFavsSet() {
+  const raw = localStorage.getItem(favStorageKey());
+  const arr = raw ? JSON.parse(raw) : [];
+  return new Set(Array.isArray(arr) ? arr : []);
+}
+function saveFavsSet(set) {
+  localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
+}
+
+/* --- Your image map --- */
 const imageMap = {
   "Dodge Challenger | AWD": "challenger.png",
   "KIA K4 | RWD": "kia.png",
@@ -283,6 +350,12 @@ let filteredCars = [];
 
 function safeStr(v){ return (v ?? "").toString().trim(); }
 
+/* Unique car key so duplicates (Highlander AWD vs RWD) can have different images/favs */
+function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
+  const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
+  return `${manufacturer}|${model}|${drivetrain}|${p}`;
+}
+
 function normalizeCar(car){
   const manufacturer = safeStr(car["Manufacturer"]);
   const model        = safeStr(car["Model"]);
@@ -294,6 +367,7 @@ function normalizeCar(car){
   const isAvailable = Number(availability) === 1;
 
   const priceNum = Number(priceRaw);
+  const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
   const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
 
   const name = `${manufacturer} ${model}`.trim();
@@ -301,12 +375,15 @@ function normalizeCar(car){
   const imgFile = imageMap[imgKey] || "placeholder.png";
   const imgUrl  = `./assets/cars/${imgFile}`;
 
+  const favKey = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
+
   return {
     manufacturer, model, type, drivetrain,
     isAvailable,
     priceText,
     imgKey, imgUrl,
-    priceNum: Number.isFinite(priceNum) ? priceNum : null,
+    priceNum: cleanPriceNum,
+    favKey
   };
 }
 
@@ -321,6 +398,7 @@ async function loadCars() {
     const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
     allCars = rawCars.map(normalizeCar);
 
+    // slider max based on data
     const prices = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
     const maxPrice = prices.length ? Math.max(...prices) : 2000;
     const slider = document.getElementById("filterPrice");
@@ -346,10 +424,13 @@ function renderCars(cars) {
     return;
   }
 
+  const favs = loadFavsSet();
+
   cars.forEach((car) => {
     const tagClass = car.isAvailable ? "available" : "unavailable";
     const tagText  = car.isAvailable ? "Available" : "Unavailable";
     const name = `${car.manufacturer} ${car.model}`.trim();
+    const isSaved = favs.has(car.favKey);
 
     const card = document.createElement("div");
     card.className = "card";
@@ -359,14 +440,25 @@ function renderCars(cars) {
            onerror="this.src='./assets/cars/placeholder.png'">
 
       <div class="cardBody">
-        <div class="titleRow">
-          <h3>${name}</h3>
-          <div class="price">${car.priceText}</div>
+        <div class="titleRow" style="align-items:center; gap:10px;">
+          <div>
+            <h3 style="margin:0 0 4px 0;">${name}</h3>
+            <div class="meta">${car.type} • ${car.drivetrain}</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+            <div class="price">${car.priceText}</div>
+
+            <button class="heartBtn ${isSaved ? "saved" : ""}"
+                    type="button"
+                    data-favkey="${encodeURIComponent(car.favKey)}"
+                    aria-label="Toggle favourite">
+              <span class="heart">${isSaved ? "♥" : "♡"}</span>
+            </button>
+          </div>
         </div>
 
         <span class="tag ${tagClass}">${tagText}</span>
-
-        <p class="meta">${car.type} • ${car.drivetrain}</p>
 
         <div class="cardActions">
           <a class="linkBtn viewBtn" href="#"
@@ -376,28 +468,46 @@ function renderCars(cars) {
         </div>
       </div>
     `;
+
     grid.appendChild(card);
+  });
+
+  // heart click handlers
+  grid.querySelectorAll(".heartBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = decodeURIComponent(btn.getAttribute("data-favkey") || "");
+      if (!key) return;
+
+      const favs = loadFavsSet();
+      const isSaved = favs.has(key);
+
+      if (isSaved) favs.delete(key);
+      else favs.add(key);
+
+      saveFavsSet(favs);
+
+      // update button UI instantly
+      btn.classList.toggle("saved", !isSaved);
+      btn.querySelector(".heart").textContent = !isSaved ? "♥" : "♡";
+    });
   });
 }
 
+/* ---------- Search + Filters (your existing logic) ---------- */
 function getSearchQuery() {
   const input = document.getElementById("searchInput");
   return (input?.value || "").trim().toLowerCase();
 }
-
 function getSelectedType() {
   return (document.getElementById("filterType")?.value || "").trim();
 }
-
 function getSelectedDrive() {
   return (document.getElementById("filterDrive")?.value || "").trim();
 }
-
 function getMaxPrice() {
   const v = Number(document.getElementById("filterPrice")?.value);
   return Number.isFinite(v) ? v : Infinity;
 }
-
 function updatePriceLabel() {
   const slider = document.getElementById("filterPrice");
   const label = document.getElementById("priceLabel");
@@ -406,11 +516,8 @@ function updatePriceLabel() {
   const max = Number(slider.max);
   const val = Number(slider.value);
 
-  if (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) {
-    label.textContent = "Any";
-  } else {
-    label.textContent = `$${val}`;
-  }
+  if (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) label.textContent = "Any";
+  else label.textContent = `$${val}`;
 }
 
 function applyAllFilters() {
@@ -424,15 +531,11 @@ function applyAllFilters() {
       const title = `${c.manufacturer} ${c.model}`.toLowerCase();
       const type = (c.type || "").toLowerCase();
       const drive = (c.drivetrain || "").toLowerCase();
-      const matchesSearch = title.includes(q) || type.includes(q) || drive.includes(q);
-      if (!matchesSearch) return false;
+      if (!(title.includes(q) || type.includes(q) || drive.includes(q))) return false;
     }
-
     if (typeFilter && (c.type || "").toLowerCase() !== typeFilter) return false;
     if (driveFilter && (c.drivetrain || "").toLowerCase() !== driveFilter) return false;
-
     if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice) return false;
-
     return true;
   });
 
@@ -464,11 +567,9 @@ function wireUI() {
     const t = document.getElementById("filterType");
     const d = document.getElementById("filterDrive");
     const p = document.getElementById("filterPrice");
-
     if (t) t.value = "";
     if (d) d.value = "";
     if (p) p.value = p.max;
-
     updatePriceLabel();
     applyAllFilters();
   });
