@@ -74,8 +74,8 @@ button{
     <div class="sub">Saved cars for this account</div>
   </div>
   <div style="display:flex; gap:12px;">
-    <button class="secondary" onclick="location.href='cars.html'">← Back to Cars</button>
-    <button class="secondary" onclick="location.href='home.html'">← Home</button>
+    <button class="secondary" onclick="location.href='cars.html?preview=1'">← Back to Cars</button>
+    <button class="secondary" onclick="location.href='home.html?v=7'">← Home</button>
   </div>
 </header>
 
@@ -86,6 +86,8 @@ button{
 
 <script>
 const API = "https://server-side-zqaz.onrender.com";
+const params = new URLSearchParams(window.location.search);
+const isPreview = params.get("preview") === "1";
 
 const SESSION_MS = 12 * 60 * 60 * 1000;
 function requireSession() {
@@ -104,7 +106,9 @@ function requireSession() {
   }
   return email;
 }
-const userEmail = requireSession();
+const userEmail = isPreview
+  ? (localStorage.getItem("userEmail") || "preview@example.com")
+  : requireSession();
 
 function favStorageKey(){ return `favs:${userEmail}`; }
 function loadFavsSet(){

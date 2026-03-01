@@ -22,7 +22,12 @@ function requireSession() {
   return email;
 }
 
-const userEmail = requireSession();
+const params = new URLSearchParams(window.location.search);
+const isPreview = params.get("preview") === "1";
+
+const userEmail = isPreview
+  ? (localStorage.getItem("userEmail") || "preview@example.com")
+  : requireSession();
 
 const signInBtn = document.getElementById("signInBtn");
 const logoutBtn = document.getElementById("logout");
@@ -40,7 +45,6 @@ if (logoutBtn) {
   });
 }
 
-const params = new URLSearchParams(window.location.search);
 const where = params.get("where") || "";
 const pickup = params.get("pickup") || "";
 const dropoff = params.get("dropoff") || "";
@@ -151,14 +155,16 @@ async function loadCars() {
     grid.querySelectorAll("[data-view]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const vehicleId = btn.getAttribute("data-view");
-        window.location.href = `car-details.html?id=${vehicleId}`;
+        const previewSuffix = isPreview ? "&preview=1" : "";
+        window.location.href = `car-details.html?id=${vehicleId}${previewSuffix}`;
       });
     });
     
     grid.querySelectorAll("[data-book]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const vehicleId = btn.getAttribute("data-book");
-        window.location.href = `bookings.html?id=${vehicleId}`;
+        const previewSuffix = isPreview ? "&preview=1" : "";
+        window.location.href = `bookings.html?id=${vehicleId}${previewSuffix}`;
       });
     });
     
@@ -196,4 +202,3 @@ async function bookCar(vehicleId) {
 }
 
 loadCars();
-

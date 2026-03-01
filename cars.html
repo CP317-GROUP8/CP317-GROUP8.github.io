@@ -313,6 +313,8 @@ button{
 
 <script>
 const API = "https://server-side-zqaz.onrender.com";
+const params = new URLSearchParams(window.location.search);
+const isPreview = params.get("preview") === "1";
 
 const SESSION_MS = 12 * 60 * 60 * 1000;
 function requireSession() {
@@ -331,7 +333,9 @@ function requireSession() {
   }
   return email;
 }
-const userEmail = requireSession();
+const userEmail = isPreview
+  ? (localStorage.getItem("userEmail") || "preview@example.com")
+  : requireSession();
 
 function favStorageKey() {
   return `favs:${userEmail}`;
@@ -445,7 +449,9 @@ function renderCars(cars) {
 
     const card = document.createElement("div");
     card.className = "card";
-    const detailsHref = car.id ? `car-details.html?id=${encodeURIComponent(car.id)}` : "#";
+    const detailsHref = car.id
+      ? `car-details.html?id=${encodeURIComponent(car.id)}${isPreview ? "&preview=1" : ""}`
+      : "#";
     const detailsOnClick = car.id
       ? ""
       : `onclick="event.preventDefault(); alert('Missing vehicle id for this car');"`;

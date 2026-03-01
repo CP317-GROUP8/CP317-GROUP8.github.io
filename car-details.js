@@ -1,5 +1,7 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
 const SESSION_MS = 12 * 60 * 60 * 1000;
+const params = new URLSearchParams(location.search);
+const isPreview = params.get("preview") === "1";
 
 function requireSession() {
   const email = localStorage.getItem("userEmail");
@@ -19,9 +21,10 @@ function requireSession() {
   return email;
 }
 
-const userEmail = requireSession();
+const userEmail = isPreview
+  ? (localStorage.getItem("userEmail") || "preview@example.com")
+  : requireSession();
 
-const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
 const loadingState = document.getElementById("loadingState");
@@ -38,6 +41,13 @@ const fromDateEl = document.getElementById("fromDate");
 const toDateEl = document.getElementById("toDate");
 const bookBtn = document.getElementById("bookBtn");
 const statusText = document.getElementById("statusText");
+const allCarsBtn = document.getElementById("allCarsBtn");
+
+if (allCarsBtn && isPreview) {
+  allCarsBtn.onclick = () => {
+    window.location.href = "cars.html?preview=1";
+  };
+}
 
 function getCarImage(manufacturer, model, drivetrain) {
   const name = `${manufacturer} ${model}`.trim(); 
@@ -150,4 +160,3 @@ async function bookCar() {
 
 bookBtn.addEventListener("click", bookCar);
 loadCarDetails();
-
