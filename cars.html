@@ -34,7 +34,7 @@ h1{ font-size:44px; margin:0; }
 .topRow{
   display:flex;
   justify-content:space-between;
-  margin:30px 0 20px;
+  margin:30px 0 12px; 
   gap:16px;
 }
 
@@ -78,6 +78,53 @@ button{
 
 .cardBody{ padding:18px; }
 
+.headerRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;   
+  gap:16px;
+}
+
+.headerLeft h3{
+  margin:0;
+  line-height:1.2;
+}
+
+.headerLeft .meta{
+  margin-top:4px;
+}
+
+.heartBtn{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.55);
+  background:#ffffff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0;
+  cursor:pointer;
+  transition: all .15s ease;
+}
+
+.heartBtn:hover{
+  border-color:#4f46e5;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+
+.heartBtn svg{
+  width:20px;
+  height:20px;
+  display:block;
+}
+
+.heartBtn.saved{
+  border-color:#ef4444;
+}
+
 .titleRow{
   display:flex;
   justify-content:space-between;
@@ -118,6 +165,90 @@ button{
 
 @media(max-width:900px){
   .grid{grid-template-columns:1fr;}
+  .topRow{ flex-direction:column; align-items:stretch; }
+  .searchBox{ width:100%; }
+}
+
+#filterPanel{
+  display:none;
+  margin: 10px 0 22px;
+  padding: 18px;
+  border-radius: 18px;
+
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(148,163,184,0.35);
+  box-shadow: 0 16px 45px rgba(15,23,42,0.10);
+}
+
+#filterPanel .sub{
+  color:#475569;
+  font-size: 13px;
+}
+
+#filterPanel select,
+#filterPanel input[type="range"]{
+  outline: none;
+}
+
+#filterPanel select{
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(148,163,184,0.45);
+  background: rgba(255,255,255,0.95);
+  padding: 0 12px;
+  min-width: 190px;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+#filterPanel select:focus{
+  border-color: rgba(79,70,229,0.55);
+  box-shadow: 0 0 0 4px rgba(79,70,229,0.15);
+}
+
+#filterPanel input[type="range"]{
+  width: 260px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.35);
+}
+
+#filterPanel input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #4f46e5;
+  border: 2px solid white;
+  box-shadow: 0 10px 18px rgba(79,70,229,0.25);
+  cursor: pointer;
+}
+
+#filterPanel input[type="range"]::-moz-range-thumb{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #4f46e5;
+  border: 2px solid white;
+  box-shadow: 0 10px 18px rgba(79,70,229,0.25);
+  cursor: pointer;
+}
+
+#clearFilters{
+  border: 1px solid rgba(148,163,184,0.55);
+  background: rgba(255,255,255,0.85);
+}
+
+#clearFilters:hover{
+  background: white;
+}
+
+#filterBtn:hover{
+  border-color: rgba(79,70,229,0.35);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.06);
 }
 </style>
 </head>
@@ -126,19 +257,54 @@ button{
 <div class="container">
 
 <header>
-<div>
-<h1>Cars</h1>
-<div class="sub">Live from SQL database</div>
-</div>
+  <div>
+    <h1>Cars</h1>
+    <div class="sub">Live from SQL database</div>
+  </div>
 
-<div>
-<button class="secondary" onclick="location.href='home.html'">← Home</button>
-</div>
+  <div>
+    <button class="secondary" onclick="location.href='home.html'">← Home</button>
+  </div>
 </header>
 
 <div class="topRow">
-<input class="searchBox" placeholder="Search (Coming soon)">
-<button class="secondary" onclick="alert('Filter Sprint 2')">Filter</button>
+  <input id="searchInput" class="searchBox" placeholder="Search by make/model">
+  <button id="filterBtn" class="secondary" type="button">Filter</button>
+</div>
+
+<div id="filterPanel" style="display:none; margin-bottom:20px; background:white; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow:0 10px 25px rgba(0,0,0,.06);">
+  <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+
+    <div>
+      <div class="sub" style="margin-bottom:6px;">Vehicle Type</div>
+      <select id="filterType" style="height:42px; border-radius:12px; border:1px solid #ddd; padding:0 12px; min-width:180px;">
+        <option value="">Any</option>
+        <option value="Sedan">Sedan</option>
+        <option value="SUV">SUV</option>
+        <option value="Sport">Sport</option>
+      </select>
+    </div>
+
+    <div>
+      <div class="sub" style="margin-bottom:6px;">Drivetrain</div>
+      <select id="filterDrive" style="height:42px; border-radius:12px; border:1px solid #ddd; padding:0 12px; min-width:180px;">
+        <option value="">Any</option>
+        <option value="AWD">AWD</option>
+        <option value="FWD">FWD</option>
+        <option value="RWD">RWD</option>
+      </select>
+    </div>
+
+    <div style="min-width:260px;">
+      <div class="sub" style="margin-bottom:6px;">Max price : <span id="priceLabel">Any</span></div>
+      <input id="filterPrice" type="range" min="0" max="2000" step="50" value="2000" style="width:260px;">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button id="clearFilters" class="secondary" type="button">Clear</button>
+    </div>
+
+  </div>
 </div>
 
 <div class="grid" id="carsGrid"></div>
@@ -147,6 +313,37 @@ button{
 
 <script>
 const API = "https://server-side-zqaz.onrender.com";
+
+const SESSION_MS = 12 * 60 * 60 * 1000;
+function requireSession() {
+  const email = localStorage.getItem("userEmail");
+  const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+  if (!email || !loggedInAt) {
+    window.location.replace("index.html");
+    throw new Error("No session");
+  }
+  if (Date.now() - loggedInAt > SESSION_MS) {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("loggedInAt");
+    localStorage.removeItem("isAdmin");
+    window.location.replace("index.html");
+    throw new Error("Session expired");
+  }
+  return email;
+}
+const userEmail = requireSession();
+
+function favStorageKey() {
+  return `favs:${userEmail}`;
+}
+function loadFavsSet() {
+  const raw = localStorage.getItem(favStorageKey());
+  const arr = raw ? JSON.parse(raw) : [];
+  return new Set(Array.isArray(arr) ? arr : []);
+}
+function saveFavsSet(set) {
+  localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
+}
 
 const imageMap = {
   "Dodge Challenger | AWD": "challenger.png",
@@ -159,6 +356,47 @@ const imageMap = {
   "Toyota Corolla | AWD": "corolla-awd.png"
 };
 
+let allCars = [];
+let filteredCars = [];
+
+function safeStr(v){ return (v ?? "").toString().trim(); }
+
+function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
+  const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
+  return `${manufacturer}|${model}|${drivetrain}|${p}`;
+}
+
+function normalizeCar(car){
+  const manufacturer = safeStr(car["Manufacturer"]);
+  const model        = safeStr(car["Model"]);
+  const type         = safeStr(car["Vehicle Type"]);
+  const drivetrain   = safeStr(car["Drivetrain"]);
+  const priceRaw     = car["Price"];
+  const availability = car["Availability"];
+
+  const isAvailable = Number(availability) === 1;
+
+  const priceNum = Number(priceRaw);
+  const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
+  const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+
+  const name = `${manufacturer} ${model}`.trim();
+  const imgKey = `${name} | ${drivetrain}`;
+  const imgFile = imageMap[imgKey] || "placeholder.png";
+  const imgUrl  = `./assets/cars/${imgFile}`;
+
+  const favKey = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
+
+  return {
+    manufacturer, model, type, drivetrain,
+    isAvailable,
+    priceText,
+    imgKey, imgUrl,
+    priceNum: cleanPriceNum,
+    favKey
+  };
+}
+
 async function loadCars() {
   const grid = document.getElementById("carsGrid");
   grid.innerHTML = "<div style='color:#555;'>Loading cars…</div>";
@@ -167,8 +405,19 @@ async function loadCars() {
     const res = await fetch(`${API}/cars`);
     const data = await res.json();
 
-    const cars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
-    renderCars(cars);
+    const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
+    allCars = rawCars.map(normalizeCar);
+
+    const prices = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
+    const maxPrice = prices.length ? Math.max(...prices) : 2000;
+    const slider = document.getElementById("filterPrice");
+    if (slider) {
+      slider.max = String(Math.ceil(maxPrice / 50) * 50);
+      slider.value = slider.max;
+      updatePriceLabel();
+    }
+
+    applyAllFilters();
   } catch (e) {
     console.error(e);
     grid.innerHTML = "<div style='color:#b91c1c;'>Failed to load cars.</div>";
@@ -179,42 +428,54 @@ function renderCars(cars) {
   const grid = document.getElementById("carsGrid");
   grid.innerHTML = "";
 
+  if (!cars.length) {
+    grid.innerHTML = "<div style='color:#555;'>No cars match your search/filters.</div>";
+    return;
+  }
+
+  const favs = loadFavsSet();
+
   cars.forEach((car) => {
-    const manufacturer= car["Manufacturer"];
-    const model       = car["Model"];
-    const type        = car["Vehicle Type"];
-    const drivetrain  = car["Drivetrain"];
-    const priceRaw    = car["Price"];
-    const availability= car["Availability"];
-
-    const isAvailable = Number(availability) === 1;
-    const tagClass = isAvailable ? "available" : "unavailable";
-    const tagText  = isAvailable ? "Available" : "Unavailable";
-
-    const priceNum = Number(priceRaw);
-    const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
-
-    const name = `${manufacturer} ${model}`;
-    const imgKey = `${name} | ${drivetrain}`;
-
-    const imgFile = imageMap[imgKey] || "placeholder.png";
-    const imgUrl  = `./assets/cars/${imgFile}`;
+    const tagClass = car.isAvailable ? "available" : "unavailable";
+    const tagText  = car.isAvailable ? "Available" : "Unavailable";
+    const name = `${car.manufacturer} ${car.model}`.trim();
+    const isSaved = favs.has(car.favKey);
 
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${imgUrl}" alt="${imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
+      <img src="${car.imgUrl}" alt="${car.imgKey}"
+           onerror="this.src='./assets/cars/placeholder.png'">
+
       <div class="cardBody">
 
-        <div class="titleRow">
-          <h3>${name}</h3>
-          <div class="price">${priceText}</div>
+        <div class="headerRow">
+          <div class="headerLeft">
+            <h3>${name}</h3>
+            <div class="meta">${car.type} • ${car.drivetrain}</div>
+          </div>
+
+          <button class="heartBtn ${isSaved ? "saved" : ""}"
+                  type="button"
+                  data-favkey="${encodeURIComponent(car.favKey)}"
+                  aria-label="Toggle favourite">
+
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
+                fill="${isSaved ? "#ef4444" : "none"}"
+                stroke="${isSaved ? "#ef4444" : "#64748b"}"
+                stroke-width="1.8"/>
+            </svg>
+
+          </button>
         </div>
 
-        <span class="tag ${tagClass}">${tagText}</span>
+        <div class="price" style="margin-top:8px;">${car.priceText}</div>
 
-        <p class="meta">${type} • ${drivetrain}</p>
+        <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">
+          ${tagText}
+        </span>
 
         <div class="cardActions">
           <a class="linkBtn viewBtn" href="car-details.html?id=${car["Vehicle ID"]}">
@@ -233,15 +494,115 @@ function renderCars(cars) {
 
     grid.appendChild(card);
   });
-  grid.querySelectorAll("[data-book]").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const vehicleId = btn.getAttribute("data-book");
-      await bookCar(vehicleId);
+
+  grid.querySelectorAll(".heartBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = decodeURIComponent(btn.getAttribute("data-favkey") || "");
+      if (!key) return;
+
+      const favs = loadFavsSet();
+      const isSaved = favs.has(key);
+
+      if (isSaved) favs.delete(key);
+      else favs.add(key);
+
+      saveFavsSet(favs);
+
+      btn.classList.toggle("saved", !isSaved);
+
+      const path = btn.querySelector("path");
+      if (path) {
+        path.setAttribute("fill", !isSaved ? "#ef4444" : "none");
+        path.setAttribute("stroke", !isSaved ? "#ef4444" : "#64748b");
+      }
     });
   });
 }
 
+function getSearchQuery() {
+  const input = document.getElementById("searchInput");
+  return (input?.value || "").trim().toLowerCase();
+}
+function getSelectedType() {
+  return (document.getElementById("filterType")?.value || "").trim();
+}
+function getSelectedDrive() {
+  return (document.getElementById("filterDrive")?.value || "").trim();
+}
+function getMaxPrice() {
+  const v = Number(document.getElementById("filterPrice")?.value);
+  return Number.isFinite(v) ? v : Infinity;
+}
+function updatePriceLabel() {
+  const slider = document.getElementById("filterPrice");
+  const label = document.getElementById("priceLabel");
+  if (!slider || !label) return;
+
+  const max = Number(slider.max);
+  const val = Number(slider.value);
+
+  if (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) label.textContent = "Any";
+  else label.textContent = `$${val}`;
+}
+
+function applyAllFilters() {
+  const q = getSearchQuery();
+  const typeFilter = getSelectedType().toLowerCase();
+  const driveFilter = getSelectedDrive().toLowerCase();
+  const maxPrice = getMaxPrice();
+
+  filteredCars = allCars.filter(c => {
+    if (q) {
+      const title = `${c.manufacturer} ${c.model}`.toLowerCase();
+      const type = (c.type || "").toLowerCase();
+      const drive = (c.drivetrain || "").toLowerCase();
+      if (!(title.includes(q) || type.includes(q) || drive.includes(q))) return false;
+    }
+    if (typeFilter && (c.type || "").toLowerCase() !== typeFilter) return false;
+    if (driveFilter && (c.drivetrain || "").toLowerCase() !== driveFilter) return false;
+    if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice) return false;
+    return true;
+  });
+
+  renderCars(filteredCars);
+}
+
+function wireUI() {
+  const search = document.getElementById("searchInput");
+  search?.addEventListener("input", applyAllFilters);
+
+  const btn = document.getElementById("filterBtn");
+  const panel = document.getElementById("filterPanel");
+  btn?.addEventListener("click", () => {
+    if (!panel) return;
+    panel.style.display = (panel.style.display === "none" || !panel.style.display) ? "block" : "none";
+  });
+
+  document.getElementById("filterType")?.addEventListener("change", applyAllFilters);
+  document.getElementById("filterDrive")?.addEventListener("change", applyAllFilters);
+
+  const price = document.getElementById("filterPrice");
+  price?.addEventListener("input", () => {
+    updatePriceLabel();
+    applyAllFilters();
+  });
+
+  document.getElementById("clearFilters")?.addEventListener("click", () => {
+    if (search) search.value = "";
+    const t = document.getElementById("filterType");
+    const d = document.getElementById("filterDrive");
+    const p = document.getElementById("filterPrice");
+    if (t) t.value = "";
+    if (d) d.value = "";
+    if (p) p.value = p.max;
+    updatePriceLabel();
+    applyAllFilters();
+  });
+
+  updatePriceLabel();
+}
+
+wireUI();
 loadCars();
 </script>
 

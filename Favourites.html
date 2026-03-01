@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Favourites</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{ box-sizing:border-box; font-family:Inter,system-ui; }
+body{ margin:0; background:linear-gradient(180deg,#eef2ff,#f8fafc); }
+.container{ max-width:1400px; margin:auto; padding:40px; }
+
+header{ display:flex; justify-content:space-between; align-items:center; }
+h1{ font-size:44px; margin:0; }
+.sub{ color:#555; }
+
+button{
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+}
+.secondary{ background:white;border:1px solid #ccc; }
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+  margin-top:24px;
+}
+
+.card{
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+}
+
+.card img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  background:#ddd;
+}
+
+.cardBody{ padding:18px; }
+.titleRow{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.price{ font-weight:600; }
+.meta{ color:#555;font-size:14px; margin-top:6px; }
+
+.removeBtn{
+  padding:10px 12px;
+  border-radius:12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid rgba(153,27,27,0.2);
+  cursor:pointer;
+  font-weight:600;
+}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <div>
+    <h1>Favourites</h1>
+    <div class="sub">Saved cars for this account</div>
+  </div>
+  <div style="display:flex; gap:12px;">
+    <button class="secondary" onclick="location.href='cars.html'">← Back to Cars</button>
+    <button class="secondary" onclick="location.href='home.html'">← Home</button>
+  </div>
+</header>
+
+<div class="sub" id="status" style="margin-top:16px;"></div>
+<div class="grid" id="favGrid"></div>
+
+</div>
+
+<script>
+const API = "https://server-side-zqaz.onrender.com";
+
+const SESSION_MS = 12 * 60 * 60 * 1000;
+function requireSession() {
+  const email = localStorage.getItem("userEmail");
+  const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+  if (!email || !loggedInAt) {
+    window.location.replace("index.html");
+    throw new Error("No session");
+  }
+  if (Date.now() - loggedInAt > SESSION_MS) {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("loggedInAt");
+    localStorage.removeItem("isAdmin");
+    window.location.replace("index.html");
+    throw new Error("Session expired");
+  }
+  return email;
+}
+const userEmail = requireSession();
+
+function favStorageKey(){ return `favs:${userEmail}`; }
+function loadFavsSet(){
+  const raw = localStorage.getItem(favStorageKey());
+  const arr = raw ? JSON.parse(raw) : [];
+  return new Set(Array.isArray(arr) ? arr : []);
+}
+function saveFavsSet(set){
+  localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
+}
+
+function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
+  const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
+  return `${manufacturer}|${model}|${drivetrain}|${p}`;
+}
+function safeStr(v){ return (v ?? "").toString().trim(); }
+
+const imageMap = {
+  "Dodge Challenger | AWD": "challenger.png",
+  "KIA K4 | RWD": "kia.png",
+  "Honda Civic | RWD": "civic.png",
+  "Porsche 911 | AWD": "porsche.png",
+  "Toyota Highlander | AWD": "highlander-awd.png",
+  "Toyota Highlander | RWD": "highlander-rwd.png",
+  "Toyota Corolla | FWD": "corolla-fwd.png",
+  "Toyota Corolla | AWD": "corolla-awd.png"
+};
+
+function normalizeCar(car){
+  const manufacturer = safeStr(car["Manufacturer"]);
+  const model        = safeStr(car["Model"]);
+  const type         = safeStr(car["Vehicle Type"]);
+  const drivetrain   = safeStr(car["Drivetrain"]);
+  const priceRaw     = car["Price"];
+
+  const priceNum = Number(priceRaw);
+  const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
+  const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+
+  const name = `${manufacturer} ${model}`.trim();
+  const imgKey = `${name} | ${drivetrain}`;
+  const imgFile = imageMap[imgKey] || "placeholder.png";
+  const imgUrl  = `./assets/cars/${imgFile}`;
+
+  const favKey = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
+
+  return { manufacturer, model, type, drivetrain, priceText, imgKey, imgUrl, favKey };
+}
+
+async function loadFavouriteCars(){
+  const status = document.getElementById("status");
+  const grid = document.getElementById("favGrid");
+
+  const favs = loadFavsSet();
+  if (!favs.size){
+    status.textContent = "No favourites yet. Go to Cars and tap the heart.";
+    grid.innerHTML = "";
+    return;
+  }
+
+  status.textContent = "Loading favourites…";
+  grid.innerHTML = "";
+
+  const res = await fetch(`${API}/cars`);
+  const data = await res.json().catch(() => []);
+  const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
+  const cars = rawCars.map(normalizeCar);
+
+  const favCars = cars.filter(c => favs.has(c.favKey));
+
+  status.textContent = `${favCars.length} saved car(s)`;
+
+  if (!favCars.length){
+    status.textContent = "Your saved cars are not currently available in the DB list.";
+    return;
+  }
+
+  favCars.forEach(c => {
+    const name = `${c.manufacturer} ${c.model}`.trim();
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${c.imgUrl}" alt="${c.imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
+      <div class="cardBody">
+        <div class="titleRow">
+          <div>
+            <h3 style="margin:0;">${name}</h3>
+            <div class="meta">${c.type} • ${c.drivetrain}</div>
+          </div>
+          <div class="price">${c.priceText}</div>
+        </div>
+
+        <div style="margin-top:14px; display:flex; justify-content:flex-end;">
+          <button class="removeBtn" type="button" data-remove="${encodeURIComponent(c.favKey)}">
+            Remove
+          </button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll("[data-remove]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = decodeURIComponent(btn.getAttribute("data-remove") || "");
+      const favs = loadFavsSet();
+      favs.delete(key);
+      saveFavsSet(favs);
+      loadFavouriteCars();
+    });
+  });
+}
+
+loadFavouriteCars();
+</script>
+</body>
+</html>

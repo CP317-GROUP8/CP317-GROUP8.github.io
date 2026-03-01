@@ -39,7 +39,6 @@ const toDateEl = document.getElementById("toDate");
 const bookBtn = document.getElementById("bookBtn");
 const statusText = document.getElementById("statusText");
 
-// reuse same image map logic if you want
 function getCarImage(manufacturer, model, drivetrain) {
   const name = `${manufacturer} ${model}`.trim(); // ✅ NO drivetrain here
 
@@ -62,8 +61,6 @@ async function loadCarDetails() {
   }
 
   try {
-    // ✅ easiest for now: fetch /cars and find the one car
-    // (no new server route required)
     const res = await fetch(`${API_BASE}/cars`);
     const data = await res.json().catch(() => []);
     if (!res.ok) throw new Error(data.error || "Could not load cars");
