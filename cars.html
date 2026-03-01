@@ -478,11 +478,16 @@ function renderCars(cars) {
         </span>
 
         <div class="cardActions">
-          <a class="linkBtn viewBtn" href="#"
-             onclick="event.preventDefault(); alert('Details page in Sprint 2');">View</a>
-          <a class="linkBtn bookBtn" href="#"
-             onclick="event.preventDefault(); alert('Booking in Sprint 2');">Book</a>
+          <a class="linkBtn viewBtn" href="car-details.html?id=${car["Vehicle ID"]}">
+            View
+          </a>
+
+          <a class="linkBtn bookBtn" href="bookings.html?id=${car["Vehicle ID"]}">
+            Book
+          </a>
         </div>
+
+
 
       </div>
     `;
@@ -603,4 +608,3 @@ loadCars();
 
 </body>
 </html>
-

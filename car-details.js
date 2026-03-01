@@ -40,7 +40,7 @@ const bookBtn = document.getElementById("bookBtn");
 const statusText = document.getElementById("statusText");
 
 function getCarImage(manufacturer, model, drivetrain) {
-  const name = `${manufacturer} ${model}`.trim(); 
+  const name = `${manufacturer} ${model}`.trim(); // ✅ NO drivetrain here
 
   const map = {
     "Toyota Corolla": drivetrain === "AWD" ? "corolla-awd.png" : "corolla-fwd.png",
@@ -51,7 +51,7 @@ function getCarImage(manufacturer, model, drivetrain) {
     "Porsche 911": "porsche.png",
   };
 
-  return `./assets/cars/${map[name] || "car1.png"}`;
+  return `./assets/cars/${map[name] || "car1.png"}`; // ✅ fallback that exists
 }
 
 async function loadCarDetails() {
@@ -150,4 +150,3 @@ async function bookCar() {
 
 bookBtn.addEventListener("click", bookCar);
 loadCarDetails();
-
