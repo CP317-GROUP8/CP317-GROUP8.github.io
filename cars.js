@@ -59,8 +59,15 @@ function pick(...vals) {
 }
 
 function normalizeCar(row) {
-  const id = pick(row["Vehicle ID"], row.vehicleId, row.id);
-
+  const id = pick(
+    row["Vehicle ID"],
+    row["VehicleID"],
+    row["VehicleId"],
+    row.vehicleId,
+    row.vehicleID,
+    row.vehicle_id,
+    row.id
+  );
   const manufacturer = pick(row["Manufacturer"], row.manufacturer) || "Unknown";
   const model = pick(row["Model"], row.model) || "";
 
