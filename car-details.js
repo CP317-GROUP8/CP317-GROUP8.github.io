@@ -41,18 +41,18 @@ const statusText = document.getElementById("statusText");
 
 // reuse same image map logic if you want
 function getCarImage(manufacturer, model, drivetrain) {
-  const key = `${manufacturer} ${model} | ${drivetrain}`.trim();
+  const name = `${manufacturer} ${model}`.trim(); // ✅ NO drivetrain here
+
   const map = {
-    "Toyota Corolla | AWD": "corolla-awd.png",
-    "Toyota Corolla | FWD": "corolla-fwd.png",
-    "Toyota Highlander | AWD": "highlander-awd.png",
-    "Toyota Highlander | RWD": "highlander-rwd.png",
-    "Dodge Challenger | AWD": "challenger-awd.png",
-    "KIA K4 | RWD": "kia-k4-rwd.png",
-    "Honda Civic | RWD": "civic-rwd.png",
-    "Porsche 911 | AWD": "porsche-911-awd.png",
+    "Toyota Corolla": drivetrain === "AWD" ? "corolla-awd.png" : "corolla-fwd.png",
+    "Toyota Highlander": drivetrain === "AWD" ? "highlander-awd.png" : "highlander-rwd.png",
+    "Dodge Challenger": "challenger.png",
+    "Honda Civic": "civic.png",
+    "KIA K4": "kia.png",
+    "Porsche 911": "porsche.png",
   };
-  return `./assets/cars/${map[key] || "placeholder.png"}`;
+
+  return `./assets/cars/${map[name] || "car1.png"}`; // ✅ fallback that exists
 }
 
 async function loadCarDetails() {
@@ -95,9 +95,14 @@ async function loadCarDetails() {
       carAvail.className = "pill bad";
       bookBtn.disabled = true;
     }
+    const imgSrc = getCarImage(manufacturer, model, drivetrain);
+    console.log("Loading image:", imgSrc);
 
-    carImg.src = getCarImage(manufacturer, model, drivetrain);
-    carImg.onerror = () => (carImg.src = "./assets/cars/placeholder.png");
+    carImg.src = imgSrc;
+    carImg.onerror = () => {
+      console.warn("Image failed, using fallback");
+      carImg.src = "./assets/car1.png";
+    };
 
     loadingState.style.display = "none";
     detailsUI.style.display = "block";
@@ -148,4 +153,3 @@ async function bookCar() {
 
 bookBtn.addEventListener("click", bookCar);
 loadCarDetails();
-

@@ -111,7 +111,7 @@ function getCarImageSrc(c) {
 
 async function loadCars() {
   const status = document.getElementById("status");
-  const grid = document.getElementById("carGrid");
+  const grid = document.getElementById("carsGrid");
 
   try {
     status.textContent = "Loading cars…";
@@ -156,18 +156,21 @@ async function loadCars() {
       grid.appendChild(card);
     });
 
-    grid.querySelectorAll("[data-book]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const vehicleId = btn.getAttribute("data-book");
-        await bookCar(vehicleId);
-      });
-    });
     grid.querySelectorAll("[data-view]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-view");
-        window.location.href = `car-details.html?id=${encodeURIComponent(id)}`;
+        const vehicleId = btn.getAttribute("data-view");
+        window.location.href = `car-details.html?id=${vehicleId}`;
       });
     });
+    
+    grid.querySelectorAll("[data-book]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const vehicleId = btn.getAttribute("data-book");
+        window.location.href = `bookings.html?id=${vehicleId}`;
+      });
+    });
+    
+    
     
   } catch (err) {
     document.getElementById("status").textContent = `Error: ${err.message}`;
@@ -201,4 +204,3 @@ async function bookCar(vehicleId) {
 }
 
 loadCars();
-
