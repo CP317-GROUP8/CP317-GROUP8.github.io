@@ -236,9 +236,9 @@ async function confirmBooking() {
 
     const saleId = data.saleId ? ` Sale ID #${data.saleId}.` : "";
     setStatus(`Booked successfully.${saleId}`, "ok");
+    el.confirmBtn.disabled = true;
   } catch (err) {
     setStatus(`Error: ${err.message}`, "error");
-  } finally {
     refreshUI();
   }
 }
