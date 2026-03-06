@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; font-family: Inter, system-ui; }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
+      min-height: 100vh;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .topbar h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .topbar .sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+    }
+    .btn:hover { filter: brightness(0.96); }
+
+    /* Booking card */
+    .bookingCard {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.06);
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+
+    .bookingCard img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #e2e8f0;
+      min-height: 160px;
+    }
+
+    .bookingBody {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .bookingTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .bookingTop h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .saleId {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4f46e5;
+      white-space: nowrap;
+    }
+
+    .pillRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .pill {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .dates {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .dateBox {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .dateBox .label {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .dateBox .value {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Empty / loading states */
+    .stateBox {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.06);
+      padding: 60px 40px;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .stateBox .emoji { font-size: 40px; margin-bottom: 12px; }
+    .stateBox h2 { margin: 0 0 8px; font-size: 20px; color: #0f172a; }
+    .stateBox p { margin: 0; font-size: 14px; }
+
+    @media (max-width: 700px) {
+      .bookingCard { grid-template-columns: 1fr; }
+      .bookingCard img { height: 180px; }
+      .dates { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div>
+        <h1>My Bookings</h1>
+        <div class="sub">Your rental history</div>
+      </div>
+      <button class="btn" onclick="location.href='home.html'">← Home</button>
+    </div>
+
+    <div id="bookingsContainer">
+      <div class="stateBox">
+        <div class="emoji">⏳</div>
+        <h2>Loading your bookings...</h2>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = "https://server-side-zqaz.onrender.com";
+    const SESSION_MS = 12 * 60 * 60 * 1000;
+
+    function requireSession() {
+      const email = localStorage.getItem("userEmail");
+      const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+      if (!email || !loggedInAt) {
+        window.location.replace("index.html");
+        throw new Error("No session");
+      }
+      if (Date.now() - loggedInAt > SESSION_MS) {
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("loggedInAt");
+        localStorage.removeItem("isAdmin");
+        window.location.replace("index.html");
+        throw new Error("Session expired");
+      }
+      return email;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const isPreview = params.get("preview") === "1";
+    const userEmail = isPreview
+      ? (localStorage.getItem("userEmail") || "preview@example.com")
+      : requireSession();
+
+    const imageMap = {
+      "Toyota Corolla AWD":     "corolla-awd.png",
+      "Toyota Corolla FWD":     "corolla-fwd.png",
+      "Toyota Highlander AWD":  "highlander-awd.png",
+      "Toyota Highlander RWD":  "highlander-rwd.png",
+      "Dodge Challenger AWD":   "challenger.png",
+      "Honda Civic RWD":        "civic.png",
+      "KIA K4 RWD":             "kia.png",
+      "Porsche 911 AWD":        "porsche.png",
+    };
+
+    function getImage(manufacturer, model, drivetrain) {
+      const key = `${manufacturer} ${model} ${drivetrain}`.trim();
+      return `./assets/cars/${imageMap[key] || "placeholder.png"}`;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function formatMoney(val) {
+      return `$${Number(val || 0).toFixed(2)}`;
+    }
+
+    async function loadBookings() {
+      const container = document.getElementById("bookingsContainer");
+
+      try {
+        const res = await fetch(`${API_BASE}/me/bookings`, {
+          headers: { "X-User-Email": userEmail }
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Could not load bookings");
+
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+
+        if (!rows.length) {
+          container.innerHTML = `
+            <div class="stateBox">
+              <div class="emoji">🚗</div>
+              <h2>No bookings yet</h2>
+              <p>You haven't rented any cars yet. <a href="cars.html" style="color:#4f46e5;">Browse cars</a> to get started.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = rows.map(booking => {
+          const name = `${booking.manufacturer} ${booking.model}`.trim();
+          const imgSrc = getImage(booking.manufacturer, booking.model, booking.drivetrain);
+
+          return `
+            <div class="bookingCard">
+              <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
+              <div class="bookingBody">
+                <div>
+                  <div class="bookingTop">
+                    <div>
+                      <h2>${name}</h2>
+                      <div class="saleId">Sale ID #${booking.saleId}</div>
+                    </div>
+                    <div class="price">${formatMoney(booking.priceSoldAt)}/day</div>
+                  </div>
+
+                  <div class="pillRow">
+                    <span class="pill">${booking.vehicleType || "—"}</span>
+                    <span class="pill">${booking.drivetrain || "—"}</span>
+                  </div>
+                </div>
+
+                <div class="dates">
+                  <div class="dateBox">
+                    <div class="label">Pickup</div>
+                    <div class="value">${formatDate(booking.fromDate)}</div>
+                  </div>
+                  <div class="dateBox">
+                    <div class="label">Dropoff</div>
+                    <div class="value">${formatDate(booking.toDate)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (err) {
+        container.innerHTML = `
+          <div class="stateBox">
+            <div class="emoji">⚠️</div>
+            <h2>Could not load bookings</h2>
+            <p>${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    loadBookings();
+  </script>
+</body>
+</html>
