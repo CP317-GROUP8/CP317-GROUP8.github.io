@@ -3,287 +3,150 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book Car</title>
+  <title>My Bookings</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-    body {
-      margin: 0;
-      color: #0f172a;
+  <style>
+    * { box-sizing: border-box; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+
+    body{
+      margin:0;
       background: linear-gradient(180deg, #eef2ff, #f8fafc);
+      color:#0f172a;
     }
 
-    .container {
+    .container{
       max-width: 1100px;
       margin: 0 auto;
-      padding: 28px 20px 42px;
+      padding: 40px 20px;
     }
 
-    .topbar {
-      display: flex;
+    .topbar{
+      display:flex;
       justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
     }
 
-    .btn {
-      border: none;
-      cursor: pointer;
-      border-radius: 12px;
-      padding: 11px 14px;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .btn.secondary {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #0f172a;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 1.25fr 1fr;
-      gap: 18px;
-    }
-
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 18px;
-      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08);
-      overflow: hidden;
-    }
-
-    .section {
-      padding: 18px;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .section:first-child { border-top: none; }
-
-    .header h1 {
-      margin: 0;
-      font-size: 30px;
+    .titleWrap h1{
+      margin:0;
+      font-size: 32px;
       line-height: 1.15;
     }
 
-    .sub {
-      margin-top: 6px;
-      color: #475569;
-      font-size: 14px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 210px 1fr;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .hero img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 14px;
-      background: #e2e8f0;
-      border: 1px solid #dbeafe;
-    }
-
-    .title {
-      font-size: 22px;
-      margin: 0;
-    }
-
-    .price {
-      margin-top: 8px;
-      font-size: 18px;
-      font-weight: 700;
-      color: #1d4ed8;
-    }
-
-    .pillRow {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .pill {
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      border: 1px solid #e2e8f0;
-      color: #334155;
-      background: #f8fafc;
-    }
-
-    .pill.ok {
-      border-color: #86efac;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .pill.bad {
-      border-color: #fecaca;
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .formGrid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field label {
+    .sub{
+      margin: 8px 0 0;
+      color:#475569;
       font-size: 13px;
-      color: #475569;
       font-weight: 600;
     }
 
-    .field input {
-      height: 42px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      padding: 0 12px;
-      font-size: 14px;
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: transform .05s ease, opacity .2s ease;
+      white-space: nowrap;
     }
 
-    .hint {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #64748b;
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{ background:white; border:1px solid #cbd5e1; color:#0f172a; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 12px;
     }
 
-    .boxTitle {
-      margin: 0;
+    .bookingCard{
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.06);
+      border: 1px solid #e2e8f0;
+    }
+
+    .row{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+
+    .thumb{
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      background:#e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .bookingTitle{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .bookingTitle b{
       font-size: 16px;
     }
 
-    .line {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 10px;
-      font-size: 14px;
+    .pillRow{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 10px;
     }
 
-    .line.total {
-      margin-top: 14px;
-      padding-top: 10px;
-      border-top: 1px dashed #cbd5e1;
-      font-size: 18px;
-      font-weight: 700;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color:#334155;
     }
 
-    .confirmBtn {
-      width: 100%;
-      margin-top: 16px;
-      background: #2563eb;
-      color: #ffffff;
-      height: 46px;
-      border-radius: 12px;
-      border: none;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
+    .meta{
+      color:#334155;
+      font-size: 13px;
+      line-height: 1.4;
     }
 
-    .confirmBtn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
+    .muted{
+      color:#64748b;
+      font-size: 12px;
+      margin-top: 8px;
     }
 
-    #status {
-      margin-top: 12px;
-      font-size: 14px;
-      min-height: 20px;
-    }
-
-    #status.ok { color: #166534; }
-    #status.error { color: #b91c1c; }
-
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .hero { grid-template-columns: 1fr; }
-      .formGrid { grid-template-columns: 1fr; }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction: column; }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="topbar">
-      <button class="btn secondary" onclick="location.href='cars.html'">← Cars</button>
-      <button class="btn secondary" onclick="location.href='home.html'">Home</button>
-    </div>
-
-    <div class="header" style="margin-bottom:14px;">
-      <h1>Confirm Booking</h1>
-      <div class="sub" id="pageSub">Loading selected car...</div>
-    </div>
-
-    <div class="layout">
-      <div class="card" id="leftCard">
-        <div class="section">
-          <div class="hero">
-            <img id="carImg" src="./assets/cars/placeholder.png" alt="Selected car" />
-            <div>
-              <h2 class="title" id="carName">Car</h2>
-              <div class="price" id="carPrice">$0.00/day</div>
-              <div class="pillRow">
-                <span class="pill" id="carType">Type: -</span>
-                <span class="pill" id="carDrive">Drive: -</span>
-                <span class="pill" id="carAvail">Checking...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="formGrid">
-            <div class="field">
-              <label for="fromDate">Pickup Date</label>
-              <input id="fromDate" type="date" />
-            </div>
-            <div class="field">
-              <label for="toDate">Dropoff Date</label>
-              <input id="toDate" type="date" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="pickupLocation">Pickup Location (optional)</label>
-              <input id="pickupLocation" type="text" placeholder="Downtown Toronto" />
-            </div>
-          </div>
-          <div class="hint">Dropoff must be after pickup date.</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section">
-          <h3 class="boxTitle">Price Breakdown</h3>
-          <div class="line"><span>Daily rate</span><b id="lineRate">$0.00</b></div>
-          <div class="line"><span>Rental days</span><b id="lineDays">0</b></div>
-          <div class="line"><span>Subtotal</span><b id="lineSubtotal">$0.00</b></div>
-          <div class="line"><span>Service fee</span><b id="lineFee">$15.00</b></div>
-          <div class="line"><span>Tax (13%)</span><b id="lineTax">$0.00</b></div>
-          <div class="line total"><span>Total</span><span id="lineTotal">$0.00</span></div>
-
-          <button class="confirmBtn" id="confirmBtn" disabled>Confirm Booking</button>
-          <div id="status"></div>
-        </div>
+      <button class="btn secondary" onclick="location.href='home.html'">← Home</button>
+      <div class="titleWrap">
+        <h1>My Bookings</h1>
+        <p class="sub" id="status">Loading your bookings...</p>
       </div>
     </div>
+
+    <div id="list" class="grid"></div>
   </div>
 
-  <script src="book-car.js"></script>
+  <script src="bookings.js"></script>
 </body>
 </html>
