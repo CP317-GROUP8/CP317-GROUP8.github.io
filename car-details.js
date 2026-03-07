@@ -152,8 +152,8 @@ async function bookCar() {
       statusText.textContent = "Please select both From and To dates.";
       return;
     }
-    if (toDate < fromDate) {
-      statusText.className  = "status error";
+    if (toDate <= fromDate) {
+      statusText.className = "status error";
       statusText.textContent = "To date must be after From date.";
       return;
     }
