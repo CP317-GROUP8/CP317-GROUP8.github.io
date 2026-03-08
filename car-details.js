@@ -1,5 +1,6 @@
 const API_BASE = "https://server-side-zqaz.onrender.com";
 const SESSION_MS = 12 * 60 * 60 * 1000;
+
 const params = new URLSearchParams(location.search);
 const isPreview = params.get("preview") === "1";
 const id = params.get("id");
@@ -12,6 +13,7 @@ function requireSession() {
     window.location.replace("index.html");
     throw new Error("No session");
   }
+
   if (Date.now() - loggedInAt > SESSION_MS) {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("loggedInAt");
@@ -19,14 +21,13 @@ function requireSession() {
     window.location.replace("index.html");
     throw new Error("Session expired");
   }
+
   return email;
 }
 
 const userEmail = isPreview
   ? (localStorage.getItem("userEmail") || "preview@example.com")
   : requireSession();
-
-const id = params.get("id");
 
 const loadingState = document.getElementById("loadingState");
 const detailsUI = document.getElementById("detailsUI");
@@ -51,6 +52,14 @@ if (allCarsBtn && isPreview) {
   };
 }
 
+function todayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 function getCarImage(manufacturer, model, drivetrain) {
   const name = `${manufacturer} ${model}`.trim();
 
@@ -68,13 +77,18 @@ function getCarImage(manufacturer, model, drivetrain) {
 
 function populateVehicleTable(car) {
   const rows = [
-    ["Vehicle ID",    car["Vehicle ID"]],
-    ["Manufacturer",  car["Manufacturer"]],
-    ["Model",         car["Model"]],
-    ["Vehicle Type",  car["Vehicle Type"]],
-    ["Drivetrain",    car["Drivetrain"]],
-    ["Price",         Number.isFinite(Number(car["Price"])) ? `$${Number(car["Price"]).toFixed(2)}/day` : car["Price"]],
-    ["Availability",  Number(car["Availability"]) === 1 ? "Available" : "Unavailable"],
+    ["Vehicle ID", car["Vehicle ID"]],
+    ["Manufacturer", car["Manufacturer"]],
+    ["Model", car["Model"]],
+    ["Vehicle Type", car["Vehicle Type"]],
+    ["Drivetrain", car["Drivetrain"]],
+    [
+      "Price",
+      Number.isFinite(Number(car["Price"]))
+        ? `$${Number(car["Price"]).toFixed(2)}/day`
+        : car["Price"],
+    ],
+    ["Availability", Number(car["Availability"]) === 1 ? "Available" : "Unavailable"],
   ];
 
   vehicleTableBody.innerHTML = rows.map(([label, value]) => `
@@ -88,55 +102,54 @@ function populateVehicleTable(car) {
 async function loadCarDetails() {
   if (!id) {
     loadingState.textContent = "Missing car id in URL.";
+    bookBtn.disabled = true;
     return;
   }
 
   try {
-    const res = await fetch(`${API_BASE}/cars/${id}`);
-    const data = await res.json().catch(() => []);
-    if (!res.ok) throw new Error(data.error || "Could not load cars");
+    const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}`);
+    const car = await res.json().catch(() => ({}));
 
-    const car = (Array.isArray(data) ? data : []).find(
-      (r) => String(r["Vehicle ID"]) === String(id)
-    );
-
-    if (!car) throw new Error("Car not found (maybe not available anymore).");
+    if (!res.ok) {
+      throw new Error(car.error || "Could not load car details");
+    }
 
     const manufacturer = car["Manufacturer"];
-    const model        = car["Model"];
-    const type         = car["Vehicle Type"];
-    const drivetrain   = car["Drivetrain"];
-    const price        = Number(car["Price"]);
+    const model = car["Model"];
+    const type = car["Vehicle Type"];
+    const drivetrain = car["Drivetrain"];
+    const price = Number(car["Price"]);
     const availability = Number(car["Availability"]);
 
-    // Header section
-    carName.textContent  = `${manufacturer} ${model}`;
+    carName.textContent = `${manufacturer} ${model}`;
     carPrice.textContent = Number.isFinite(price) ? `$${price.toFixed(2)}/day` : "—";
-    carType.textContent  = `Type: ${type || "—"}`;
+    carType.textContent = `Type: ${type || "—"}`;
     carDrive.textContent = `Drivetrain: ${drivetrain || "—"}`;
 
     if (availability === 1) {
       carAvail.textContent = "Available";
-      carAvail.className   = "pill ok";
-      bookBtn.disabled     = false;
+      carAvail.className = "pill ok";
+      bookBtn.disabled = false;
     } else {
       carAvail.textContent = "Unavailable";
-      carAvail.className   = "pill bad";
-      bookBtn.disabled     = true;
+      carAvail.className = "pill bad";
+      bookBtn.disabled = true;
     }
 
-    // Car image
     const imgSrc = getCarImage(manufacturer, model, drivetrain);
     carImg.src = imgSrc;
-    carImg.onerror = () => { carImg.src = "./assets/car1.png"; };
+    carImg.onerror = () => {
+      carImg.onerror = null;
+      carImg.src = "./assets/car1.png";
+    };
 
-    // Vehicle Table
     populateVehicleTable(car);
 
     loadingState.style.display = "none";
-    detailsUI.style.display    = "block";
+    detailsUI.style.display = "block";
   } catch (err) {
     loadingState.textContent = `Failed to load details: ${err.message}`;
+    bookBtn.disabled = true;
   }
 }
 
@@ -144,36 +157,30 @@ async function bookCar() {
   try {
     statusText.className = "status";
     statusText.textContent = "Booking...";
+    bookBtn.disabled = true;
 
     const fromDate = fromDateEl.value;
     const toDate = toDateEl.value;
 
     if (!id) {
-      statusText.className = "status error";
-      statusText.textContent = "Missing car ID in URL.";
-      return;
+      throw new Error("Missing car ID in URL.");
     }
 
     if (!fromDate || !toDate) {
-      statusText.className = "status error";
-      statusText.textContent = "Please select both From and To dates.";
-      return;
+      throw new Error("Please select both From and To dates.");
+    }
+
+    const today = todayISO();
+
+    if (fromDate < today) {
+      throw new Error("From date cannot be in the past.");
     }
 
     if (toDate <= fromDate) {
-      statusText.className = "status error";
-      statusText.textContent = "To date must be after From date.";
-      return;
+      throw new Error("To date must be after From date.");
     }
 
-    console.log("Booking request:", {
-      vehicleId: id,
-      userEmail,
-      fromDate,
-      toDate
-    });
-
-    const res = await fetch(`${API_BASE}/cars/${id}/book`, {
+    const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}/book`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -184,22 +191,31 @@ async function bookCar() {
 
     const data = await res.json().catch(() => ({}));
 
-    console.log("Booking response status:", res.status);
-    console.log("Booking response data:", data);
-
     if (!res.ok) {
-      throw new Error(data.error || `Booking failed with status ${res.status}`);
+      throw new Error(data.error || "Booking failed");
     }
 
     statusText.className = "status ok";
     statusText.textContent = `Booked ✅ Sale ID #${data.saleId}`;
-    bookBtn.disabled = true;
+
+    // optional: store latest sale id in case payment page needs it later
+    localStorage.setItem("latestSaleId", String(data.saleId || ""));
+
+    // send user to bookings page after successful booking
+    setTimeout(() => {
+      window.location.href = "bookings.html";
+    }, 900);
   } catch (err) {
-    console.error("bookCar error:", err);
     statusText.className = "status error";
     statusText.textContent = `Error: ${err.message}`;
+    bookBtn.disabled = false;
   }
 }
 
 bookBtn.addEventListener("click", bookCar);
+
+const minDate = todayISO();
+fromDateEl.min = minDate;
+toDateEl.min = minDate;
+
 loadCarDetails();
