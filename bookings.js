@@ -50,6 +50,15 @@ function getBookingImage(manufacturer, model) {
   return map[key] || "car1.png";
 }
 
+function getRowValue(row, ...keys) {
+  for (const key of keys) {
+    if (row && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+      return row[key];
+    }
+  }
+  return "";
+}
+
 const userEmail = requireSession();
 
 const statusEl = document.getElementById("status");
@@ -78,6 +87,8 @@ function renderBookings(rows) {
     const model = escapeHtml(r.model);
     const vehicleType = escapeHtml(r.vehicleType || "—");
     const drivetrain = escapeHtml(r.drivetrain || "—");
+    const pickupLocation = escapeHtml(getRowValue(r, "pickupLocation", "pickup_location", "Pickup Location"));
+    const dropoffLocation = escapeHtml(getRowValue(r, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location"));
     const imgFile = getBookingImage(r.manufacturer, r.model);
     const price = Number(r.priceSoldAt || 0).toFixed(2);
 
@@ -106,6 +117,14 @@ function renderBookings(rows) {
 
             <div class="meta">
               <b>Dates:</b> ${prettyDate(r.fromDate)} → ${prettyDate(r.toDate)}
+            </div>
+
+            <div class="meta">
+              <b>Pickup Location:</b> ${pickupLocation || "—"}
+            </div>
+
+            <div class="meta">
+              <b>Dropoff Location:</b> ${dropoffLocation || "—"}
             </div>
 
             <div class="muted">Booked successfully ✅</div>

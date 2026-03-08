@@ -26,6 +26,52 @@ function normalizeCol(col) {
   return String(col || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function normalizeColKey(col) {
+  return normalizeCol(col).replace(/[_-\s]/g, "");
+}
+
+function findMatchingColumnName(columns, aliases) {
+  const byKey = new Map((columns || []).map((c) => [normalizeColKey(c), c]));
+  for (const alias of aliases) {
+    const hit = byKey.get(normalizeColKey(alias));
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function ensureSalesColumns(columns) {
+  if (currentTableKey !== "sales") return columns;
+
+  const next = [...(columns || [])];
+  const required = [
+    {
+      aliases: ["pickupLocation", "pickup_location", "pickup location", "Pickup Location"],
+      fallback: "pickupLocation",
+    },
+    {
+      aliases: ["dropoffLocation", "dropoff_location", "drop off location", "Drop Off Location", "Dropoff Location"],
+      fallback: "dropoffLocation",
+    },
+  ];
+
+  required.forEach(({ aliases, fallback }) => {
+    if (!findMatchingColumnName(next, aliases)) {
+      next.push(fallback);
+    }
+  });
+
+  return next;
+}
+
+function readRowValue(row, col) {
+  if (!row) return "";
+  if (Object.prototype.hasOwnProperty.call(row, col)) return row[col];
+
+  const wanted = normalizeColKey(col);
+  const found = Object.keys(row).find((k) => normalizeColKey(k) === wanted);
+  return found ? row[found] : "";
+}
+
 function isLockedIdColumn(col) {
   const c = normalizeCol(col);
   return c === "user id" || c === "vehicle id" || c === "sale id";
@@ -213,6 +259,7 @@ async function loadTable(key, label) {
   const data = await api(`/admin/${key}`, { method: "GET" });
   currentRows = Array.isArray(data.rows) ? data.rows : [];
   currentColumns = currentRows[0] ? Object.keys(currentRows[0]) : [];
+  currentColumns = ensureSalesColumns(currentColumns);
 
   updateButtons();
   renderTable();
@@ -227,7 +274,7 @@ function rowHtml(row, cols, pkName) {
   let tr = `<tr data-rowid="${escapeHtml(rowIdAttr)}">`;
 
   cols.forEach((col) => {
-    let val = isNew ? "" : (row[col] ?? "");
+    let val = isNew ? "" : (readRowValue(row, col) ?? "");
 
     // Defaults for new vehicle (even though locked)
     if (isNew && currentTableKey === "vehicles" && isAvailability(col)) val = "1";

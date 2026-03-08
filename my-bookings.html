@@ -222,6 +222,15 @@
       return `$${Number(val || 0).toFixed(2)}`;
     }
 
+    function getRowValue(row, ...keys) {
+      for (const key of keys) {
+        if (row && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+          return row[key];
+        }
+      }
+      return "";
+    }
+
     async function cancelBooking(saleId, btnEl) {
       if (!confirm("Cancel this booking? The car will be made available again.")) return;
 
@@ -286,6 +295,8 @@
         container.innerHTML = rows.map(booking => {
           const name = `${booking.manufacturer} ${booking.model}`.trim();
           const imgSrc = getImage(booking.manufacturer, booking.model, booking.drivetrain);
+          const pickupLocation = getRowValue(booking, "pickupLocation", "pickup_location", "Pickup Location");
+          const dropoffLocation = getRowValue(booking, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location");
           return `
             <div class="bookingCard">
               <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
@@ -301,6 +312,8 @@
                   <div class="pillRow">
                     <span class="pill">${booking.vehicleType || "—"}</span>
                     <span class="pill">${booking.drivetrain || "—"}</span>
+                    <span class="pill">Pickup: ${pickupLocation || "—"}</span>
+                    <span class="pill">Dropoff: ${dropoffLocation || "—"}</span>
                   </div>
                 </div>
                 <div class="bottomRow">

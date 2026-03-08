@@ -42,6 +42,8 @@ const vehicleTableBody = document.getElementById("vehicleTableBody");
 
 const fromDateEl = document.getElementById("fromDate");
 const toDateEl = document.getElementById("toDate");
+const pickupLocationEl = document.getElementById("pickupLocation");
+const dropoffLocationEl = document.getElementById("dropoffLocation");
 const bookBtn = document.getElementById("bookBtn");
 const statusText = document.getElementById("statusText");
 const allCarsBtn = document.getElementById("allCarsBtn");
@@ -161,6 +163,8 @@ async function bookCar() {
 
     const fromDate = fromDateEl.value;
     const toDate = toDateEl.value;
+    const pickupLocation = (pickupLocationEl?.value || "").trim();
+    const dropoffLocation = (dropoffLocationEl?.value || "").trim();
 
     if (!id) {
       throw new Error("Missing car ID in URL.");
@@ -186,7 +190,7 @@ async function bookCar() {
         "Content-Type": "application/json",
         "X-User-Email": userEmail,
       },
-      body: JSON.stringify({ fromDate, toDate }),
+      body: JSON.stringify({ fromDate, toDate, pickupLocation, dropoffLocation }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -212,10 +216,17 @@ async function bookCar() {
   }
 }
 
-bookBtn.addEventListener("click", bookCar);
+function todayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 const minDate = todayISO();
 fromDateEl.min = minDate;
 toDateEl.min = minDate;
 
 loadCarDetails();
+bookBtn.addEventListener("click", bookCar);
