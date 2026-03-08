@@ -32,17 +32,33 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+const imageMap = {
+  "Dodge Challenger AWD": "challenger.png",
+  "KIA K4 RWD":           "kia.png",
+  "Honda Civic RWD":      "civic.png",
+  "Porsche 911 AWD":      "porsche.png",
+  "Toyota Highlander AWD":"highlander-awd.png",
+  "Toyota Highlander RWD":"highlander-rwd.png",
+  "Toyota Corolla FWD":   "corolla-fwd.png",
+  "Toyota Corolla AWD":   "corolla-awd.png",
+};
+
+function getCarImage(manufacturer, model, drivetrain) {
+  const key = `${manufacturer} ${model} ${drivetrain}`.trim();
+  return `./assets/cars/${imageMap[key] || "civic.png"}`;
+}
+
 function getBookingImage(manufacturer, model) {
   const key = `${manufacturer} ${model}`.trim();
   const map = {
-    "KIA K4": "kia.png",
-    "Dodge Challenger": "challenger.png",
-    "Honda Civic": "civic.png",
-    "Toyota Corolla": "corolla-fwd.png",
+    "KIA K4":            "kia.png",
+    "Dodge Challenger":  "challenger.png",
+    "Honda Civic":       "civic.png",
+    "Toyota Corolla":    "corolla-fwd.png",
     "Toyota Highlander": "highlander-awd.png",
-    "Porsche 911": "porsche.png",
+    "Porsche 911":       "porsche.png",
   };
-  return map[key] || "car1.png";
+  return map[key] || "civic.png";
 }
 
 function getRowValue(row, ...keys) {
@@ -57,14 +73,13 @@ function getRowValue(row, ...keys) {
 const params = new URLSearchParams(window.location.search);
 const vehicleId = params.get("id");
 const isPreview = params.get("preview") === "1";
-
 const userEmail = requireSession();
 
-const statusEl = document.getElementById("status");
-const listEl = document.getElementById("list");
-const bookFormEl = document.getElementById("bookForm");
+const statusEl   = document.getElementById("status");
+const listEl     = document.getElementById("list");
+const bookLayout = document.getElementById("bookLayout");
 const pageTitleEl = document.getElementById("pageTitle");
-const backBtn = document.getElementById("backBtn");
+const backBtn    = document.getElementById("backBtn");
 
 function setStatus(msg, isError = false) {
   if (!statusEl) return;
@@ -76,42 +91,56 @@ function setStatus(msg, isError = false) {
 if (vehicleId) {
   pageTitleEl.textContent = "Book a Car";
   backBtn.onclick = () => history.back();
-  bookFormEl.style.display = "block";
+  bookLayout.style.display = "grid";
   listEl.style.display = "none";
 
-  // Load car name
-  async function loadCarName() {
+  // Load car details and populate left panel
+  async function loadCarDetails() {
     try {
       const res = await fetch(`${API_BASE}/cars/${vehicleId}`);
       const car = await res.json();
-      if (car && (car["Manufacturer"] || car.manufacturer)) {
-        const mfr = car["Manufacturer"] || car.manufacturer || "";
-        const model = car["Model"] || car.model || "";
-        document.getElementById("formCarName").textContent = `${mfr} ${model}`.trim();
-      }
+
+      const mfr       = car["Manufacturer"] || car.manufacturer || "";
+      const model     = car["Model"]        || car.model        || "";
+      const type      = car["Vehicle Type"] || car.vehicleType  || "";
+      const drivetrain= car["Drivetrain"]   || car.drivetrain   || "";
+      const price     = car["Price"]        || car.price        || "";
+      const priceText = price ? `$${Number(price).toFixed(2)}/day` : "";
+
+      // Populate image
+      document.getElementById("carImg").src = getCarImage(mfr, model, drivetrain);
+      document.getElementById("carImg").alt = `${mfr} ${model}`;
+
+      // Populate info
+      document.getElementById("carImgName").textContent = `${mfr} ${model}`.trim();
+      document.getElementById("carImgPrice").textContent = priceText;
+      document.getElementById("carImgPills").innerHTML = [type, drivetrain]
+        .filter(Boolean)
+        .map(v => `<span class="carPill">${escapeHtml(v)}</span>`)
+        .join("");
+
     } catch (e) {
-      document.getElementById("formCarName").textContent = `Vehicle #${vehicleId}`;
+      document.getElementById("carImgName").textContent = `Vehicle #${vehicleId}`;
     }
   }
-  loadCarName();
+  loadCarDetails();
 
-  // Set min date on date inputs to today
+  // Set min date to today
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("fromDate").min = today;
   document.getElementById("toDate").min = today;
-
   document.getElementById("fromDate").addEventListener("change", function () {
     document.getElementById("toDate").min = this.value || today;
   });
 
-  // Book Now button
+  // Book Now
   document.getElementById("bookNowBtn").addEventListener("click", async () => {
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
+    const fromDate       = document.getElementById("fromDate").value;
+    const toDate         = document.getElementById("toDate").value;
     const pickupLocation = document.getElementById("pickupLocation").value.trim();
-    const dropoffLocation = document.getElementById("dropoffLocation").value.trim();
+    const dropoffLocation= document.getElementById("dropoffLocation").value.trim();
     const msgEl = document.getElementById("bookMsg");
-    const btn = document.getElementById("bookNowBtn");
+    const btn   = document.getElementById("bookNowBtn");
 
     msgEl.className = "";
     msgEl.textContent = "";
@@ -141,7 +170,6 @@ if (vehicleId) {
       });
 
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) throw new Error(data.error || "Booking failed");
 
       msgEl.className = "success";
@@ -164,7 +192,7 @@ if (vehicleId) {
 } else {
   pageTitleEl.textContent = "My Bookings";
   backBtn.onclick = () => location.href = "home.html";
-  bookFormEl.style.display = "none";
+  bookLayout.style.display = "none";
   listEl.style.display = "grid";
 
   function renderEmptyState(message) {
@@ -177,22 +205,21 @@ if (vehicleId) {
 
   function renderBookings(rows) {
     listEl.innerHTML = rows.map((r) => {
-      const manufacturer = escapeHtml(r.manufacturer);
-      const model = escapeHtml(r.model);
-      const vehicleType = escapeHtml(r.vehicleType || "—");
-      const drivetrain = escapeHtml(r.drivetrain || "—");
+      const manufacturer   = escapeHtml(r.manufacturer);
+      const model          = escapeHtml(r.model);
+      const vehicleType    = escapeHtml(r.vehicleType || "—");
+      const drivetrain     = escapeHtml(r.drivetrain || "—");
       const pickupLocation = escapeHtml(getRowValue(r, "pickupLocation", "pickup_location", "Pickup Location"));
-      const dropoffLocation = escapeHtml(getRowValue(r, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location"));
-      const imgFile = getBookingImage(r.manufacturer, r.model);
-      const price = Number(r.priceSoldAt || 0).toFixed(2);
+      const dropoffLocation= escapeHtml(getRowValue(r, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location"));
+      const imgFile        = getBookingImage(r.manufacturer, r.model);
+      const price          = Number(r.priceSoldAt || 0).toFixed(2);
 
       return `
         <div class="bookingCard">
           <div class="row">
-            <img
-              class="thumb"
+            <img class="thumb"
               src="./assets/cars/${imgFile}"
-              onerror="this.onerror=null;this.src='./assets/car1.png';"
+              onerror="this.onerror=null;this.src='./assets/cars/civic.png';"
               alt="${manufacturer} ${model}"
             />
             <div style="flex:1">
