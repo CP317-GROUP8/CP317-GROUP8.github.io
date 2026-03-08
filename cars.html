@@ -85,50 +85,18 @@ button{
   gap:16px;
 }
 
-.headerLeft h3{
-  margin:0;
-  line-height:1.2;
-}
-
-.headerLeft .meta{
-  margin-top:4px;
-}
+.headerLeft h3{ margin:0; line-height:1.2; }
+.headerLeft .meta{ margin-top:4px; }
 
 .heartBtn svg {
-  width: 20px;
-  height: 20px;
-  display: block;    
-  margin: auto;         
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:0;
-  cursor:pointer;
-  transition: all .15s ease;
+  width:20px; height:20px; display:block; margin:auto;
+  padding:0; cursor:pointer; transition:all .15s ease;
 }
+.heartBtn:hover{ border-color:#4f46e5; box-shadow:0 8px 18px rgba(0,0,0,.08); }
+.heartBtn svg{ width:20px; height:20px; display:block; }
+.heartBtn.saved{ border-color:#ef4444; }
 
-.heartBtn:hover{
-  border-color:#4f46e5;
-  box-shadow:0 8px 18px rgba(0,0,0,.08);
-}
-
-.heartBtn svg{
-  width:20px;
-  height:20px;
-  display:block;
-}
-
-.heartBtn.saved{
-  border-color:#ef4444;
-}
-
-.titleRow{
-  display:flex;
-  justify-content:space-between;
-}
-
+.titleRow{ display:flex; justify-content:space-between; }
 .price{ font-weight:600; }
 
 .tag{
@@ -141,22 +109,13 @@ button{
 
 .available{ background:#dcfce7;color:#166534; }
 .unavailable{ background:#fee2e2;color:#991b1b; }
-
 .meta{ color:#555;font-size:14px; }
 
-.cardActions{
-  display:flex;
-  gap:12px;
-  margin-top:14px;
-}
+.cardActions{ display:flex; gap:12px; margin-top:14px; }
 
 .linkBtn{
-  flex:1;
-  text-align:center;
-  padding:10px;
-  border-radius:12px;
-  text-decoration:none;
-  font-weight:600;
+  flex:1; text-align:center; padding:10px;
+  border-radius:12px; text-decoration:none; font-weight:600;
 }
 
 .viewBtn{ background:#4f46e5;color:white; }
@@ -170,91 +129,53 @@ button{
 
 #filterPanel{
   display:none;
-  margin: 10px 0 22px;
-  padding: 18px;
-  border-radius: 18px;
-
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border: 1px solid rgba(148,163,184,0.35);
-  box-shadow: 0 16px 45px rgba(15,23,42,0.10);
+  margin:10px 0 22px;
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.7);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(148,163,184,0.35);
+  box-shadow:0 16px 45px rgba(15,23,42,0.10);
 }
 
-#filterPanel .sub{
-  color:#475569;
-  font-size: 13px;
-}
-
-#filterPanel select,
-#filterPanel input[type="range"]{
-  outline: none;
-}
+#filterPanel .sub{ color:#475569; font-size:13px; }
+#filterPanel select, #filterPanel input[type="range"]{ outline:none; }
 
 #filterPanel select{
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid rgba(148,163,184,0.45);
-  background: rgba(255,255,255,0.95);
-  padding: 0 12px;
-  min-width: 190px;
-  transition: box-shadow .15s ease, border-color .15s ease;
+  height:44px; border-radius:14px;
+  border:1px solid rgba(148,163,184,0.45);
+  background:rgba(255,255,255,0.95);
+  padding:0 12px; min-width:190px;
+  transition:box-shadow .15s ease, border-color .15s ease;
 }
-
 #filterPanel select:focus{
-  border-color: rgba(79,70,229,0.55);
-  box-shadow: 0 0 0 4px rgba(79,70,229,0.15);
+  border-color:rgba(79,70,229,0.55);
+  box-shadow:0 0 0 4px rgba(79,70,229,0.15);
 }
-
 #filterPanel input[type="range"]{
-  width: 260px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(148,163,184,0.35);
+  width:260px; height:6px; border-radius:999px;
+  background:rgba(148,163,184,0.35);
 }
-
 #filterPanel input[type="range"]::-webkit-slider-thumb{
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #4f46e5;
-  border: 2px solid white;
-  box-shadow: 0 10px 18px rgba(79,70,229,0.25);
-  cursor: pointer;
+  -webkit-appearance:none; appearance:none;
+  width:18px; height:18px; border-radius:999px;
+  background:#4f46e5; border:2px solid white;
+  box-shadow:0 10px 18px rgba(79,70,229,0.25); cursor:pointer;
 }
-
 #filterPanel input[type="range"]::-moz-range-thumb{
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #4f46e5;
-  border: 2px solid white;
-  box-shadow: 0 10px 18px rgba(79,70,229,0.25);
-  cursor: pointer;
+  width:18px; height:18px; border-radius:999px;
+  background:#4f46e5; border:2px solid white;
+  box-shadow:0 10px 18px rgba(79,70,229,0.25); cursor:pointer;
 }
+#clearFilters{ border:1px solid rgba(148,163,184,0.55); background:rgba(255,255,255,0.85); }
+#clearFilters:hover{ background:white; }
+#filterBtn:hover{ border-color:rgba(79,70,229,0.35); box-shadow:0 10px 22px rgba(15,23,42,0.06); }
 
-#clearFilters{
-  border: 1px solid rgba(148,163,184,0.55);
-  background: rgba(255,255,255,0.85);
-}
-
-#clearFilters:hover{
-  background: white;
-}
-
-#filterBtn:hover{
-  border-color: rgba(79,70,229,0.35);
-  box-shadow: 0 10px 22px rgba(15,23,42,0.06);
-}
-
-/* Available card hover effect */
 .card.clickable:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(79,70,229,0.15);
-  transition: all 0.2s ease;
+  transform:translateY(-4px);
+  box-shadow:0 20px 40px rgba(79,70,229,0.15);
+  transition:all 0.2s ease;
 }
 </style>
 </head>
@@ -279,7 +200,6 @@ button{
 
   <div id="filterPanel" style="display:none; margin-bottom:20px; background:white; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow:0 10px 25px rgba(0,0,0,.06);">
     <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
-
       <div>
         <div class="sub" style="margin-bottom:6px;">Vehicle Type</div>
         <select id="filterType" style="height:42px; border-radius:12px; border:1px solid #ddd; padding:0 12px; min-width:180px;">
@@ -289,7 +209,6 @@ button{
           <option value="Sport">Sport</option>
         </select>
       </div>
-
       <div>
         <div class="sub" style="margin-bottom:6px;">Drivetrain</div>
         <select id="filterDrive" style="height:42px; border-radius:12px; border:1px solid #ddd; padding:0 12px; min-width:180px;">
@@ -299,16 +218,13 @@ button{
           <option value="RWD">RWD</option>
         </select>
       </div>
-
       <div style="min-width:260px;">
         <div class="sub" style="margin-bottom:6px;">Max price : <span id="priceLabel">Any</span></div>
         <input id="filterPrice" type="range" min="0" max="2000" step="50" value="2000" style="width:260px;">
       </div>
-
       <div style="display:flex; gap:10px;">
         <button id="clearFilters" class="secondary" type="button">Clear</button>
       </div>
-
     </div>
   </div>
 
@@ -344,27 +260,18 @@ function getWeekKey(date = new Date()) {
   d.setDate(d.getDate() + diffToMonday);
   return d.toISOString().slice(0, 10);
 }
-
-function popularityStorageKey() {
-  return `popularity:${getWeekKey()}`;
-}
-
+function popularityStorageKey() { return `popularity:${getWeekKey()}`; }
 function loadPopularityMap() {
   const raw = localStorage.getItem(popularityStorageKey());
   const obj = raw ? JSON.parse(raw) : {};
   return obj && typeof obj === "object" ? obj : {};
 }
-
-function savePopularityMap(map) {
-  localStorage.setItem(popularityStorageKey(), JSON.stringify(map));
-}
-
+function savePopularityMap(map) { localStorage.setItem(popularityStorageKey(), JSON.stringify(map)); }
 function bumpPopularity(vehicleId, amount) {
   if (!vehicleId) return;
   const map = loadPopularityMap();
   const key = String(vehicleId);
-  const current = Number(map[key] || 0);
-  map[key] = current + Number(amount || 0);
+  map[key] = Number(map[key] || 0) + Number(amount || 0);
   savePopularityMap(map);
 }
 
@@ -372,10 +279,7 @@ const SESSION_MS = 12 * 60 * 60 * 1000;
 function requireSession() {
   const email = localStorage.getItem("userEmail");
   const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
-  if (!email || !loggedInAt) {
-    window.location.replace("index.html");
-    throw new Error("No session");
-  }
+  if (!email || !loggedInAt) { window.location.replace("index.html"); throw new Error("No session"); }
   if (Date.now() - loggedInAt > SESSION_MS) {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("loggedInAt");
@@ -385,26 +289,15 @@ function requireSession() {
   }
   return email;
 }
-const userEmail = isPreview
-  ? (localStorage.getItem("userEmail") || "preview@example.com")
-  : requireSession();
+const userEmail = isPreview ? (localStorage.getItem("userEmail") || "preview@example.com") : requireSession();
 
-function favStorageKey() {
-  return `favs:${userEmail}`;
-}
+function favStorageKey() { return `favs:${userEmail}`; }
 function loadFavsSet() {
   const raw = localStorage.getItem(favStorageKey());
   const arr = raw ? JSON.parse(raw) : [];
   return new Set(Array.isArray(arr) ? arr : []);
 }
-function saveFavsSet(set) {
-  localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
-}
-
-window.bumpPopularityFromAttr = function (el, amount) {
-  const id = el?.getAttribute("data-vehicle-id") || "";
-  bumpPopularity(id, amount);
-};
+function saveFavsSet(set) { localStorage.setItem(favStorageKey(), JSON.stringify([...set])); }
 
 const imageMap = {
   "Dodge Challenger | AWD": "challenger.png",
@@ -417,11 +310,9 @@ const imageMap = {
   "Toyota Corolla | AWD": "corolla-awd.png"
 };
 
-let allCars = [];
-let filteredCars = [];
+let allCars = [], filteredCars = [];
 
 function safeStr(v){ return (v ?? "").toString().trim(); }
-
 function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
   const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
   return `${manufacturer}|${model}|${drivetrain}|${p}`;
@@ -435,43 +326,37 @@ function normalizeCar(car){
   const drivetrain   = safeStr(car["Drivetrain"]);
   const priceRaw     = car["Price"];
   const availability = car["Availability"];
-
-  const isAvailable = Number(availability) === 1;
-
-  const priceNum = Number(priceRaw);
+  const isAvailable  = Number(availability) === 1;
+  const priceNum     = Number(priceRaw);
   const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
-  const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+  const priceText    = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
+  const name         = `${manufacturer} ${model}`.trim();
+  const imgKey       = `${name} | ${drivetrain}`;
+  const imgFile      = imageMap[imgKey] || "placeholder.png";
+  const imgUrl       = `./assets/cars/${imgFile}`;
+  const favKey       = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
+  return { id, manufacturer, model, type, drivetrain, isAvailable, priceText, imgKey, imgUrl, priceNum: cleanPriceNum, favKey };
+}
 
-  const name = `${manufacturer} ${model}`.trim();
-  const imgKey = `${name} | ${drivetrain}`;
-  const imgFile = imageMap[imgKey] || "placeholder.png";
-  const imgUrl  = `./assets/cars/${imgFile}`;
-
-  const favKey = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
-
-  return {
-    id,
-    manufacturer, model, type, drivetrain,
-    isAvailable,
-    priceText,
-    imgKey, imgUrl,
-    priceNum: cleanPriceNum,
-    favKey
-  };
+// ── Href helpers ───────────────────────────────────────
+function carDetailsHref(vehicleId) {
+  if (!vehicleId) return "#";
+  return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
+}
+function carBookHref(vehicleId) {
+  if (!vehicleId) return "#";
+  return `bookings.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
 }
 
 // ── Modal ──────────────────────────────────────────────
 function openModal(car) {
   const name = `${car.manufacturer} ${car.model}`.trim();
-
   document.getElementById("modalImg").src = car.imgUrl;
   document.getElementById("modalImg").alt = name;
   document.getElementById("modalTitle").textContent = name;
-
   const tag = document.getElementById("modalTag");
   tag.textContent = car.isAvailable ? "Available" : "Unavailable";
   tag.className = `tag ${car.isAvailable ? "available" : "unavailable"}`;
-
   const rows = [
     ["Manufacturer", car.manufacturer],
     ["Model",        car.model],
@@ -480,56 +365,30 @@ function openModal(car) {
     ["Price",        car.priceText],
     ["Vehicle ID",   car.id || "—"],
   ];
-
   document.getElementById("modalTable").innerHTML = rows.map(([label, val]) => `
     <tr style="border-bottom:1px solid #f1f5f9;">
       <td style="padding:10px 8px; color:#64748b; font-weight:600; width:40%;">${label}</td>
       <td style="padding:10px 8px;">${val || "—"}</td>
     </tr>
   `).join("");
-
-  const detailsHref = car.id ? carDetailsHref(car.id) : "#";
-  const bookHref = car.id ? carDetailsHref(car.id) : "#";
-
-  document.getElementById("modalViewBtn").href = detailsHref;
-  document.getElementById("modalBookBtn").href = bookHref;
+  document.getElementById("modalViewBtn").href = carDetailsHref(car.id);
+  document.getElementById("modalBookBtn").href = carBookHref(car.id);
   document.getElementById("modalViewBtn").setAttribute("data-vehicle-id", car.id || "");
   document.getElementById("modalBookBtn").setAttribute("data-vehicle-id", car.id || "");
-
-  const modal = document.getElementById("vehicleModal");
-  modal.style.display = "flex";
+  document.getElementById("vehicleModal").style.display = "flex";
 }
 
-function closeModal() {
-  document.getElementById("vehicleModal").style.display = "none";
-}
+function closeModal() { document.getElementById("vehicleModal").style.display = "none"; }
 
-function carDetailsHref(vehicleId) {
-  if (!vehicleId) return "#";
-  return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
-}
-
-function navigateToCarDetails(vehicleId) {
-  if (!vehicleId) return;
-  window.location.assign(carDetailsHref(vehicleId));
-}
-
-// Close on backdrop click
-document.getElementById("vehicleModal").addEventListener("click", function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Close on Escape key
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") closeModal();
-});
+document.getElementById("vehicleModal").addEventListener("click", function(e) { if (e.target === this) closeModal(); });
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModal(); });
 
 document.getElementById("modalViewBtn").addEventListener("click", function(e) {
   const vehicleId = this.getAttribute("data-vehicle-id") || "";
   if (!vehicleId) return;
   e.preventDefault();
   bumpPopularity(vehicleId, 2);
-  navigateToCarDetails(vehicleId);
+  window.location.assign(carDetailsHref(vehicleId));
 });
 
 document.getElementById("modalBookBtn").addEventListener("click", function(e) {
@@ -537,21 +396,17 @@ document.getElementById("modalBookBtn").addEventListener("click", function(e) {
   if (!vehicleId) return;
   e.preventDefault();
   bumpPopularity(vehicleId, 4);
-  navigateToCarDetails(vehicleId);
+  window.location.assign(carBookHref(vehicleId));
 });
-// ── End Modal ──────────────────────────────────────────
 
 async function loadCars() {
   const grid = document.getElementById("carsGrid");
   grid.innerHTML = "<div style='color:#555;'>Loading cars…</div>";
-
   try {
     const res = await fetch(`${API}/cars`);
     const data = await res.json();
-
     const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
     allCars = rawCars.map(normalizeCar);
-
     const prices = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
     const maxPrice = prices.length ? Math.max(...prices) : 2000;
     const slider = document.getElementById("filterPrice");
@@ -560,91 +415,59 @@ async function loadCars() {
       slider.value = slider.max;
       updatePriceLabel();
     }
-
     applyAllFilters();
   } catch (e) {
     console.error(e);
-    grid.innerHTML = "<div style='color:#b91c1c;'>Failed to load cars.</div>";
+    document.getElementById("carsGrid").innerHTML = "<div style='color:#b91c1c;'>Failed to load cars.</div>";
   }
 }
 
 function renderCars(cars) {
   const grid = document.getElementById("carsGrid");
   grid.innerHTML = "";
-
   if (!cars.length) {
     grid.innerHTML = "<div style='color:#555;'>No cars match your search/filters.</div>";
     return;
   }
-
   const favs = loadFavsSet();
-
   cars.forEach((car) => {
     const tagClass = car.isAvailable ? "available" : "unavailable";
     const tagText  = car.isAvailable ? "Available" : "Unavailable";
     const name = `${car.manufacturer} ${car.model}`.trim();
     const isSaved = favs.has(car.favKey);
-
     const card = document.createElement("div");
     card.className = "card";
-
-    // Make available cards clickable → open modal
     if (car.isAvailable) {
       card.classList.add("clickable");
       card.style.cursor = "pointer";
       card.addEventListener("click", (e) => {
-        if (e.target.closest("a, button")) return; // don't intercept View/Book/Heart
+        if (e.target.closest("a, button")) return;
         openModal(car);
       });
     }
-
-    const detailsHref = car.id ? carDetailsHref(car.id) : "#";
-    const detailsOnClick = car.id
-      ? ""
-      : `onclick="event.preventDefault(); alert('Missing vehicle id for this car');"`;
-    const bookHref = car.id ? carDetailsHref(car.id) : "#";
-    const bookOnClick = car.id
-      ? ""
-      : `onclick="event.preventDefault(); alert('Missing vehicle id for this car');"`;
-
     card.innerHTML = `
-      <img src="${car.imgUrl}" alt="${car.imgKey}"
-           onerror="this.src='./assets/cars/placeholder.png'">
-
+      <img src="${car.imgUrl}" alt="${car.imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
       <div class="cardBody">
-
         <div class="headerRow">
           <div class="headerLeft">
             <h3>${name}</h3>
             <div class="meta">${car.type} • ${car.drivetrain}</div>
           </div>
-
-          <button class="heartBtn …" type="button" …>
-            <svg viewBox="0 0 24 24"
-                aria-hidden="true"
-                preserveAspectRatio="xMidYMid meet">
-              <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1
-                      c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9
-                      3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
-                    fill="none" stroke="#64748b" stroke-width="1.8"/>
+          <button class="heartBtn" type="button" data-favkey="${encodeURIComponent(car.favKey)}" data-vehicle-id="${encodeURIComponent(car.id || "")}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+              <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
+                    fill="${isSaved ? '#ef4444' : 'none'}" stroke="${isSaved ? '#ef4444' : '#64748b'}" stroke-width="1.8"/>
             </svg>
           </button>
         </div>
-
         <div class="price" style="margin-top:8px;">${car.priceText}</div>
-
-        <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">
-          ${tagText}
-        </span>
-
+        <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">${tagText}</span>
         <div class="cardActions">
-          <a class="linkBtn viewBtn" href="${detailsHref}" data-vehicle-id="${car.id || ""}" ${detailsOnClick}>View</a>
-          <a class="linkBtn bookBtn" href="${bookHref}" data-vehicle-id="${car.id || ""}" ${bookOnClick}>Book</a>
+          <a class="linkBtn viewBtn" href="${carDetailsHref(car.id)}" data-vehicle-id="${car.id || ""}">View</a>
+          <a class="linkBtn bookBtn" href="${carBookHref(car.id)}" data-vehicle-id="${car.id || ""}">Book</a>
         </div>
-
       </div>
     `;
-
     grid.appendChild(card);
   });
 
@@ -652,10 +475,9 @@ function renderCars(cars) {
     link.addEventListener("click", (e) => {
       const vehicleId = link.getAttribute("data-vehicle-id") || "";
       if (!vehicleId) return;
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       bumpPopularity(vehicleId, 2);
-      navigateToCarDetails(vehicleId);
+      window.location.assign(carDetailsHref(vehicleId));
     });
   });
 
@@ -663,10 +485,9 @@ function renderCars(cars) {
     link.addEventListener("click", (e) => {
       const vehicleId = link.getAttribute("data-vehicle-id") || "";
       if (!vehicleId) return;
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       bumpPopularity(vehicleId, 4);
-      navigateToCarDetails(vehicleId);
+      window.location.assign(carBookHref(vehicleId));
     });
   });
 
@@ -675,50 +496,30 @@ function renderCars(cars) {
       const key = decodeURIComponent(btn.getAttribute("data-favkey") || "");
       const vehicleId = decodeURIComponent(btn.getAttribute("data-vehicle-id") || "");
       if (!key) return;
-
       const favs = loadFavsSet();
       const isSaved = favs.has(key);
-
-      if (isSaved) favs.delete(key);
-      else favs.add(key);
-
+      if (isSaved) favs.delete(key); else favs.add(key);
       saveFavsSet(favs);
-
       btn.classList.toggle("saved", !isSaved);
-
       const path = btn.querySelector("path");
       if (path) {
         path.setAttribute("fill", !isSaved ? "#ef4444" : "none");
         path.setAttribute("stroke", !isSaved ? "#ef4444" : "#64748b");
       }
-
       if (!isSaved && vehicleId) bumpPopularity(vehicleId, 1);
     });
   });
 }
 
-function getSearchQuery() {
-  const input = document.getElementById("searchInput");
-  return (input?.value || "").trim().toLowerCase();
-}
-function getSelectedType() {
-  return (document.getElementById("filterType")?.value || "").trim();
-}
-function getSelectedDrive() {
-  return (document.getElementById("filterDrive")?.value || "").trim();
-}
-function getMaxPrice() {
-  const v = Number(document.getElementById("filterPrice")?.value);
-  return Number.isFinite(v) ? v : Infinity;
-}
+function getSearchQuery() { return (document.getElementById("searchInput")?.value || "").trim().toLowerCase(); }
+function getSelectedType() { return (document.getElementById("filterType")?.value || "").trim(); }
+function getSelectedDrive() { return (document.getElementById("filterDrive")?.value || "").trim(); }
+function getMaxPrice() { const v = Number(document.getElementById("filterPrice")?.value); return Number.isFinite(v) ? v : Infinity; }
 function updatePriceLabel() {
   const slider = document.getElementById("filterPrice");
   const label = document.getElementById("priceLabel");
   if (!slider || !label) return;
-
-  const max = Number(slider.max);
-  const val = Number(slider.value);
-
+  const max = Number(slider.max), val = Number(slider.value);
   if (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) label.textContent = "Any";
   else label.textContent = `$${val}`;
 }
@@ -728,55 +529,42 @@ function applyAllFilters() {
   const typeFilter = getSelectedType().toLowerCase();
   const driveFilter = getSelectedDrive().toLowerCase();
   const maxPrice = getMaxPrice();
-
   filteredCars = allCars.filter(c => {
     if (q) {
       const title = `${c.manufacturer} ${c.model}`.toLowerCase();
-      const type = (c.type || "").toLowerCase();
-      const drive = (c.drivetrain || "").toLowerCase();
-      if (!(title.includes(q) || type.includes(q) || drive.includes(q))) return false;
+      if (!(title.includes(q) || (c.type||"").toLowerCase().includes(q) || (c.drivetrain||"").toLowerCase().includes(q))) return false;
     }
-    if (typeFilter && (c.type || "").toLowerCase() !== typeFilter) return false;
-    if (driveFilter && (c.drivetrain || "").toLowerCase() !== driveFilter) return false;
+    if (typeFilter && (c.type||"").toLowerCase() !== typeFilter) return false;
+    if (driveFilter && (c.drivetrain||"").toLowerCase() !== driveFilter) return false;
     if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice) return false;
     return true;
   });
-
   renderCars(filteredCars);
 }
 
 function wireUI() {
-  const search = document.getElementById("searchInput");
-  search?.addEventListener("input", applyAllFilters);
-
+  document.getElementById("searchInput")?.addEventListener("input", applyAllFilters);
   const btn = document.getElementById("filterBtn");
   const panel = document.getElementById("filterPanel");
   btn?.addEventListener("click", () => {
     if (!panel) return;
     panel.style.display = (panel.style.display === "none" || !panel.style.display) ? "block" : "none";
   });
-
   document.getElementById("filterType")?.addEventListener("change", applyAllFilters);
   document.getElementById("filterDrive")?.addEventListener("change", applyAllFilters);
-
-  const price = document.getElementById("filterPrice");
-  price?.addEventListener("input", () => {
-    updatePriceLabel();
-    applyAllFilters();
-  });
-
+  document.getElementById("filterPrice")?.addEventListener("input", () => { updatePriceLabel(); applyAllFilters(); });
   document.getElementById("clearFilters")?.addEventListener("click", () => {
-    if (search) search.value = "";
+    const s = document.getElementById("searchInput");
     const t = document.getElementById("filterType");
     const d = document.getElementById("filterDrive");
     const p = document.getElementById("filterPrice");
+    if (s) s.value = "";
     if (t) t.value = "";
     if (d) d.value = "";
     if (p) p.value = p.max;
     updatePriceLabel();
     applyAllFilters();
   });
-
   updatePriceLabel();
 }
 
