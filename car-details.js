@@ -2,6 +2,7 @@ const API_BASE = "https://server-side-zqaz.onrender.com";
 const SESSION_MS = 12 * 60 * 60 * 1000;
 const params = new URLSearchParams(location.search);
 const isPreview = params.get("preview") === "1";
+const id = params.get("id");
 
 function requireSession() {
   const email = localStorage.getItem("userEmail");
@@ -91,7 +92,7 @@ async function loadCarDetails() {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/cars`);
+    const res = await fetch(`${API_BASE}/cars/${id}`);
     const data = await res.json().catch(() => []);
     if (!res.ok) throw new Error(data.error || "Could not load cars");
 
@@ -141,22 +142,36 @@ async function loadCarDetails() {
 
 async function bookCar() {
   try {
-    statusText.className  = "status";
-    statusText.textContent = "Booking…";
+    statusText.className = "status";
+    statusText.textContent = "Booking...";
 
     const fromDate = fromDateEl.value;
-    const toDate   = toDateEl.value;
+    const toDate = toDateEl.value;
+
+    if (!id) {
+      statusText.className = "status error";
+      statusText.textContent = "Missing car ID in URL.";
+      return;
+    }
 
     if (!fromDate || !toDate) {
-      statusText.className  = "status error";
+      statusText.className = "status error";
       statusText.textContent = "Please select both From and To dates.";
       return;
     }
+
     if (toDate <= fromDate) {
       statusText.className = "status error";
       statusText.textContent = "To date must be after From date.";
       return;
     }
+
+    console.log("Booking request:", {
+      vehicleId: id,
+      userEmail,
+      fromDate,
+      toDate
+    });
 
     const res = await fetch(`${API_BASE}/cars/${id}/book`, {
       method: "POST",
@@ -168,13 +183,20 @@ async function bookCar() {
     });
 
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Booking failed");
 
-    statusText.className  = "status ok";
+    console.log("Booking response status:", res.status);
+    console.log("Booking response data:", data);
+
+    if (!res.ok) {
+      throw new Error(data.error || `Booking failed with status ${res.status}`);
+    }
+
+    statusText.className = "status ok";
     statusText.textContent = `Booked ✅ Sale ID #${data.saleId}`;
     bookBtn.disabled = true;
   } catch (err) {
-    statusText.className  = "status error";
+    console.error("bookCar error:", err);
+    statusText.className = "status error";
     statusText.textContent = `Error: ${err.message}`;
   }
 }
