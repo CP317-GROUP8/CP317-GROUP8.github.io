@@ -176,12 +176,18 @@
   </div>
 
   <script>
-    const API_BASE = "https://server-side-zqaz.onrender.com";
+    const API_BASE = window.location.hostname === "localhost"
+      ? "http://localhost:10000"
+      : "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
+    const params = new URLSearchParams(window.location.search);
+    const isPreview = params.get("preview") === "1";
+    const isLocalhost = window.location.hostname === "localhost";
 
     function requireSession() {
       const email = localStorage.getItem("userEmail");
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+      if (isPreview || isLocalhost) return email || "preview@example.com";
       if (!email || !loggedInAt) { window.location.replace("index.html"); throw new Error("No session"); }
       if (Date.now() - loggedInAt > SESSION_MS) {
         localStorage.removeItem("userEmail");

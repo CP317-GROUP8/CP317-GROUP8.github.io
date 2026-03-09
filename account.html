@@ -386,11 +386,11 @@
 
   <!-- HEADER -->
   <header class="header">
-    <a class="header-logo" href="home.html">Drive<span>.</span></a>
+    <a class="header-logo" href="home.html?preview=1">Drive<span>.</span></a>
     <nav class="header-nav">
-      <a class="nav-btn" href="cars.html">Browse Cars</a>
-      <a class="nav-btn" href="my-bookings.html">My Bookings</a>
-      <a class="nav-btn active" href="account.html">Account</a>
+      <a class="nav-btn" href="cars.html?preview=1" onclick="return goLocalPreview(event, 'cars.html');">Browse Cars</a>
+      <a class="nav-btn" href="my-bookings.html?preview=1" onclick="return goLocalPreview(event, 'my-bookings.html');">My Bookings</a>
+      <a class="nav-btn active" href="account.html?preview=1" onclick="return goLocalPreview(event, 'account.html');">Account</a>
     </nav>
   </header>
 
@@ -469,7 +469,7 @@
       <div class="card bookings-card">
         <div class="card-header">
           <span class="card-title">Recent Bookings</span>
-          <a class="nav-btn" href="my-bookings.html" style="padding:6px 12px;font-size:13px;">View All →</a>
+          <a class="nav-btn" href="my-bookings.html?preview=1" onclick="return goLocalPreview(event, 'my-bookings.html');" style="padding:6px 12px;font-size:13px;">View All →</a>
         </div>
         <div class="card-body" id="bookingsBody">
           <div class="empty-state">
@@ -483,13 +483,29 @@
   </main>
 
   <script>
-    const API_BASE = "https://server-side-zqaz.onrender.com";
+    const API_BASE = window.location.hostname === "localhost"
+      ? "http://localhost:10000"
+      : "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
+    const params = new URLSearchParams(window.location.search);
+    const isPreview = params.get("preview") === "1";
+    const isLocalhost = window.location.hostname === "localhost";
+
+    function goLocalPreview(event, path) {
+      if (!isLocalhost) return true;
+      event.preventDefault();
+      const next = new URL(path, window.location.href);
+      next.searchParams.set("preview", "1");
+      next.searchParams.set("v", String(Date.now()));
+      window.location.assign(`${next.pathname.split("/").pop()}${next.search}`);
+      return false;
+    }
 
     // ── SESSION ──
     function requireSession() {
       const email = localStorage.getItem("userEmail");
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
+      if (isPreview || isLocalhost) return email || "preview@example.com";
       if (!email || !loggedInAt) { window.location.replace("index.html"); throw new Error("No session"); }
       if (Date.now() - loggedInAt > SESSION_MS) {
         ["userEmail","loggedInAt","isAdmin","userData"].forEach(k => localStorage.removeItem(k));

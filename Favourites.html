@@ -85,7 +85,9 @@ button{
 </div>
 
 <script>
-const API = "https://server-side-zqaz.onrender.com";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:10000"
+  : "https://server-side-zqaz.onrender.com";
 const params = new URLSearchParams(window.location.search);
 const isPreview = params.get("preview") === "1";
 

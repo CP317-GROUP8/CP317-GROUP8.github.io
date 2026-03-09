@@ -248,9 +248,12 @@ button{
 </div>
 
 <script>
-const API = "https://server-side-zqaz.onrender.com";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:10000"
+  : "https://server-side-zqaz.onrender.com";
 const params = new URLSearchParams(window.location.search);
 const isPreview = params.get("preview") === "1";
+const searchWhere = normalizeCity(params.get("where"));
 
 function getWeekKey(date = new Date()) {
   const d = new Date(date);
@@ -313,6 +316,12 @@ const imageMap = {
 let allCars = [], filteredCars = [];
 
 function safeStr(v){ return (v ?? "").toString().trim(); }
+function normalizeCity(v){
+  return String(v || "")
+    .trim()
+    .toLowerCase()
+    .replace(/,.*$/, "");
+}
 function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
   const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
   return `${manufacturer}|${model}|${drivetrain}|${p}`;
@@ -324,6 +333,7 @@ function normalizeCar(car){
   const model        = safeStr(car["Model"]);
   const type         = safeStr(car["Vehicle Type"]);
   const drivetrain   = safeStr(car["Drivetrain"]);
+  const city         = safeStr(car["City"] ?? car.city ?? car["Available City"] ?? car.availableCity);
   const priceRaw     = car["Price"];
   const availability = car["Availability"];
   const isAvailable  = Number(availability) === 1;
@@ -335,7 +345,7 @@ function normalizeCar(car){
   const imgFile      = imageMap[imgKey] || "placeholder.png";
   const imgUrl       = `./assets/cars/${imgFile}`;
   const favKey       = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
-  return { id, manufacturer, model, type, drivetrain, isAvailable, priceText, imgKey, imgUrl, priceNum: cleanPriceNum, favKey };
+  return { id, manufacturer, model, type, drivetrain, city, isAvailable, priceText, imgKey, imgUrl, priceNum: cleanPriceNum, favKey };
 }
 
 // ── Href helpers ───────────────────────────────────────
@@ -345,7 +355,7 @@ function carDetailsHref(vehicleId) {
 }
 function carBookHref(vehicleId) {
   if (!vehicleId) return "#";
-  return `bookings.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
+  return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
 }
 
 // ── Modal ──────────────────────────────────────────────
@@ -360,6 +370,7 @@ function openModal(car) {
   const rows = [
     ["Manufacturer", car.manufacturer],
     ["Model",        car.model],
+    ["City",         car.city || "—"],
     ["Type",         car.type],
     ["Drivetrain",   car.drivetrain],
     ["Price",        car.priceText],
@@ -401,12 +412,19 @@ document.getElementById("modalBookBtn").addEventListener("click", function(e) {
 
 async function loadCars() {
   const grid = document.getElementById("carsGrid");
+  const subtitle = document.getElementById("carsSubtitle");
   grid.innerHTML = "<div style='color:#555;'>Loading cars…</div>";
   try {
-    const res = await fetch(`${API}/cars`);
+    const endpoint = searchWhere ? `${API}/cars?where=${encodeURIComponent(params.get("where"))}` : `${API}/cars`;
+    const res = await fetch(endpoint);
     const data = await res.json();
     const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
     allCars = rawCars.map(normalizeCar);
+    if (subtitle) {
+      subtitle.textContent = searchWhere
+        ? `Showing cars in ${params.get("where")}`
+        : "Live from SQL database";
+    }
     const prices = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
     const maxPrice = prices.length ? Math.max(...prices) : 2000;
     const slider = document.getElementById("filterPrice");
@@ -435,6 +453,7 @@ function renderCars(cars) {
     const tagText  = car.isAvailable ? "Available" : "Unavailable";
     const name = `${car.manufacturer} ${car.model}`.trim();
     const isSaved = favs.has(car.favKey);
+    const metaBits = [car.city, car.type, car.drivetrain].filter(Boolean);
     const card = document.createElement("div");
     card.className = "card";
     if (car.isAvailable) {
@@ -451,7 +470,7 @@ function renderCars(cars) {
         <div class="headerRow">
           <div class="headerLeft">
             <h3>${name}</h3>
-            <div class="meta">${car.type} • ${car.drivetrain}</div>
+            <div class="meta">${metaBits.join(" • ") || "—"}</div>
           </div>
           <button class="heartBtn" type="button" data-favkey="${encodeURIComponent(car.favKey)}" data-vehicle-id="${encodeURIComponent(car.id || "")}">
             <svg viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
@@ -532,8 +551,10 @@ function applyAllFilters() {
   filteredCars = allCars.filter(c => {
     if (q) {
       const title = `${c.manufacturer} ${c.model}`.toLowerCase();
-      if (!(title.includes(q) || (c.type||"").toLowerCase().includes(q) || (c.drivetrain||"").toLowerCase().includes(q))) return false;
+      const city = normalizeCity(c.city);
+      if (!(title.includes(q) || city.includes(normalizeCity(q)) || (c.type||"").toLowerCase().includes(q) || (c.drivetrain||"").toLowerCase().includes(q))) return false;
     }
+    if (searchWhere && !normalizeCity(c.city).includes(searchWhere)) return false;
     if (typeFilter && (c.type||"").toLowerCase() !== typeFilter) return false;
     if (driveFilter && (c.drivetrain||"").toLowerCase() !== driveFilter) return false;
     if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice) return false;

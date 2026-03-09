@@ -1,4 +1,6 @@
-const API_BASE = "https://server-side-zqaz.onrender.com";
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:10000"
+  : "https://server-side-zqaz.onrender.com";
 
 const SESSION_MS = 12 * 60 * 60 * 1000; 
 

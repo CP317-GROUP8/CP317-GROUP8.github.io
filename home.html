@@ -200,7 +200,7 @@ button{
   </div>
 
   <div class="header-btns">
-    <button class="secondary" onclick="location.href='account.html'" style="padding:10px 18px;font-size:14px;">👤 My Account</button>
+    <button class="secondary" onclick="location.href='account.html?preview=1'" style="padding:10px 18px;font-size:14px;">👤 My Account</button>
     <button class="secondary" onclick="logout()" style="padding:10px 18px;font-size:14px;">Logout</button>
   </div>
 </header>
@@ -214,13 +214,13 @@ button{
     <p>Enter your city and pickup/dropoff dates.</p>
 
     <div class="inputs">
-      <input placeholder="City">
-      <input type="date">
-      <input type="date">
+      <input id="cityInput" placeholder="City">
+      <input id="pickupDateInput" type="date">
+      <input id="dropoffDateInput" type="date">
     </div>
 
     <div class="buttons">
-      <button class="primary">Search Cars</button>
+      <button class="primary" onclick="searchCars()">Search Cars</button>
       <button class="secondary" onclick="location.href='cars.html?preview=1&v=5'">Browse All</button>
     </div>
   </div>
@@ -272,7 +272,7 @@ button{
     <div class="cardContent">
       <h3>My Account</h3>
       <p>View your profile and booking history.</p>
-      <a href="account.html">Go to Account →</a>
+      <a href="account.html?preview=1">Go to Account →</a>
     </div>
   </div>
 
@@ -281,6 +281,21 @@ button{
 </div>
 
 <script>
+function searchCars(){
+  const params = new URLSearchParams();
+  const city = (document.getElementById("cityInput")?.value || "").trim();
+  const pickup = document.getElementById("pickupDateInput")?.value || "";
+  const dropoff = document.getElementById("dropoffDateInput")?.value || "";
+
+  params.set("preview", "1");
+  params.set("v", "5");
+  if (city) params.set("where", city);
+  if (pickup) params.set("pickup", pickup);
+  if (dropoff) params.set("dropoff", dropoff);
+
+  location.href = `cars.html?${params.toString()}`;
+}
+
 function logout(){
   localStorage.clear();
   location.href="index.html";
