@@ -44,6 +44,12 @@ h1{
   margin-top:6px;
 }
 
+.header-btns {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .hero{
   position:relative;
   display:flex;
@@ -174,6 +180,11 @@ button{
   .cards{
     grid-template-columns:1fr;
   }
+
+  .header-btns {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 </style>
 </head>
@@ -188,7 +199,10 @@ button{
     <div class="subtitle">Find cars, pick dates, rent instantly.</div>
   </div>
 
-  <button class="secondary" onclick="logout()">Logout</button>
+  <div class="header-btns">
+    <button class="secondary" onclick="location.href='account.html'" style="padding:10px 18px;font-size:14px;">👤 My Account</button>
+    <button class="secondary" onclick="logout()" style="padding:10px 18px;font-size:14px;">Logout</button>
+  </div>
 </header>
 
 <section class="hero">
@@ -250,6 +264,15 @@ button{
       <h3>My Bookings</h3>
       <p>View your rental history.</p>
       <a href="my-bookings.html?preview=1">View Bookings →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="assets/cars/porsche.png" onerror="this.src='assets/car2.png'">
+    <div class="cardContent">
+      <h3>My Account</h3>
+      <p>View your profile and booking history.</p>
+      <a href="account.html">Go to Account →</a>
     </div>
   </div>
 
