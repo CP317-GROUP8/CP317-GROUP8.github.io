@@ -155,73 +155,51 @@ async function loadCarDetails() {
   }
 }
 
-async function bookCar() {
-  try {
-    statusText.className = "status";
-    statusText.textContent = "Booking...";
-    bookBtn.disabled = true;
+// ── REDIRECT TO PAYMENT instead of booking directly ──
+function bookCar() {
+  statusText.className = "status";
 
-    const fromDate = fromDateEl.value;
-    const toDate = toDateEl.value;
-    const pickupLocation = (pickupLocationEl?.value || "").trim();
-    const dropoffLocation = (dropoffLocationEl?.value || "").trim();
+  const fromDate = fromDateEl.value;
+  const toDate = toDateEl.value;
+  const pickupLocation = (pickupLocationEl?.value || "").trim();
+  const dropoffLocation = (dropoffLocationEl?.value || "").trim();
 
-    if (!id) {
-      throw new Error("Missing car ID in URL.");
-    }
-
-    if (!fromDate || !toDate) {
-      throw new Error("Please select both From and To dates.");
-    }
-
-    const today = todayISO();
-
-    if (fromDate < today) {
-      throw new Error("From date cannot be in the past.");
-    }
-
-    if (toDate <= fromDate) {
-      throw new Error("To date must be after From date.");
-    }
-
-    const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}/book`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-User-Email": userEmail,
-      },
-      body: JSON.stringify({ fromDate, toDate, pickupLocation, dropoffLocation }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(data.error || "Booking failed");
-    }
-
-    statusText.className = "status ok";
-    statusText.textContent = `Booked ✅ Sale ID #${data.saleId}`;
-
-    // optional: store latest sale id in case payment page needs it later
-    localStorage.setItem("latestSaleId", String(data.saleId || ""));
-
-    // send user to bookings page after successful booking
-    setTimeout(() => {
-      window.location.href = "bookings.html";
-    }, 900);
-  } catch (err) {
+  if (!id) {
     statusText.className = "status error";
-    statusText.textContent = `Error: ${err.message}`;
-    bookBtn.disabled = false;
+    statusText.textContent = "Error: Missing car ID in URL.";
+    return;
   }
-}
 
-function todayISO() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  if (!fromDate || !toDate) {
+    statusText.className = "status error";
+    statusText.textContent = "Error: Please select both From and To dates.";
+    return;
+  }
+
+  const today = todayISO();
+
+  if (fromDate < today) {
+    statusText.className = "status error";
+    statusText.textContent = "Error: From date cannot be in the past.";
+    return;
+  }
+
+  if (toDate <= fromDate) {
+    statusText.className = "status error";
+    statusText.textContent = "Error: To date must be after From date.";
+    return;
+  }
+
+  // Redirect to payment page with all booking details as URL params
+  const qs = new URLSearchParams({
+    id,
+    from: fromDate,
+    to: toDate,
+    pickup: pickupLocation,
+    dropoff: dropoffLocation,
+  }).toString();
+
+  window.location.href = `payment.html?${qs}`;
 }
 
 const minDate = todayISO();
