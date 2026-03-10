@@ -91,6 +91,19 @@
       color: #334155;
     }
 
+    /* Reference number pill */
+    .pill-ref {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.04em;
+    }
+
     .bottomRow {
       display: flex;
       justify-content: space-between;
@@ -176,18 +189,12 @@
   </div>
 
   <script>
-    const API_BASE = window.location.hostname === "localhost"
-      ? "http://localhost:10000"
-      : "https://server-side-zqaz.onrender.com";
+    const API_BASE = "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
-    const params = new URLSearchParams(window.location.search);
-    const isPreview = params.get("preview") === "1";
-    const isLocalhost = window.location.hostname === "localhost";
 
     function requireSession() {
       const email = localStorage.getItem("userEmail");
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
-      if (isPreview || isLocalhost) return email || "preview@example.com";
       if (!email || !loggedInAt) { window.location.replace("index.html"); throw new Error("No session"); }
       if (Date.now() - loggedInAt > SESSION_MS) {
         localStorage.removeItem("userEmail");
@@ -217,7 +224,6 @@
       return `./assets/cars/${imageMap[key] || "placeholder.png"}`;
     }
 
-    // ✅ FIX: Parse date parts directly to avoid UTC timezone shift
     function formatDate(dateStr) {
       if (!dateStr) return "—";
       const [year, month, day] = dateStr.slice(0, 10).split("-");
@@ -251,6 +257,11 @@
 
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Cancel failed");
+
+        // Remove reference number from localStorage too
+        const refs = JSON.parse(localStorage.getItem("bookingRefs") || "{}");
+        delete refs[saleId];
+        localStorage.setItem("bookingRefs", JSON.stringify(refs));
 
         const card = btnEl.closest(".bookingCard");
         card.style.transition = "opacity 0.3s";
@@ -286,6 +297,7 @@
         if (!res.ok) throw new Error(data.error || "Could not load bookings");
 
         const rows = Array.isArray(data.rows) ? data.rows : [];
+        const refs = JSON.parse(localStorage.getItem("bookingRefs") || "{}");
 
         if (!rows.length) {
           container.innerHTML = `
@@ -303,6 +315,8 @@
           const imgSrc = getImage(booking.manufacturer, booking.model, booking.drivetrain);
           const pickupLocation = getRowValue(booking, "pickupLocation", "pickup_location", "Pickup Location");
           const dropoffLocation = getRowValue(booking, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location");
+          const refNum = refs[booking.saleId] || null;
+
           return `
             <div class="bookingCard">
               <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
@@ -320,6 +334,7 @@
                     <span class="pill">${booking.drivetrain || "—"}</span>
                     <span class="pill">Pickup: ${pickupLocation || "—"}</span>
                     <span class="pill">Dropoff: ${dropoffLocation || "—"}</span>
+                    ${refNum ? `<span class="pill-ref">🔖 Ref: ${refNum}</span>` : ""}
                   </div>
                 </div>
                 <div class="bottomRow">
