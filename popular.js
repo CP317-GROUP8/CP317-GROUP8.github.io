@@ -31,6 +31,7 @@ function normalizeCar(car) {
   const model = safeStr(car["Model"]);
   const type = safeStr(car["Vehicle Type"]);
   const drivetrain = safeStr(car["Drivetrain"]);
+  const city = safeStr(car["City"] ?? car.city ?? car["Available City"] ?? car.availableCity);
   const priceNum = Number(car["Price"]);
   const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : "—";
 
@@ -52,6 +53,7 @@ function normalizeCar(car) {
   return {
     id,
     name,
+    city,
     type,
     drivetrain,
     priceText,
@@ -83,6 +85,7 @@ function render(cars, popularityMap) {
     .map((c) => {
       const details = `car-details.html?id=${encodeURIComponent(c.id)}&preview=1`;
       const book = `car-details.html?id=${encodeURIComponent(c.id)}&preview=1`;
+      const metaBits = [c.city, c.type, c.drivetrain].filter(Boolean);
       return `
         <article class="card">
           <img src="${c.imgUrl}" alt="${c.name}" onerror="this.src='./assets/cars/placeholder.png'">
@@ -91,7 +94,7 @@ function render(cars, popularityMap) {
               <h3 class="title">${c.name}</h3>
               <span class="score">Score ${c.score}</span>
             </div>
-            <div class="meta">${c.type || "—"} • ${c.drivetrain || "—"}</div>
+            <div class="meta">${metaBits.join(" • ") || "—"}</div>
             <div class="price">${c.priceText}</div>
             <div class="actions">
               <a class="linkBtn view" href="${details}">View</a>
