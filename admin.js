@@ -21,6 +21,7 @@ const tableTitleEl = document.getElementById("tableTitle");
 const tableContainerEl = document.getElementById("tableContainer");
 const saveBtn = document.getElementById("saveBtn");
 const createBtn = document.getElementById("createBtn");
+const exportBtn = document.getElementById("exportBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 // ---------- helpers ----------
@@ -87,7 +88,6 @@ function isAvailability(col) {
   return normalizeCol(col) === "availability";
 }
 
-// ✅ Availability + Owner ID should NEVER be editable in Vehicles table (create OR edit)
 function isVehicleLockedBusinessColumn(col) {
   if (currentTableKey !== "vehicles") return false;
   return isOwnerId(col) || isAvailability(col);
@@ -95,10 +95,7 @@ function isVehicleLockedBusinessColumn(col) {
 
 function isLockedColumnForContext(col) {
   if (isLockedIdColumn(col)) return true;
-
-  // ✅ Vehicles table: lock Availability + Owner ID always
   if (isVehicleLockedBusinessColumn(col)) return true;
-
   return false;
 }
 
@@ -106,6 +103,7 @@ function updateButtons() {
   createBtn.disabled = !currentTableKey || creating;
   createBtn.title = creating ? "Finish creating the current entry first" : "";
   saveBtn.disabled = !(creating || editingRowId !== null);
+  exportBtn.disabled = !currentTableKey || !currentRows.length;
 }
 
 function escapeHtml(s) {
@@ -154,6 +152,76 @@ function highlightLink(linkEl, message) {
     linkEl.style.padding = "";
   }, 2500);
 }
+
+// ---------- PDF EXPORT ----------
+exportBtn?.addEventListener("click", () => {
+  if (!currentRows.length || !currentTableKey) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" });
+
+  const tableLabel = tableTitleEl.textContent || currentTableKey;
+  const exportDate = new Date().toLocaleDateString("en-CA", {
+    year: "numeric", month: "long", day: "numeric"
+  });
+
+  // Title
+  doc.setFontSize(18);
+  doc.setTextColor(15, 23, 42);
+  doc.text(`Admin Export: ${tableLabel}`, 14, 18);
+
+  // Subtitle
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Generated on ${exportDate} · ${currentRows.length} record(s)`, 14, 26);
+
+  // Table columns and rows
+  const cols = currentColumns.length
+    ? currentColumns
+    : (currentRows[0] ? Object.keys(currentRows[0]) : []);
+
+  const head = [cols];
+  const body = currentRows.map(row =>
+    cols.map(col => String(readRowValue(row, col) ?? ""))
+  );
+
+  doc.autoTable({
+    head,
+    body,
+    startY: 32,
+    styles: {
+      fontSize: 9,
+      cellPadding: 4,
+      textColor: [15, 23, 42],
+    },
+    headStyles: {
+      fillColor: [79, 70, 229],
+      textColor: 255,
+      fontStyle: "bold",
+      fontSize: 9,
+    },
+    alternateRowStyles: {
+      fillColor: [238, 242, 255],
+    },
+    margin: { left: 14, right: 14 },
+  });
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(
+      `CP317 Car Rentals · Page ${i} of ${pageCount}`,
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() - 8,
+      { align: "center" }
+    );
+  }
+
+  doc.save(`${currentTableKey}-export-${Date.now()}.pdf`);
+});
 
 // ---------- logout ----------
 logoutBtn?.addEventListener("click", () => {
@@ -278,7 +346,6 @@ function rowHtml(row, cols, pkName) {
   cols.forEach((col) => {
     let val = isNew ? "" : (readRowValue(row, col) ?? "");
 
-    // Defaults for new vehicle (even though locked)
     if (isNew && currentTableKey === "vehicles" && isAvailability(col)) val = "1";
     if (isNew && currentTableKey === "vehicles" && isOwnerId(col)) val = "";
 
@@ -344,12 +411,11 @@ function renderTable() {
     updateButtons();
     return;
   }
-  
 
   const pkName = pkForTable(currentTableKey, currentColumns, currentRows);
   const cols = currentColumns.length
-  ? currentColumns
-  : (currentRows[0] ? Object.keys(currentRows[0]) : []);
+    ? currentColumns
+    : (currentRows[0] ? Object.keys(currentRows[0]) : []);
 
   let html = `<table><thead><tr>`;
   cols.forEach((c) => (html += `<th>${escapeHtml(c)}</th>`));
@@ -396,10 +462,7 @@ saveBtn?.addEventListener("click", async () => {
     inputs.forEach((inp) => {
       const col = inp.getAttribute("data-col");
       if (isLockedIdColumn(col)) return;
-
-      // ✅ never allow editing/sending Owner ID or Availability in Vehicles table
       if (currentTableKey === "vehicles" && (isOwnerId(col) || isAvailability(col))) return;
-
       payload[col] = inp.value;
     });
 

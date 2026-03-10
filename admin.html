@@ -6,6 +6,9 @@
   <title>Admin Dashboard</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- jsPDF for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     * { box-sizing: border-box; font-family: Inter, system-ui; }
@@ -60,6 +63,7 @@
 
     .btnPrimary { background: #4f46e5; color: white; }
     .btnSuccess { background: #22c55e; color: white; }
+    .btnExport  { background: #f59e0b; color: white; }
 
     /* Status */
     #status {
@@ -214,6 +218,7 @@
       <div class="panelHeader">
         <h2 id="tableTitle">Select a table above.</h2>
         <div class="controls">
+          <button id="exportBtn" class="btnExport" disabled>⬇ Export PDF</button>
           <button id="createBtn" class="btnPrimary" disabled>+ Create</button>
           <button id="saveBtn" class="btnSuccess" disabled>Save</button>
         </div>
