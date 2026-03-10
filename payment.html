@@ -707,7 +707,7 @@
 
         await emailjs.send("service_fvcm81h", "template_vgeh0gt", {
           to_name:    toName,
-          to_email:   userEmail,
+          email:      userEmail,
           ref_number: ref,
           car_name:   document.getElementById("carName")?.textContent || `Vehicle #${vehicleId}`,
           from_date:  fromDate,
