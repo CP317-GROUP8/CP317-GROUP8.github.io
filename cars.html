@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,13 +89,25 @@ button{
 .headerLeft h3{ margin:0; line-height:1.2; }
 .headerLeft .meta{ margin-top:4px; }
 
-.heartBtn svg {
-  width:20px; height:20px; display:block; margin:auto;
-  padding:0; cursor:pointer; transition:all .15s ease;
+/* FIXED HEART BUTTON CSS */
+.heartBtn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.heartBtn:hover{ border-color:#4f46e5; box-shadow:0 8px 18px rgba(0,0,0,.08); }
-.heartBtn svg{ width:20px; height:20px; display:block; }
-.heartBtn.saved{ border-color:#ef4444; }
+.heartBtn svg {
+  width: 24px; 
+  height: 24px; 
+  transition: transform 0.15s ease;
+}
+.heartBtn:hover svg {
+  transform: scale(1.15);
+}
+/* END FIXED HEART BUTTON CSS */
 
 .titleRow{ display:flex; justify-content:space-between; }
 .price{ font-weight:600; }
@@ -186,7 +199,7 @@ button{
   <header>
     <div>
       <h1>Cars</h1>
-      <div class="sub">Live from SQL database</div>
+      <div class="sub" id="carsSubtitle">Live from SQL database</div>
     </div>
     <div>
       <button class="secondary" onclick="location.href='home.html'">← Home</button>
@@ -232,7 +245,6 @@ button{
 
 </div>
 
-<!-- Vehicle Detail Modal -->
 <div id="vehicleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
   <div style="background:white; border-radius:20px; padding:32px; max-width:560px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25); position:relative;">
     <button onclick="closeModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b;">✕</button>
