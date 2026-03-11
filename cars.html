@@ -79,26 +79,24 @@ button{
 
 .cardBody{ padding:18px; }
 
-.headerRow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;   
-  gap:16px;
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; 
+  gap: 16px;
 }
 
 .headerLeft h3{ margin:0; line-height:1.2; }
 .headerLeft .meta{ margin-top:4px; }
 
-/* FIXED HEART BUTTON CSS */
 .heartBtn {
   background: transparent;
   border: none;
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0; 
+  cursor: pointer;
+  margin-top: 4px; 
 }
+
 .heartBtn svg {
   width: 24px; 
   height: 24px; 
@@ -107,7 +105,6 @@ button{
 .heartBtn:hover svg {
   transform: scale(1.15);
 }
-/* END FIXED HEART BUTTON CSS */
 
 .titleRow{ display:flex; justify-content:space-between; }
 .price{ font-weight:600; }
