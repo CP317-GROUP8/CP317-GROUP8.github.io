@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,6 +67,7 @@ button{
   border-radius:20px;
   overflow:hidden;
   box-shadow:0 12px 30px rgba(0,0,0,.06);
+  position: relative;
 }
 
 .card img{
@@ -79,32 +79,41 @@ button{
 
 .cardBody{ padding:18px; }
 
-.headerRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start; 
-  gap: 16px;
+.headerRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;   
+  gap:16px;
 }
 
 .headerLeft h3{ margin:0; line-height:1.2; }
 .headerLeft .meta{ margin-top:4px; }
 
 .heartBtn {
-  background: transparent;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
-  padding: 0; 
+  padding: 8px;
+  border-radius: 50%;
   cursor: pointer;
-  margin-top: 4px; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.heartBtn:hover {
+  background: white;
+  transform: scale(1.1);
 }
 
 .heartBtn svg {
-  width: 24px; 
-  height: 24px; 
-  transition: transform 0.15s ease;
-}
-.heartBtn:hover svg {
-  transform: scale(1.15);
-}
+  width: 20px; 
+  height: 20px; 
 
 .titleRow{ display:flex; justify-content:space-between; }
 .price{ font-weight:600; }
@@ -357,7 +366,6 @@ function normalizeCar(car){
   return { id, manufacturer, model, type, drivetrain, city, isAvailable, priceText, imgKey, imgUrl, priceNum: cleanPriceNum, favKey };
 }
 
-// ── Href helpers ───────────────────────────────────────
 function carDetailsHref(vehicleId) {
   if (!vehicleId) return "#";
   return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
@@ -367,7 +375,6 @@ function carBookHref(vehicleId) {
   return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
 }
 
-// ── Modal ──────────────────────────────────────────────
 function openModal(car) {
   const name = `${car.manufacturer} ${car.model}`.trim();
   document.getElementById("modalImg").src = car.imgUrl;
@@ -474,6 +481,13 @@ function renderCars(cars) {
       });
     }
     card.innerHTML = `
+      <button class="heartBtn" type="button" data-favkey="${encodeURIComponent(car.favKey)}" data-vehicle-id="${encodeURIComponent(car.id || "")}">
+        <svg viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+          <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
+                fill="${isSaved ? '#ef4444' : 'none'}" stroke="${isSaved ? '#ef4444' : '#64748b'}" stroke-width="1.8"/>
+        </svg>
+      </button>
+
       <img src="${car.imgUrl}" alt="${car.imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
       <div class="cardBody">
         <div class="headerRow">
@@ -481,12 +495,6 @@ function renderCars(cars) {
             <h3>${name}</h3>
             <div class="meta">${metaBits.join(" • ") || "—"}</div>
           </div>
-          <button class="heartBtn" type="button" data-favkey="${encodeURIComponent(car.favKey)}" data-vehicle-id="${encodeURIComponent(car.id || "")}">
-            <svg viewBox="0 0 24 24" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-              <path d="M12 21s-7-4.6-9.4-8.5C.7 9.6 2.2 6.5 5.5 6.1c1.8-.2 3.4.6 4.5 1.9 1.1-1.3 2.7-2.1 4.5-1.9 3.3.4 4.8 3.5 2.9 6.4C19 16.4 12 21 12 21z"
-                    fill="${isSaved ? '#ef4444' : 'none'}" stroke="${isSaved ? '#ef4444' : '#64748b'}" stroke-width="1.8"/>
-            </svg>
-          </button>
         </div>
         <div class="price" style="margin-top:8px;">${car.priceText}</div>
         <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">${tagText}</span>
