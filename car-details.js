@@ -191,8 +191,8 @@ function bookCar() {
   // ✅ FIX: Check for date conflicts with existing bookings
   const conflict = hasDateConflict(fromDate, toDate);
   if (conflict) {
-    statusText.className = "status error";
-    statusText.textContent = `Car already booked ${conflict.fromDate} – ${conflict.toDate}. Please choose different dates.`;
+    statusText.className = "status";
+    statusText.innerHTML = `<div style="background:#fee2e2;border:1px solid #f87171;border-radius:12px;padding:12px 14px;font-size:13px;color:#991b1b;">❌ <strong>Dates unavailable:</strong> ${formatDate(conflict.fromDate)} → ${formatDate(conflict.toDate)}<br><span style="font-size:12px;">Please choose different dates.</span></div>`;
     return;
   }
 
