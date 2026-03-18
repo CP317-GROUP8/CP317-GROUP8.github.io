@@ -88,6 +88,18 @@ function isAvailability(col) {
   return normalizeCol(col) === "availability";
 }
 
+// ✅ NEW: detect date columns and format value for <input type="date">
+function isDateColumn(col) {
+  const c = normalizeCol(col);
+  return c.includes("date") || c.includes("pickup") || c.includes("dropoff");
+}
+
+function toDateInputValue(val) {
+  if (!val) return "";
+  // handles "2024-07-01T00:00:00.000Z" → "2024-07-01"
+  return String(val).substring(0, 10);
+}
+
 function isVehicleLockedBusinessColumn(col) {
   if (currentTableKey !== "vehicles") return false;
   return isOwnerId(col) || isAvailability(col);
@@ -353,7 +365,10 @@ function rowHtml(row, cols, pkName) {
       if (isLockedColumnForContext(col)) {
         tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}" disabled style="background:#f3f3f3;color:#666;"></td>`;
       } else {
-        tr += `<td><input data-col="${escapeHtml(col)}" value="${escapeHtml(val)}"></td>`;
+        // ✅ Use date picker for date columns, plain text for everything else
+        const inputType = isDateColumn(col) ? "date" : "text";
+        const inputVal = isDateColumn(col) ? toDateInputValue(val) : escapeHtml(val);
+        tr += `<td><input type="${inputType}" data-col="${escapeHtml(col)}" value="${inputVal}"></td>`;
       }
     } else {
       tr += `<td>${escapeHtml(val)}</td>`;
@@ -563,16 +578,11 @@ async function onActionClick(e) {
       savePromoBtn.addEventListener("click", () => {
         localStorage.setItem("promoBanner", promoInput.value);
         savePromoBtn.textContent = "Saved!";
-        setTimeout(() => savePromoBtn.textContent = "Save Banner", 2000);
+        setTimeout(() => (savePromoBtn.textContent = "Save Banner"), 2000);
       });
     }
-
-  } catch (e) {
-    console.log("BOOT ERROR:", e);
-    statusEl && (statusEl.textContent = `Error: ${e.message}`);
-    adminArea && (adminArea.style.display = "none");
-    logoutBtn && (logoutBtn.style.display = "none");
-  } finally {
-    updateButtons();
+  } catch (err) {
+    console.error("BOOT ERROR:", err);
+    statusEl && (statusEl.textContent = `Error: ${err.message}`);
   }
 })();
