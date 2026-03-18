@@ -1,1053 +1,276 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cars</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Car Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
-      rel="stylesheet"
-    />
+  <style>
+    * { box-sizing: border-box; font-family: Inter, system-ui; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
+      color: #0f172a;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn {
+      border: none;
+      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      transition: transform .05s ease, opacity .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: white; border: 1px solid #cbd5e1; }
+    .btn.primary { background: #4f46e5; color: white; }
+    .btn.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-    <style>
-      * {
-        box-sizing: border-box;
-        font-family: Inter, system-ui;
-      }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      margin-top: 18px;
+    }
 
-      body {
-        margin: 0;
-        background: linear-gradient(180deg, #eef2ff, #f8fafc);
-      }
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
 
-      .container {
-        max-width: 1400px;
-        margin: auto;
-        padding: 40px;
-      }
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .heroImg {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+      background: #e2e8f0;
+    }
+    .heroBody {
+      padding: 18px 18px 8px;
+    }
+    .titleRow {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 {
+      font-size: 30px;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      white-space: nowrap;
+    }
+    .pillRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0 4px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+    }
+    .pill.ok { background: #dcfce7; border-color: #bbf7d0; color: #166534; }
+    .pill.bad { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
 
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    /* Vehicle Table */
+    .vehicleTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+    .vehicleTable th {
+      text-align: left;
+      padding: 10px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .vehicleTable td {
+      padding: 12px 18px;
+      font-size: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #0f172a;
+    }
+    .vehicleTable tr:last-child td {
+      border-bottom: none;
+    }
+    .vehicleTable tr:hover td {
+      background: #fafbff;
+    }
+    .vehicleTable td:first-child {
+      font-weight: 600;
+      color: #475569;
+      width: 40%;
+    }
 
-      h1 {
-        font-size: 44px;
-        margin: 0;
-      }
+    .section {
+      padding: 18px;
+    }
+    .section h2 {
+      font-size: 16px;
+      margin: 0 0 12px;
+    }
 
-      .sub {
-        color: #555;
-      }
+    .formRow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input[type="date"] {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      outline: none;
+      background: white;
+    }
+    input[type="date"]:focus {
+      border-color: #a5b4fc;
+      box-shadow: 0 0 0 4px rgba(79,70,229,.12);
+    }
 
-      .topRow {
-        display: flex;
-        justify-content: space-between;
-        margin: 30px 0 12px;
-        gap: 16px;
-      }
+    .status {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #334155;
+    }
+    .status.error { color: #b91c1c; }
+    .status.ok { color: #166534; }
 
-      button {
-        padding: 12px 18px;
-        border-radius: 14px;
-        border: none;
-        cursor: pointer;
-      }
+    .skeleton {
+      padding: 22px;
+      color: #64748b;
+    }
 
-      .primary {
-        background: #4f46e5;
-        color: white;
-      }
-      .secondary {
-        background: white;
-        border: 1px solid #ccc;
-      }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .heroImg { height: 260px; }
+    }
+  </style>
+</head>
 
-      .searchBox {
-        height: 46px;
-        border-radius: 14px;
-        border: 1px solid #ddd;
-        padding: 0 14px;
-        width: 300px;
-      }
+<body>
+  <div class="container">
+    <div class="topbar">
+      <button class="btn secondary" onclick="history.back()">← Back</button>
+      <button class="btn secondary" id="allCarsBtn" onclick="location.href='cars.html'">All Cars</button>
+    </div>
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
-      }
-
-      .card {
-        background: white;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-        position: relative;
-      }
-
-      .card img {
-        width: 100%;
-        height: 220px;
-        object-fit: cover;
-        background: #ddd;
-      }
-
-      .cardBody {
-        padding: 18px;
-      }
-
-      .headerRow {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .headerLeft h3 {
-        margin: 0;
-        line-height: 1.2;
-      }
-      .headerLeft .meta {
-        margin-top: 4px;
-      }
-
-      .titleRow {
-        display: flex;
-        justify-content: space-between;
-      }
-      .price {
-        font-weight: 600;
-      }
-
-      .tag {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        margin: 8px 0;
-      }
-
-      .available {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .unavailable {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .meta {
-        color: #555;
-        font-size: 14px;
-      }
-
-      .cardActions {
-        display: flex;
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      .linkBtn {
-        flex: 1;
-        text-align: center;
-        padding: 10px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-      }
-
-      .viewBtn {
-        background: #4f46e5;
-        color: white;
-      }
-      .bookBtn {
-        border: 1px solid #ccc;
-        color: black;
-      }
-
-      @media (max-width: 900px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-        .topRow {
-          flex-direction: column;
-          align-items: stretch;
-        }
-        .searchBox {
-          width: 100%;
-        }
-      }
-
-      #filterPanel {
-        display: none;
-        margin: 10px 0 22px;
-        padding: 18px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        box-shadow: 0 16px 45px rgba(15, 23, 42, 0.1);
-      }
-
-      #filterPanel .sub {
-        color: #475569;
-        font-size: 13px;
-      }
-      #filterPanel select,
-      #filterPanel input[type="range"] {
-        outline: none;
-      }
-
-      #filterPanel select {
-        height: 44px;
-        border-radius: 14px;
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        background: rgba(255, 255, 255, 0.95);
-        padding: 0 12px;
-        min-width: 190px;
-        transition:
-          box-shadow 0.15s ease,
-          border-color 0.15s ease;
-      }
-      #filterPanel select:focus {
-        border-color: rgba(79, 70, 229, 0.55);
-        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
-      }
-      #filterPanel input[type="range"] {
-        width: 260px;
-        height: 6px;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.35);
-      }
-      #filterPanel input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        background: #4f46e5;
-        border: 2px solid white;
-        box-shadow: 0 10px 18px rgba(79, 70, 229, 0.25);
-        cursor: pointer;
-      }
-      #filterPanel input[type="range"]::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        background: #4f46e5;
-        border: 2px solid white;
-        box-shadow: 0 10px 18px rgba(79, 70, 229, 0.25);
-        cursor: pointer;
-      }
-      #clearFilters {
-        border: 1px solid rgba(148, 163, 184, 0.55);
-        background: rgba(255, 255, 255, 0.85);
-      }
-      #clearFilters:hover {
-        background: white;
-      }
-      #filterBtn:hover {
-        border-color: rgba(79, 70, 229, 0.35);
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
-      }
-
-      .card.clickable:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15);
-        transition: all 0.2s ease;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <header>
-        <div>
-          <h1>Cars</h1>
-          <div class="sub" id="carsSubtitle">
-            <span id="availableCount">—</span> available vehicles • Updated in real-time
-          </div>
+    <div class="grid">
+      <div class="card" id="detailsCard">
+        <div class="skeleton" id="loadingState">
+          <b>Loading car details…</b><br><br>
+          If this never loads, your API route for fetching one car is missing.
         </div>
-        <div>
-          <button class="secondary" onclick="location.href = 'home.html'">
-            ← Home
-          </button>
-        </div>
-      </header>
 
-      <div class="topRow">
-        <input
-          id="searchInput"
-          class="searchBox"
-          placeholder="Search by make/model"
-        />
-        <button id="filterBtn" class="secondary" type="button">Filter</button>
-      </div>
+        <div id="detailsUI" style="display:none;">
+          <div class="hero">
+            <img id="carImg" class="heroImg" alt="Car image" onerror="this.src='./assets/cars/dummy.png'" />
 
-      <div
-        id="filterPanel"
-        style="
-          display: none;
-          margin-bottom: 20px;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 16px;
-          padding: 16px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-        "
-      >
-        <div
-          style="display: flex; gap: 16px; flex-wrap: wrap; align-items: end"
-        >
-          <div>
-            <div class="sub" style="margin-bottom: 6px">Vehicle Type</div>
-            <select
-              id="filterType"
-              style="
-                height: 42px;
-                border-radius: 12px;
-                border: 1px solid #ddd;
-                padding: 0 12px;
-                min-width: 180px;
-              "
-            >
-              <option value="">Any</option>
-              <option value="Sedan">Sedan</option>
-              <option value="SUV">SUV</option>
-              <option value="Sport">Sport</option>
-            </select>
-          </div>
-          <div>
-            <div class="sub" style="margin-bottom: 6px">Drivetrain</div>
-            <select
-              id="filterDrive"
-              style="
-                height: 42px;
-                border-radius: 12px;
-                border: 1px solid #ddd;
-                padding: 0 12px;
-                min-width: 180px;
-              "
-            >
-              <option value="">Any</option>
-              <option value="AWD">AWD</option>
-              <option value="FWD">FWD</option>
-              <option value="RWD">RWD</option>
-            </select>
-          </div>
-          <div style="min-width: 260px">
-            <div class="sub" style="margin-bottom: 6px">
-              Max price : <span id="priceLabel">Any</span>
+            <div class="heroBody">
+              <div class="titleRow">
+                <h1 id="carName">—</h1>
+                <div class="price" id="carPrice">—</div>
+              </div>
+
+              <div class="pillRow">
+                <span class="pill" id="carType">Type: —</span>
+                <span class="pill" id="carDrive">Drivetrain: —</span>
+                <span class="pill ok" id="carAvail">Available</span>
+              </div>
             </div>
-            <input
-              id="filterPrice"
-              type="range"
-              min="0"
-              max="2000"
-              step="50"
-              value="2000"
-              style="width: 260px"
-            />
           </div>
-          <div style="display: flex; gap: 10px">
-            <button id="clearFilters" class="secondary" type="button">
-              Clear
-            </button>
-          </div>
+
+          <!-- Vehicle Table -->
+          <table class="vehicleTable">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody id="vehicleTableBody">
+              <!-- Populated by car-details.js -->
+            </tbody>
+          </table>
+
         </div>
       </div>
 
-      <div class="grid" id="carsGrid"></div>
-    </div>
+      <div class="card">
+        <div class="section">
+          <h2>Book this car</h2>
 
-    <div
-      id="vehicleModal"
-      style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <div
-        style="
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          max-width: 560px;
-          width: 90%;
-          max-height: 85vh;
-          overflow-y: auto;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-          position: relative;
-        "
-      >
-        <button
-          onclick="closeModal()"
-          style="
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 22px;
-            cursor: pointer;
-            color: #64748b;
-          "
-        >
-          ✕
-        </button>
-        <img
-          id="modalImg"
-          src=""
-          alt=""
-          style="
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 20px;
-          "
-          onerror="this.src='./assets/cars/dummy.png'"
-        />
-        <h2 id="modalTitle" style="margin: 0 0 4px"></h2>
-        <span
-          id="modalTag"
-          class="tag"
-          style="margin-bottom: 16px; display: inline-block"
-        ></span>
-        <table
-          id="modalTable"
-          style="width: 100%; border-collapse: collapse; font-size: 15px"
-        ></table>
-        <div style="display: flex; gap: 12px; margin-top: 24px">
-          <a
-            id="modalViewBtn"
-            href="#"
-            class="linkBtn viewBtn"
-            style="
-              flex: 1;
-              text-align: center;
-              padding: 12px;
-              text-decoration: none;
-              font-weight: 600;
-              border-radius: 12px;
-            "
-            >View Details</a
-          >
-          <a
-            id="modalBookBtn"
-            href="#"
-            class="linkBtn bookBtn"
-            style="
-              flex: 1;
-              text-align: center;
-              padding: 12px;
-              text-decoration: none;
-              font-weight: 600;
-              border-radius: 12px;
-              border: 1px solid #ccc;
-              color: black;
-            "
-            >Book</a
-          >
+          <div class="formRow">
+            <div>
+              <label for="fromDate">From</label>
+              <input id="fromDate" type="date" />
+            </div>
+            <div>
+              <label for="toDate">To</label>
+              <input id="toDate" type="date" />
+            </div>
+          </div>
+
+          <div class="formRow">
+            <div>
+              <label for="pickupLocation">Pickup Location</label>
+              <input id="pickupLocation" type="text" placeholder="Downtown Toronto" />
+            </div>
+            <div>
+              <label for="dropoffLocation">Dropoff Location</label>
+              <input id="dropoffLocation" type="text" placeholder="Toronto Pearson Airport" />
+            </div>
+          </div>
+
+          <button class="btn primary" id="bookBtn" style="width:100%;">Book Now</button>
+          <div class="status" id="statusText">Pick dates then book.</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      const API =
-        window.location.hostname === "localhost"
-          ? "http://localhost:10000"
-          : "https://server-side-zqaz.onrender.com";
-      const params = new URLSearchParams(window.location.search);
-      const isPreview = params.get("preview") === "1";
-      const searchWhere = normalizeCity(params.get("where"));
-
-      // Image cache keys
-      const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
-      
-      // Define all possible image combinations that exist in your assets
-      const IMAGE_MANIFEST = {
-        'honda/civic': [
-          { num: 1, ext: 'jpeg' },
-          { num: 2, ext: 'jpeg' },
-          { num: 3, ext: 'jpeg' }
-        ],
-        'toyota/corolla': [
-          { num: 1, ext: 'png' },
-          { num: 2, ext: 'png' },
-          { num: 3, ext: 'jpeg' }
-        ],
-        'toyota/highlander': [
-          { num: 1, ext: 'png' },
-          { num: 2, ext: 'png' },
-          { num: 3, ext: 'jpeg' }
-        ],
-        'porsche/911': [
-          { num: 1, ext: 'jpeg' },
-          { num: 2, ext: 'jpeg' },
-          { num: 3, ext: 'jpeg' }
-        ],
-        'kia/k4': [
-          { num: 1, ext: 'jpeg' },
-          { num: 2, ext: 'jpeg' },
-          { num: 3, ext: 'jpeg' }
-        ],
-        'dodge/challenger': [
-          { num: 1, ext: 'png' },
-          { num: 2, ext: 'png' },
-          { num: 3, ext: 'jpeg' }
-        ]
-      };
-
-      function getWeekKey(date = new Date()) {
-        const d = new Date(date);
-        d.setHours(0, 0, 0, 0);
-        const day = d.getDay();
-        const diffToMonday = day === 0 ? -6 : 1 - day;
-        d.setDate(d.getDate() + diffToMonday);
-        return d.toISOString().slice(0, 10);
-      }
-      
-      function popularityStorageKey() {
-        return `popularity:${getWeekKey()}`;
-      }
-      
-      function loadPopularityMap() {
-        const raw = localStorage.getItem(popularityStorageKey());
-        const obj = raw ? JSON.parse(raw) : {};
-        return obj && typeof obj === "object" ? obj : {};
-      }
-      
-      function savePopularityMap(map) {
-        localStorage.setItem(popularityStorageKey(), JSON.stringify(map));
-      }
-      
-      function bumpPopularity(vehicleId, amount) {
-        if (!vehicleId) return;
-        const map = loadPopularityMap();
-        const key = String(vehicleId);
-        map[key] = Number(map[key] || 0) + Number(amount || 0);
-        savePopularityMap(map);
-      }
-
-      const SESSION_MS = 12 * 60 * 60 * 1000;
-      
-      function requireSession() {
-        const email = localStorage.getItem("userEmail");
-        const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
-        if (!email || !loggedInAt) {
-          window.location.replace("index.html");
-          throw new Error("No session");
-        }
-        if (Date.now() - loggedInAt > SESSION_MS) {
-          localStorage.removeItem("userEmail");
-          localStorage.removeItem("loggedInAt");
-          localStorage.removeItem("isAdmin");
-          window.location.replace("index.html");
-          throw new Error("Session expired");
-        }
-        return email;
-      }
-      
-      const userEmail = isPreview
-        ? localStorage.getItem("userEmail") || "preview@example.com"
-        : requireSession();
-
-      // Load image assignments from localStorage
-      function loadImageAssignments() {
-        const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
-        return raw ? JSON.parse(raw) : {};
-      }
-
-      // Save image assignments to localStorage
-      function saveImageAssignments(assignments) {
-        localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
-      }
-
-      // Get or create an image assignment for a specific vehicle
-      function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
-        if (!vehicleId || !manufacturer || !model) {
-          console.warn('Missing vehicleId, manufacturer, or model', { vehicleId, manufacturer, model });
-          return './assets/cars/dummy.png';
-        }
-        
-        const manufacturerLower = manufacturer.toLowerCase().trim();
-        const modelLower = model.toLowerCase().trim();
-        const modelKey = `${manufacturerLower}/${modelLower}`;
-        
-        // Get existing assignments
-        const assignments = loadImageAssignments();
-        
-        // Check if this specific vehicle already has an assigned image
-        if (assignments[vehicleId]) {
-          console.log(`Using existing image for vehicle ${vehicleId}: ${assignments[vehicleId]}`);
-          return assignments[vehicleId];
-        }
-        
-        // Get available images for this model from manifest
-        const availableImages = IMAGE_MANIFEST[modelKey];
-        
-        if (!availableImages) {
-          console.warn(`No manifest entry for model: ${modelKey}`);
-          return './assets/cars/dummy.png';
-        }
-        
-        if (availableImages.length === 0) {
-          console.warn(`Empty manifest for model: ${modelKey}`);
-          return './assets/cars/dummy.png';
-        }
-        
-        // Find which images are already assigned to OTHER vehicles of the same model
-        const assignedImagesForModel = new Set();
-        Object.entries(assignments).forEach(([vid, imageUrl]) => {
-          // Only consider other vehicles
-          if (vid !== vehicleId) {
-            // Extract the path and check if it matches this model
-            if (imageUrl.includes(`/assets/cars/${modelKey}/`)) {
-              assignedImagesForModel.add(imageUrl);
-            }
-          }
-        });
-        
-        console.log(`Available images for ${modelKey}:`, availableImages);
-        console.log(`Already assigned images for ${modelKey}:`, Array.from(assignedImagesForModel));
-        
-        // Find unassigned images for this model
-        const unassignedImages = availableImages.filter(img => {
-          const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
-          return !assignedImagesForModel.has(imageUrl);
-        });
-        
-        console.log(`Unassigned images for ${modelKey}:`, unassignedImages);
-        
-        let selectedImageUrl;
-        
-        if (unassignedImages.length > 0) {
-          // Randomly select from unassigned images
-          const randomIndex = Math.floor(Math.random() * unassignedImages.length);
-          const selected = unassignedImages[randomIndex];
-          selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
-          console.log(`Selected unassigned image for vehicle ${vehicleId}: ${selectedImageUrl}`);
-        } else {
-          // All images are used up, reset and randomly select from all available
-          const randomIndex = Math.floor(Math.random() * availableImages.length);
-          const selected = availableImages[randomIndex];
-          selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
-          console.log(`All images for ${modelKey} used, resetting pool. Selected: ${selectedImageUrl}`);
-        }
-        
-        // Assign and save
-        assignments[vehicleId] = selectedImageUrl;
-        saveImageAssignments(assignments);
-        
-        return selectedImageUrl;
-      }
-
-      function favStorageKey() {
-        return `favs:${userEmail}`;
-      }
-      
-      function loadFavsSet() {
-        const raw = localStorage.getItem(favStorageKey());
-        const arr = raw ? JSON.parse(raw) : [];
-        return new Set(Array.isArray(arr) ? arr : []);
-      }
-      
-      function saveFavsSet(set) {
-        localStorage.setItem(favStorageKey(), JSON.stringify([...set]));
-      }
-      
-      function carKeyFromParts(manufacturer, model, drivetrain, priceNum) {
-        const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA";
-        return `${manufacturer}|${model}|${drivetrain}|${p}`;
-      }
-
-      let allCars = [],
-        filteredCars = [];
-
-      function safeStr(v) {
-        return (v ?? "").toString().trim();
-      }
-      
-      function normalizeCity(v) {
-        return String(v || "")
-          .trim()
-          .toLowerCase()
-          .replace(/,.*$/, "");
-      }
-
-      function normalizeCar(car) {
-        const id = safeStr(car["Vehicle ID"] ?? car.vehicleId ?? car.id);
-        const manufacturer = safeStr(car["Manufacturer"]);
-        const model = safeStr(car["Model"]);
-        const type = safeStr(car["Vehicle Type"]);
-        const drivetrain = safeStr(car["Drivetrain"]);
-        const city = safeStr(
-          car["City"] ?? car.city ?? car["Available City"] ?? car.availableCity,
-        );
-        const priceRaw = car["Price"];
-        const availability = car["Availability"];
-        const isAvailable = Number(availability) === 1;
-        const priceNum = Number(priceRaw);
-        const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
-        const priceText = Number.isFinite(priceNum)
-          ? `$${priceNum.toFixed(2)}/day`
-          : `$${priceRaw}/day`;
-        
-        // Use the manifest-based image assignment system
-        const imgUrl = getOrCreateImageAssignment(id, manufacturer, model);
-        
-        const favKey = carKeyFromParts(
-          manufacturer,
-          model,
-          drivetrain,
-          cleanPriceNum ?? NaN,
-        );
-        
-        return {
-          id,
-          manufacturer,
-          model,
-          type,
-          drivetrain,
-          city,
-          isAvailable,
-          priceText,
-          imgUrl,
-          priceNum: cleanPriceNum,
-          favKey,
-        };
-      }
-
-      function carDetailsHref(vehicleId) {
-        if (!vehicleId) return "#";
-        return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
-      }
-      
-      function carBookHref(vehicleId) {
-        if (!vehicleId) return "#";
-        return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`;
-      }
-
-      function openModal(car) {
-        const name = `${car.manufacturer} ${car.model}`.trim();
-        
-        // Get the image URL from assignments (should already exist)
-        const modalImg = document.getElementById("modalImg");
-        modalImg.src = car.imgUrl;
-        modalImg.alt = name;
-        
-        document.getElementById("modalTitle").textContent = name;
-        const tag = document.getElementById("modalTag");
-        tag.textContent = car.isAvailable ? "Available" : "Unavailable";
-        tag.className = `tag ${car.isAvailable ? "available" : "unavailable"}`;
-        
-        const rows = [
-          ["Manufacturer", car.manufacturer],
-          ["Model", car.model],
-          ["City", car.city || "—"],
-          ["Type", car.type],
-          ["Drivetrain", car.drivetrain],
-          ["Price", car.priceText],
-          ["Vehicle ID", car.id || "—"],
-        ];
-        
-        document.getElementById("modalTable").innerHTML = rows
-          .map(
-            ([label, val]) => `
-    <tr style="border-bottom:1px solid #f1f5f9;">
-      <td style="padding:10px 8px; color:#64748b; font-weight:600; width:40%;">${label}</td>
-      <td style="padding:10px 8px;">${val || "—"}</td>
-    </tr>
-  `,
-          )
-          .join("");
-          
-        document.getElementById("modalViewBtn").href = carDetailsHref(car.id);
-        document.getElementById("modalBookBtn").href = carBookHref(car.id);
-        document
-          .getElementById("modalViewBtn")
-          .setAttribute("data-vehicle-id", car.id || "");
-        document
-          .getElementById("modalBookBtn")
-          .setAttribute("data-vehicle-id", car.id || "");
-          
-        document.getElementById("vehicleModal").style.display = "flex";
-      }
-
-      function closeModal() {
-        document.getElementById("vehicleModal").style.display = "none";
-      }
-
-      document
-        .getElementById("vehicleModal")
-        .addEventListener("click", function (e) {
-          if (e.target === this) closeModal();
-        });
-        
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") closeModal();
-      });
-
-      document
-        .getElementById("modalViewBtn")
-        .addEventListener("click", function (e) {
-          const vehicleId = this.getAttribute("data-vehicle-id") || "";
-          if (!vehicleId) return;
-          e.preventDefault();
-          bumpPopularity(vehicleId, 2);
-          window.location.assign(carDetailsHref(vehicleId));
-        });
-
-      document
-        .getElementById("modalBookBtn")
-        .addEventListener("click", function (e) {
-          const vehicleId = this.getAttribute("data-vehicle-id") || "";
-          if (!vehicleId) return;
-          e.preventDefault();
-          bumpPopularity(vehicleId, 4);
-          window.location.assign(carBookHref(vehicleId));
-        });
-
-      async function loadCars() {
-        const grid = document.getElementById("carsGrid");
-        const subtitle = document.getElementById("carsSubtitle");
-        grid.innerHTML = "<div style='color:#555;'>Loading cars…</div>";
-        
-        try {
-          const endpoint = searchWhere
-            ? `${API}/cars?where=${encodeURIComponent(params.get("where"))}`
-            : `${API}/cars`;
-          const res = await fetch(endpoint);
-          const data = await res.json();
-          const rawCars = Array.isArray(data)
-            ? data
-            : (data.cars ?? data.vehicles ?? []);
-          
-          allCars = rawCars.map(normalizeCar);
-          
-          // Update subtitle with dynamic count
-          if (subtitle) {
-            if (searchWhere) {
-              subtitle.innerHTML = `<span id="availableCount">${allCars.length}</span> cars in ${params.get("where")}`;
-            } else {
-              subtitle.innerHTML = `<span id="availableCount">${allCars.length}</span> available vehicles • Updated in real-time`;
-            }
-          }
-          
-          const prices = allCars
-            .map((c) => c.priceNum)
-            .filter((n) => Number.isFinite(n));
-          const maxPrice = prices.length ? Math.max(...prices) : 2000;
-          const slider = document.getElementById("filterPrice");
-          
-          if (slider) {
-            slider.max = String(Math.ceil(maxPrice / 50) * 50);
-            slider.value = slider.max;
-            updatePriceLabel();
-          }
-          
-          applyAllFilters();
-        } catch (e) {
-          console.error(e);
-          document.getElementById("carsGrid").innerHTML =
-            "<div style='color:#b91c1c;'>Failed to load cars.</div>";
-        }
-      }
-
-      function renderCars(cars) {
-        const grid = document.getElementById("carsGrid");
-        grid.innerHTML = "";
-        
-        if (!cars.length) {
-          grid.innerHTML =
-            "<div style='color:#555;'>No cars match your search/filters.</div>";
-          return;
-        }
-
-        cars.forEach((car) => {
-          const tagClass = car.isAvailable ? "available" : "unavailable";
-          const tagText = car.isAvailable ? "Available" : "Unavailable";
-          const name = `${car.manufacturer} ${car.model}`.trim();
-          const metaBits = [car.city, car.type, car.drivetrain].filter(Boolean);
-
-          const favsSet = loadFavsSet();
-          const isFav = favsSet.has(car.favKey);
-          const heartIcon = isFav ? "❤️" : "🤍";
-
-          const card = document.createElement("div");
-          card.className = "card";
-          
-          if (car.isAvailable) {
-            card.classList.add("clickable");
-            card.style.cursor = "pointer";
-            card.addEventListener("click", (e) => {
-              if (e.target.closest("a, button")) return;
-              openModal(car);
-            });
-          }
-          
-          card.innerHTML = `
-      <div class="favBtn" data-fav-key="${car.favKey}" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: transform 0.2s; user-select: none;">
-        ${heartIcon}
-      </div>
-      <img src="${car.imgUrl}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'; console.error('Failed to load image:', '${car.imgUrl}')">
-      <div class="cardBody">
-        <div class="headerRow">
-          <div class="headerLeft">
-            <h3>${name}</h3>
-            <div class="meta">${metaBits.join(" • ") || "—"}</div>
-          </div>
-        </div>
-        <div class="price" style="margin-top:8px;">${car.priceText}</div>
-        <span class="tag ${tagClass}" style="margin-top:10px; display:inline-block;">${tagText}</span>
-        <div class="cardActions">
-          <a class="linkBtn viewBtn" href="${carDetailsHref(car.id)}" data-vehicle-id="${car.id || ""}">View</a>
-          <a class="linkBtn bookBtn" href="${carBookHref(car.id)}" data-vehicle-id="${car.id || ""}">Book</a>
-        </div>
-      </div>
-    `;
-          grid.appendChild(card);
-        });
-
-        grid.querySelectorAll(".favBtn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const key = btn.getAttribute("data-fav-key");
-            if (!key) return;
-            const favs = loadFavsSet();
-            if (favs.has(key)) {
-              favs.delete(key);
-              btn.innerHTML = "🤍";
-            } else {
-              favs.add(key);
-              btn.innerHTML = "❤️";
-              btn.style.transform = "scale(1.2)";
-              setTimeout(() => (btn.style.transform = "scale(1)"), 200);
-            }
-            saveFavsSet(favs);
-          });
-        });
-
-        grid.querySelectorAll(".viewBtn").forEach((link) => {
-          link.addEventListener("click", (e) => {
-            const vehicleId = link.getAttribute("data-vehicle-id") || "";
-            if (!vehicleId) return;
-            e.preventDefault();
-            e.stopPropagation();
-            bumpPopularity(vehicleId, 2);
-            window.location.assign(carDetailsHref(vehicleId));
-          });
-        });
-
-        grid.querySelectorAll(".bookBtn").forEach((link) => {
-          link.addEventListener("click", (e) => {
-            const vehicleId = link.getAttribute("data-vehicle-id") || "";
-            if (!vehicleId) return;
-            e.preventDefault();
-            e.stopPropagation();
-            bumpPopularity(vehicleId, 4);
-            window.location.assign(carBookHref(vehicleId));
-          });
-        });
-      }
-
-      function getSearchQuery() {
-        return (document.getElementById("searchInput")?.value || "")
-          .trim()
-          .toLowerCase();
-      }
-      
-      function getSelectedType() {
-        return (document.getElementById("filterType")?.value || "").trim();
-      }
-      
-      function getSelectedDrive() {
-        return (document.getElementById("filterDrive")?.value || "").trim();
-      }
-      
-      function getMaxPrice() {
-        const v = Number(document.getElementById("filterPrice")?.value);
-        return Number.isFinite(v) ? v : Infinity;
-      }
-      
-      function updatePriceLabel() {
-        const slider = document.getElementById("filterPrice");
-        const label = document.getElementById("priceLabel");
-        if (!slider || !label) return;
-        const max = Number(slider.max),
-          val = Number(slider.value);
-        if (!Number.isFinite(val) || !Number.isFinite(max) || val >= max)
-          label.textContent = "Any";
-        else label.textContent = `$${val}`;
-      }
-
-      function applyAllFilters() {
-        const q = getSearchQuery();
-        const typeFilter = getSelectedType().toLowerCase();
-        const driveFilter = getSelectedDrive().toLowerCase();
-        const maxPrice = getMaxPrice();
-        
-        filteredCars = allCars.filter((c) => {
-          if (q) {
-            const title = `${c.manufacturer} ${c.model}`.toLowerCase();
-            const city = normalizeCity(c.city);
-            if (
-              !(
-                title.includes(q) ||
-                city.includes(normalizeCity(q)) ||
-                (c.type || "").toLowerCase().includes(q) ||
-                (c.drivetrain || "").toLowerCase().includes(q)
-              )
-            )
-              return false;
-          }
-          if (searchWhere && !normalizeCity(c.city).includes(searchWhere))
-            return false;
-          if (typeFilter && (c.type || "").toLowerCase() !== typeFilter)
-            return false;
-          if (driveFilter && (c.drivetrain || "").toLowerCase() !== driveFilter)
-            return false;
-          if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice)
-            return false;
-          return true;
-        });
-        
-        renderCars(filteredCars);
-      }
-
-      function wireUI() {
-        document
-          .getElementById("searchInput")
-          ?.addEventListener("input", applyAllFilters);
-          
-        const btn = document.getElementById("filterBtn");
-        const panel = document.getElementById("filterPanel");
-        
-        btn?.addEventListener("click", () => {
-          if (!panel) return;
-          panel.style.display =
-            panel.style.display === "none" || !panel.style.display
-              ? "block"
-              : "none";
-        });
-        
-        document
-          .getElementById("filterType")
-          ?.addEventListener("change", applyAllFilters);
-          
-        document
-          .getElementById("filterDrive")
-          ?.addEventListener("change", applyAllFilters);
-          
-        document
-          .getElementById("filterPrice")
-          ?.addEventListener("
+  <script src="car-details.js"></script>
+</body>
+</html>
