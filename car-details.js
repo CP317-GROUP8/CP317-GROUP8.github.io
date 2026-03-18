@@ -4,8 +4,44 @@ const SESSION_MS = 12 * 60 * 60 * 1000;
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
-// Image cache key for localStorage
-const IMAGE_CACHE_KEY = 'carImageCache';
+// Image cache keys
+const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
+const IMAGE_MANIFEST_KEY = 'carImageManifest';
+
+// Define all possible image combinations that exist in your assets
+// This is your "manifest" of what images actually exist
+const IMAGE_MANIFEST = {
+  'honda/civic': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'toyota/corolla': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'toyota/highlander': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'porsche/911': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'kia/k4': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'dodge/challenger': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ]
+};
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -29,99 +65,81 @@ function requireSession() {
 
 const userEmail = requireSession();
 
-// Image cache functions
-function loadImageCache() {
-  const raw = localStorage.getItem(IMAGE_CACHE_KEY);
+// Load image assignments from localStorage
+function loadImageAssignments() {
+  const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
   return raw ? JSON.parse(raw) : {};
 }
 
-function saveImageCache(cache) {
-  localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(cache));
+// Save image assignments to localStorage
+function saveImageAssignments(assignments) {
+  localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
 }
 
-// Helper function to try different image extensions
-function tryImageExtensions(imgElement, basePath, currentExtIndex = 0) {
-  const extensions = ['png', 'jpg', 'jpeg'];
-  if (currentExtIndex >= extensions.length) {
-    // All extensions failed, use dummy
-    imgElement.src = './assets/cars/dummy.png';
-    return;
-  }
-  
-  imgElement.src = `${basePath}.${extensions[currentExtIndex]}`;
-  imgElement.onerror = () => {
-    tryImageExtensions(imgElement, basePath, currentExtIndex + 1);
-  };
-}
-
-// Make it globally available for onerror handlers
-window.tryImageExtensions = tryImageExtensions;
-
-// New image loading algorithm
-function getCarImageUrl(manufacturer, model, callback) {
-  if (!manufacturer || !model) {
-    callback('./assets/cars/dummy.png');
-    return;
+// Get or create an image assignment for a specific vehicle
+function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
+  if (!vehicleId || !manufacturer || !model) {
+    return './assets/cars/dummy.png';
   }
   
   const manufacturerLower = manufacturer.toLowerCase().trim();
   const modelLower = model.toLowerCase().trim();
-  const cacheKey = `img_${manufacturerLower}_${modelLower}`;
+  const modelKey = `${manufacturerLower}/${modelLower}`;
   
-  // Check cache first
-  const cache = loadImageCache();
-  if (cache[cacheKey]) {
-    callback(cache[cacheKey]);
-    return;
+  // Get existing assignments
+  const assignments = loadImageAssignments();
+  
+  // Check if this specific vehicle already has an assigned image
+  if (assignments[vehicleId]) {
+    return assignments[vehicleId];
   }
   
-  // Generate random number 1-3
-  const randomNum = Math.floor(Math.random() * 3) + 1;
-  const basePath = `./assets/cars/${manufacturerLower}/${modelLower}/${randomNum}`;
+  // Get available images for this model from manifest
+  const availableImages = IMAGE_MANIFEST[modelKey] || [];
+  if (availableImages.length === 0) {
+    return './assets/cars/dummy.png';
+  }
   
-  // Try loading with .png first
-  const img = new Image();
-  img.onload = () => {
-    const imageUrl = `${basePath}.png`;
-    cache[cacheKey] = imageUrl;
-    saveImageCache(cache);
-    callback(imageUrl);
-  };
+  // Find which images are already assigned to OTHER vehicles of the same model
+  const assignedImagesForModel = new Set();
+  Object.entries(assignments).forEach(([vid, imageUrl]) => {
+    // Only consider other vehicles
+    if (vid !== vehicleId) {
+      // Extract the path and check if it matches this model
+      if (imageUrl.includes(`/assets/cars/${modelKey}/`)) {
+        assignedImagesForModel.add(imageUrl);
+      }
+    }
+  });
   
-  img.onerror = () => {
-    // Try .jpg
-    const jpgImg = new Image();
-    jpgImg.onload = () => {
-      const imageUrl = `${basePath}.jpg`;
-      cache[cacheKey] = imageUrl;
-      saveImageCache(cache);
-      callback(imageUrl);
-    };
+  // Find unassigned images for this model
+  const unassignedImages = availableImages.filter(img => {
+    const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
+    return !assignedImagesForModel.has(imageUrl);
+  });
+  
+  let selectedImageUrl;
+  
+  if (unassignedImages.length > 0) {
+    // Randomly select from unassigned images
+    const randomIndex = Math.floor(Math.random() * unassignedImages.length);
+    const selected = unassignedImages[randomIndex];
+    selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+  } else {
+    // All images are used up, reset and randomly select from all available
+    const randomIndex = Math.floor(Math.random() * availableImages.length);
+    const selected = availableImages[randomIndex];
+    selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
     
-    jpgImg.onerror = () => {
-      // Try .jpeg
-      const jpegImg = new Image();
-      jpegImg.onload = () => {
-        const imageUrl = `${basePath}.jpeg`;
-        cache[cacheKey] = imageUrl;
-        saveImageCache(cache);
-        callback(imageUrl);
-      };
-      
-      jpegImg.onerror = () => {
-        // All extensions failed, use dummy
-        cache[cacheKey] = './assets/cars/dummy.png';
-        saveImageCache(cache);
-        callback('./assets/cars/dummy.png');
-      };
-      
-      jpegImg.src = `${basePath}.jpeg`;
-    };
-    
-    jpgImg.src = `${basePath}.jpg`;
-  };
+    // Optional: Log that we've reset (for debugging)
+    console.log(`All images for ${modelKey} used, resetting pool`);
+  }
   
-  img.src = `${basePath}.png`;
+  // Assign and save
+  assignments[vehicleId] = selectedImageUrl;
+  saveImageAssignments(assignments);
+  
+  return selectedImageUrl;
 }
 
 const loadingState = document.getElementById("loadingState");
@@ -216,13 +234,13 @@ async function loadCarDetails() {
     carAvail.textContent = "Available";
     carAvail.className = "pill ok";
 
-    // Use new image loading algorithm
-    getCarImageUrl(manufacturer, model, (imageUrl) => {
-      carImg.src = imageUrl;
-    });
+    // Use the new image assignment system
+    const imageUrl = getOrCreateImageAssignment(id, manufacturer, model);
+    carImg.src = imageUrl;
     
     // Fallback error handler
     carImg.onerror = () => {
+      console.error(`Failed to load image: ${imageUrl}`);
       carImg.src = './assets/cars/dummy.png';
     };
 
@@ -261,7 +279,6 @@ function bookCar() {
     return;
   }
 
-  // ✅ FIX: allow same-day (toDate < fromDate is invalid, toDate === fromDate is OK)
   if (toDate < fromDate) {
     statusText.className = "status error";
     statusText.textContent = "Dropoff date cannot be before pickup date.";
@@ -280,7 +297,6 @@ function bookCar() {
     return;
   }
 
-  // ✅ FIX: Check for date conflicts with existing bookings
   const conflict = hasDateConflict(fromDate, toDate);
   if (conflict) {
     statusText.className = "status";
@@ -293,7 +309,6 @@ function bookCar() {
   window.location.href = `payment.html?${qs}`;
 }
 
-// ✅ FIX: Allow same-day — update toDate min when fromDate changes
 const minDate = todayISO();
 fromDateEl.min = minDate;
 toDateEl.min = minDate;
