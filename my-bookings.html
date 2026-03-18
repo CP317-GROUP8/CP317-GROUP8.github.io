@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Bookings</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     * { box-sizing: border-box; font-family: Inter, system-ui; }
@@ -91,7 +93,6 @@
       color: #334155;
     }
 
-    /* Reference number pill */
     .pill-ref {
       padding: 5px 12px;
       border-radius: 999px;
@@ -189,9 +190,35 @@
   </div>
 
   <script>
-    const API_BASE = "https://server-side-zqaz.onrender.com";
+    const API_BASE   = "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
 
+    // ── EmailJS config ──────────────────────────────────────────────────────
+    const EMAILJS_PUBLIC_KEY           = "H3F1dxhmOW-hMSZij";
+    const EMAILJS_SERVICE_ID           = "service_v914ueg";
+    const EMAILJS_CANCEL_TEMPLATE      = "template_rwz6pma";
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    /**
+     * Sends a cancellation confirmation email via EmailJS.
+     */
+    async function sendCancellationEmail({ userEmail, carName, pickupDate, dropoffDate, saleId }) {
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCEL_TEMPLATE, {
+          user_email:   userEmail,
+          car_name:     carName,
+          pickup_date:  pickupDate,
+          dropoff_date: dropoffDate,
+          sale_id:      saleId,
+        });
+        console.log("✅ Cancellation email sent");
+      } catch (err) {
+        console.warn("EmailJS cancellation email failed:", err);
+      }
+    }
+
+    // ── Session ─────────────────────────────────────────────────────────────
     function requireSession() {
       const email = localStorage.getItem("userEmail");
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
@@ -243,7 +270,7 @@
       return "";
     }
 
-    async function cancelBooking(saleId, btnEl) {
+    async function cancelBooking(saleId, carName, fromDate, toDate, btnEl) {
       if (!confirm("Cancel this booking? The car will be made available again.")) return;
 
       btnEl.disabled = true;
@@ -258,7 +285,16 @@
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "Cancel failed");
 
-        // Remove reference number from localStorage too
+        // ── 📧 Send cancellation email ──────────────────────────────────────
+        await sendCancellationEmail({
+          userEmail:   userEmail,
+          carName:     carName,
+          pickupDate:  formatDate(fromDate),
+          dropoffDate: formatDate(toDate),
+          saleId:      saleId,
+        });
+
+        // Remove reference number from localStorage
         const refs = JSON.parse(localStorage.getItem("bookingRefs") || "{}");
         delete refs[saleId];
         localStorage.setItem("bookingRefs", JSON.stringify(refs));
@@ -313,12 +349,16 @@
         container.innerHTML = rows.map(booking => {
           const name = `${booking.manufacturer} ${booking.model}`.trim();
           const imgSrc = getImage(booking.manufacturer, booking.model, booking.drivetrain);
-          const pickupLocation = getRowValue(booking, "pickupLocation", "pickup_location", "Pickup Location");
+          const pickupLocation  = getRowValue(booking, "pickupLocation", "pickup_location", "Pickup Location");
           const dropoffLocation = getRowValue(booking, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location");
           const refNum = refs[booking.saleId] || null;
 
           return `
-            <div class="bookingCard">
+            <div class="bookingCard"
+              data-saleid="${booking.saleId}"
+              data-carname="${name}"
+              data-fromdate="${booking.fromDate || ""}"
+              data-todate="${booking.toDate || ""}">
               <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
               <div class="bookingBody">
                 <div>
@@ -355,8 +395,18 @@
           `;
         }).join("");
 
+        // Attach cancel listeners with booking data for the email
         container.querySelectorAll(".cancelBtn").forEach(btn => {
-          btn.addEventListener("click", () => cancelBooking(btn.getAttribute("data-saleid"), btn));
+          btn.addEventListener("click", () => {
+            const card = btn.closest(".bookingCard");
+            cancelBooking(
+              btn.getAttribute("data-saleid"),
+              card.getAttribute("data-carname"),
+              card.getAttribute("data-fromdate"),
+              card.getAttribute("data-todate"),
+              btn
+            );
+          });
         });
 
       } catch (err) {
