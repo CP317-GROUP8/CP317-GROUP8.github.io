@@ -91,7 +91,45 @@ const API = window.location.hostname === "localhost"
 const params = new URLSearchParams(window.location.search);
 const isPreview = params.get("preview") === "1";
 
+// Image cache keys
+const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
+
+// Define all possible image combinations that exist in your assets
+const IMAGE_MANIFEST = {
+  'honda/civic': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'toyota/corolla': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'toyota/highlander': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'porsche/911': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'kia/k4': [
+    { num: 1, ext: 'jpeg' },
+    { num: 2, ext: 'jpeg' },
+    { num: 3, ext: 'jpeg' }
+  ],
+  'dodge/challenger': [
+    { num: 1, ext: 'png' },
+    { num: 2, ext: 'png' },
+    { num: 3, ext: 'jpeg' }
+  ]
+};
+
 const SESSION_MS = 12 * 60 * 60 * 1000;
+
 function requireSession() {
   const email = localStorage.getItem("userEmail");
   const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
@@ -112,6 +150,93 @@ const userEmail = isPreview
   ? (localStorage.getItem("userEmail") || "preview@example.com")
   : requireSession();
 
+// Load image assignments from localStorage
+function loadImageAssignments() {
+  const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+// Save image assignments to localStorage
+function saveImageAssignments(assignments) {
+  localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
+}
+
+// Get or create an image assignment for a specific vehicle
+function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
+  if (!vehicleId || !manufacturer || !model) {
+    return './assets/cars/dummy.png';
+  }
+  
+  const manufacturerLower = manufacturer.toLowerCase().trim();
+  const modelLower = model.toLowerCase().trim();
+  const modelKey = `${manufacturerLower}/${modelLower}`;
+  
+  // Get existing assignments
+  const assignments = loadImageAssignments();
+  
+  // Check if this specific vehicle already has an assigned image
+  if (assignments[vehicleId]) {
+    // Double-check that the existing assignment is still valid
+    const validPaths = new Set();
+    const availableImages = IMAGE_MANIFEST[modelKey] || [];
+    availableImages.forEach(img => {
+      validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
+    });
+    
+    if (validPaths.has(assignments[vehicleId])) {
+      return assignments[vehicleId];
+    } else {
+      // Invalid assignment, remove it
+      delete assignments[vehicleId];
+      saveImageAssignments(assignments);
+    }
+  }
+  
+  // Get available images for this model from manifest
+  const availableImages = IMAGE_MANIFEST[modelKey] || [];
+  if (availableImages.length === 0) {
+    return './assets/cars/dummy.png';
+  }
+  
+  // Find which images are already assigned to OTHER vehicles of the same model
+  const assignedImagesForModel = new Set();
+  Object.entries(assignments).forEach(([vid, imageUrl]) => {
+    // Only consider other vehicles
+    if (vid !== vehicleId) {
+      // Extract the path and check if it matches this model
+      if (imageUrl.includes(`/assets/cars/${modelKey}/`)) {
+        assignedImagesForModel.add(imageUrl);
+      }
+    }
+  });
+  
+  // Find unassigned images for this model
+  const unassignedImages = availableImages.filter(img => {
+    const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
+    return !assignedImagesForModel.has(imageUrl);
+  });
+  
+  let selectedImageUrl;
+  
+  if (unassignedImages.length > 0) {
+    // Randomly select from unassigned images
+    const randomIndex = Math.floor(Math.random() * unassignedImages.length);
+    const selected = unassignedImages[randomIndex];
+    selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+  } else {
+    // All images are used up, reset and randomly select from all available
+    const randomIndex = Math.floor(Math.random() * availableImages.length);
+    const selected = availableImages[randomIndex];
+    selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+  }
+  
+  // Assign and save
+  assignments[vehicleId] = selectedImageUrl;
+  saveImageAssignments(assignments);
+  
+  return selectedImageUrl;
+}
+
 function favStorageKey(){ return `favs:${userEmail}`; }
 function loadFavsSet(){
   const raw = localStorage.getItem(favStorageKey());
@@ -128,18 +253,8 @@ function carKeyFromParts(manufacturer, model, drivetrain, priceNum){
 }
 function safeStr(v){ return (v ?? "").toString().trim(); }
 
-const imageMap = {
-  "Dodge Challenger | AWD": "challenger.png",
-  "KIA K4 | RWD": "kia.png",
-  "Honda Civic | RWD": "civic.png",
-  "Porsche 911 | AWD": "porsche.png",
-  "Toyota Highlander | AWD": "highlander-awd.png",
-  "Toyota Highlander | RWD": "highlander-rwd.png",
-  "Toyota Corolla | FWD": "corolla-fwd.png",
-  "Toyota Corolla | AWD": "corolla-awd.png"
-};
-
 function normalizeCar(car){
+  const id = safeStr(car["Vehicle ID"] ?? car.vehicleId ?? car.id);
   const manufacturer = safeStr(car["Manufacturer"]);
   const model        = safeStr(car["Model"]);
   const type         = safeStr(car["Vehicle Type"]);
@@ -151,14 +266,22 @@ function normalizeCar(car){
   const cleanPriceNum = Number.isFinite(priceNum) ? priceNum : null;
   const priceText = Number.isFinite(priceNum) ? `$${priceNum.toFixed(2)}/day` : `$${priceRaw}/day`;
 
-  const name = `${manufacturer} ${model}`.trim();
-  const imgKey = `${name} | ${drivetrain}`;
-  const imgFile = imageMap[imgKey] || "placeholder.png";
-  const imgUrl  = `./assets/cars/${imgFile}`;
+  // Use manifest-based image assignment
+  const imgUrl = getOrCreateImageAssignment(id, manufacturer, model);
 
   const favKey = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
 
-  return { manufacturer, model, type, drivetrain, city, priceText, imgKey, imgUrl, favKey };
+  return { 
+    id,
+    manufacturer, 
+    model, 
+    type, 
+    drivetrain, 
+    city, 
+    priceText, 
+    imgUrl, 
+    favKey 
+  };
 }
 
 async function loadFavouriteCars(){
@@ -196,7 +319,7 @@ async function loadFavouriteCars(){
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
-      <img src="${c.imgUrl}" alt="${c.imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
+      <img src="${c.imgUrl}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
       <div class="cardBody">
         <div class="titleRow">
           <div>

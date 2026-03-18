@@ -491,6 +491,43 @@
     const API_BASE = "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
 
+    // Image cache keys
+    const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
+
+    // Define all possible image combinations that exist in your assets
+    const IMAGE_MANIFEST = {
+      'honda/civic': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'toyota/corolla': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'toyota/highlander': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'porsche/911': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'kia/k4': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'dodge/challenger': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ]
+    };
+
     // ── SESSION ──
     function requireSession() {
       const email = localStorage.getItem("userEmail");
@@ -506,23 +543,78 @@
 
     const userEmail = requireSession();
 
-    // ── HELPERS ──
-    const imageMap = {
-      "Toyota Corolla AWD":    "corolla-awd.png",
-      "Toyota Corolla FWD":    "corolla-fwd.png",
-      "Toyota Highlander AWD": "highlander-awd.png",
-      "Toyota Highlander RWD": "highlander-rwd.png",
-      "Dodge Challenger AWD":  "challenger.png",
-      "Honda Civic RWD":       "civic.png",
-      "KIA K4 RWD":            "kia.png",
-      "Porsche 911 AWD":       "porsche.png",
-    };
-
-    function getImage(manufacturer, model, drivetrain) {
-      const key = `${manufacturer} ${model} ${drivetrain}`.trim();
-      return `./assets/cars/${imageMap[key] || "placeholder.png"}`;
+    // ── IMAGE ASSIGNMENT FUNCTIONS ──
+    function loadImageAssignments() {
+      const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
+      return raw ? JSON.parse(raw) : {};
     }
 
+    function saveImageAssignments(assignments) {
+      localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
+    }
+
+    function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
+      if (!vehicleId || !manufacturer || !model) {
+        return './assets/cars/dummy.png';
+      }
+      
+      const manufacturerLower = manufacturer.toLowerCase().trim();
+      const modelLower = model.toLowerCase().trim();
+      const modelKey = `${manufacturerLower}/${modelLower}`;
+      
+      const assignments = loadImageAssignments();
+      
+      if (assignments[vehicleId]) {
+        const validPaths = new Set();
+        const availableImages = IMAGE_MANIFEST[modelKey] || [];
+        availableImages.forEach(img => {
+          validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
+        });
+        
+        if (validPaths.has(assignments[vehicleId])) {
+          return assignments[vehicleId];
+        } else {
+          delete assignments[vehicleId];
+          saveImageAssignments(assignments);
+        }
+      }
+      
+      const availableImages = IMAGE_MANIFEST[modelKey] || [];
+      if (availableImages.length === 0) {
+        return './assets/cars/dummy.png';
+      }
+      
+      const assignedImagesForModel = new Set();
+      Object.entries(assignments).forEach(([vid, imageUrl]) => {
+        if (vid !== vehicleId && imageUrl.includes(`/assets/cars/${modelKey}/`)) {
+          assignedImagesForModel.add(imageUrl);
+        }
+      });
+      
+      const unassignedImages = availableImages.filter(img => {
+        const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
+        return !assignedImagesForModel.has(imageUrl);
+      });
+      
+      let selectedImageUrl;
+      
+      if (unassignedImages.length > 0) {
+        const randomIndex = Math.floor(Math.random() * unassignedImages.length);
+        const selected = unassignedImages[randomIndex];
+        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+      } else {
+        const randomIndex = Math.floor(Math.random() * availableImages.length);
+        const selected = availableImages[randomIndex];
+        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+      }
+      
+      assignments[vehicleId] = selectedImageUrl;
+      saveImageAssignments(assignments);
+      
+      return selectedImageUrl;
+    }
+
+    // ── HELPERS ──
     function formatMoney(val) {
       return `$${Number(val || 0).toFixed(2)}`;
     }
@@ -555,7 +647,6 @@
         ? `<span class="badge badge-admin">👑 Administrator</span>`
         : `<span class="badge badge-member">🚗 Member</span>`;
 
-      // Generate formatted username
       const prefix = isAdmin ? "Admin" : "customer";
       const username = `${prefix}-${(first || "user").toLowerCase()}-${userId}@`;
       document.getElementById("usernameEl").textContent = username;
@@ -568,7 +659,6 @@
       document.getElementById("infoRole").textContent  = isAdmin ? "Administrator" : "Member";
       document.getElementById("infoId").textContent    = `#${userId}`;
 
-      // Cache it
       localStorage.setItem("userData", JSON.stringify(user));
     }
 
@@ -588,21 +678,27 @@
 
       const recent = rows.slice(0, 5);
       body.innerHTML = recent.map(b => {
-        const name = `${b.manufacturer || ""} ${b.model || ""}`.trim();
-        const imgSrc = getImage(b.manufacturer, b.model, b.drivetrain);
+        const vehicleId = b.vehicleId || b["Vehicle ID"] || "";
+        const manufacturer = b.manufacturer || b["Manufacturer"] || "";
+        const model = b.model || b["Model"] || "";
+        const name = `${manufacturer} ${model}`.trim() || "Unknown Vehicle";
+        
+        // Get image using manifest-based assignment
+        const imgSrc = getOrCreateImageAssignment(vehicleId, manufacturer, model);
+        
         return `
           <div class="booking-item">
-            <img class="booking-thumb" src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
+            <img class="booking-thumb" src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
             <div class="booking-info">
               <div class="booking-name">${name}</div>
               <div class="booking-meta">${formatDate(b.fromDate)} → ${formatDate(b.toDate)}</div>
               <div class="booking-pill-row">
-                <span class="pill">${b.vehicleType || "—"}</span>
-                <span class="pill">${b.drivetrain || "—"}</span>
-                <span class="pill pill-accent">Sale #${b.saleId}</span>
+                <span class="pill">${b.vehicleType || b["Vehicle Type"] || "—"}</span>
+                <span class="pill">${b.drivetrain || b["Drivetrain"] || "—"}</span>
+                <span class="pill pill-accent">Sale #${b.saleId || b["Sale ID"] || ""}</span>
               </div>
             </div>
-            <div class="booking-price">${formatMoney(b.priceSoldAt)}<span style="font-family:'DM Sans';font-size:11px;color:var(--muted);font-weight:500;"> total</span></div>
+            <div class="booking-price">${formatMoney(b.priceSoldAt || b["Price Sold At"] || 0)}<span style="font-family:'DM Sans';font-size:11px;color:var(--muted);font-weight:500;"> total</span></div>
           </div>`;
       }).join("");
 
@@ -613,14 +709,12 @@
 
     // ── LOAD DATA ──
     async function loadAll() {
-      // Try cache first for instant render
       const cached = localStorage.getItem("userData");
       if (cached) {
         try { populateProfile(JSON.parse(cached)); } catch {}
       }
 
       try {
-        // Fetch bookings (already returns user-matched data)
         const bRes = await fetch(`${API_BASE}/me/bookings`, {
           headers: { "X-User-Email": userEmail }
         });
@@ -630,10 +724,7 @@
 
         populateBookings(rows);
 
-        // Get user profile from auth (re-verify session to get fresh user data)
-        // We store user data at login — pull from localStorage or use email fallback
         if (!cached) {
-          // Minimal fallback from email
           populateProfile({ email: userEmail, firstName: "", lastName: "", administrator: localStorage.getItem("isAdmin") === "true" ? 1 : 0 });
         }
 
