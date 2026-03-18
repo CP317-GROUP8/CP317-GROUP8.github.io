@@ -193,6 +193,43 @@
     const API_BASE   = "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
 
+    // Image cache keys
+    const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
+
+    // Define all possible image combinations that exist in your assets
+    const IMAGE_MANIFEST = {
+      'honda/civic': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'toyota/corolla': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'toyota/highlander': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'porsche/911': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'kia/k4': [
+        { num: 1, ext: 'jpeg' },
+        { num: 2, ext: 'jpeg' },
+        { num: 3, ext: 'jpeg' }
+      ],
+      'dodge/challenger': [
+        { num: 1, ext: 'png' },
+        { num: 2, ext: 'png' },
+        { num: 3, ext: 'jpeg' }
+      ]
+    };
+
     // ── EmailJS config ──────────────────────────────────────────────────────
     const EMAILJS_PUBLIC_KEY           = "H3F1dxhmOW-hMSZij";
     const EMAILJS_SERVICE_ID           = "service_v914ueg";
@@ -236,20 +273,75 @@
 
     const userEmail = requireSession();
 
-    const imageMap = {
-      "Toyota Corolla AWD":    "corolla-awd.png",
-      "Toyota Corolla FWD":    "corolla-fwd.png",
-      "Toyota Highlander AWD": "highlander-awd.png",
-      "Toyota Highlander RWD": "highlander-rwd.png",
-      "Dodge Challenger AWD":  "challenger.png",
-      "Honda Civic RWD":       "civic.png",
-      "KIA K4 RWD":            "kia.png",
-      "Porsche 911 AWD":       "porsche.png",
-    };
+    // ── Image Assignment Functions ──────────────────────────────────────────
+    function loadImageAssignments() {
+      const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }
 
-    function getImage(manufacturer, model, drivetrain) {
-      const key = `${manufacturer} ${model} ${drivetrain}`.trim();
-      return `./assets/cars/${imageMap[key] || "placeholder.png"}`;
+    function saveImageAssignments(assignments) {
+      localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
+    }
+
+    function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
+      if (!vehicleId || !manufacturer || !model) {
+        return './assets/cars/dummy.png';
+      }
+      
+      const manufacturerLower = manufacturer.toLowerCase().trim();
+      const modelLower = model.toLowerCase().trim();
+      const modelKey = `${manufacturerLower}/${modelLower}`;
+      
+      const assignments = loadImageAssignments();
+      
+      if (assignments[vehicleId]) {
+        const validPaths = new Set();
+        const availableImages = IMAGE_MANIFEST[modelKey] || [];
+        availableImages.forEach(img => {
+          validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
+        });
+        
+        if (validPaths.has(assignments[vehicleId])) {
+          return assignments[vehicleId];
+        } else {
+          delete assignments[vehicleId];
+          saveImageAssignments(assignments);
+        }
+      }
+      
+      const availableImages = IMAGE_MANIFEST[modelKey] || [];
+      if (availableImages.length === 0) {
+        return './assets/cars/dummy.png';
+      }
+      
+      const assignedImagesForModel = new Set();
+      Object.entries(assignments).forEach(([vid, imageUrl]) => {
+        if (vid !== vehicleId && imageUrl.includes(`/assets/cars/${modelKey}/`)) {
+          assignedImagesForModel.add(imageUrl);
+        }
+      });
+      
+      const unassignedImages = availableImages.filter(img => {
+        const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
+        return !assignedImagesForModel.has(imageUrl);
+      });
+      
+      let selectedImageUrl;
+      
+      if (unassignedImages.length > 0) {
+        const randomIndex = Math.floor(Math.random() * unassignedImages.length);
+        const selected = unassignedImages[randomIndex];
+        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+      } else {
+        const randomIndex = Math.floor(Math.random() * availableImages.length);
+        const selected = availableImages[randomIndex];
+        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
+      }
+      
+      assignments[vehicleId] = selectedImageUrl;
+      saveImageAssignments(assignments);
+      
+      return selectedImageUrl;
     }
 
     function formatDate(dateStr) {
@@ -351,8 +443,14 @@
         }
 
         container.innerHTML = rows.map(booking => {
-          const name = `${booking.manufacturer} ${booking.model}`.trim();
-          const imgSrc = getImage(booking.manufacturer, booking.model, booking.drivetrain);
+          const vehicleId = booking.vehicleId || booking["Vehicle ID"] || "";
+          const manufacturer = booking.manufacturer || booking["Manufacturer"] || "";
+          const model = booking.model || booking["Model"] || "";
+          const name = `${manufacturer} ${model}`.trim() || "Unknown Vehicle";
+          
+          // Get image using manifest-based assignment
+          const imgSrc = getOrCreateImageAssignment(vehicleId, manufacturer, model);
+          
           const pickupLocation  = getRowValue(booking, "pickupLocation", "pickup_location", "Pickup Location");
           const dropoffLocation = getRowValue(booking, "dropoffLocation", "dropoff_location", "Drop Off Location", "Dropoff Location");
           const refNum = refs[booking.saleId] || null;
@@ -363,7 +461,7 @@
               data-carname="${name}"
               data-fromdate="${booking.fromDate || ""}"
               data-todate="${booking.toDate || ""}">
-              <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/placeholder.png'">
+              <img src="${imgSrc}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
               <div class="bookingBody">
                 <div>
                   <div class="bookingTop">
@@ -374,8 +472,8 @@
                     <div class="price">${formatMoney(booking.priceSoldAt)} total</div>
                   </div>
                   <div class="pillRow">
-                    <span class="pill">${booking.vehicleType || "—"}</span>
-                    <span class="pill">${booking.drivetrain || "—"}</span>
+                    <span class="pill">${booking.vehicleType || booking["Vehicle Type"] || "—"}</span>
+                    <span class="pill">${booking.drivetrain || booking["Drivetrain"] || "—"}</span>
                     <span class="pill">Pickup: ${pickupLocation || "—"}</span>
                     <span class="pill">Dropoff: ${dropoffLocation || "—"}</span>
                     ${refNum ? `<span class="pill-ref">🔖 Ref: ${refNum}</span>` : ""}
