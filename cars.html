@@ -572,6 +572,39 @@
         localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(assignments));
       }
 
+      // Validate and clear any old invalid assignments
+      function validateAndClearImageAssignments() {
+        const assignments = loadImageAssignments();
+        
+        // Build a set of valid image paths for quick lookup
+        const validPaths = new Set();
+        Object.entries(IMAGE_MANIFEST).forEach(([modelKey, images]) => {
+          images.forEach(img => {
+            validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
+          });
+        });
+        
+        console.log('Valid image paths:', Array.from(validPaths));
+        
+        // Check each assignment
+        let hasInvalid = false;
+        Object.entries(assignments).forEach(([vid, imageUrl]) => {
+          if (!validPaths.has(imageUrl)) {
+            console.log(`Removing invalid assignment for vehicle ${vid}: ${imageUrl}`);
+            delete assignments[vid];
+            hasInvalid = true;
+          }
+        });
+        
+        if (hasInvalid) {
+          console.log('Cleared invalid image assignments');
+          saveImageAssignments(assignments);
+        }
+      }
+
+      // Call validation immediately
+      validateAndClearImageAssignments();
+
       // Get or create an image assignment for a specific vehicle
       function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
         if (!vehicleId || !manufacturer || !model) {
@@ -587,7 +620,20 @@
         
         // Check if this specific vehicle already has an assigned image
         if (assignments[vehicleId]) {
-          return assignments[vehicleId];
+          // Double-check that the existing assignment is still valid
+          const validPaths = new Set();
+          const availableImages = IMAGE_MANIFEST[modelKey] || [];
+          availableImages.forEach(img => {
+            validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
+          });
+          
+          if (validPaths.has(assignments[vehicleId])) {
+            return assignments[vehicleId];
+          } else {
+            // Invalid assignment, remove it
+            delete assignments[vehicleId];
+            saveImageAssignments(assignments);
+          }
         }
         
         // Get available images for this model from manifest
