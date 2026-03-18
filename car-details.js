@@ -4,6 +4,9 @@ const SESSION_MS = 12 * 60 * 60 * 1000;
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 
+// Image cache key for localStorage
+const IMAGE_CACHE_KEY = 'carImageCache';
+
 function formatDate(dateStr) {
   if (!dateStr) return "—";
   const [y, m, d] = dateStr.slice(0, 10).split("-");
@@ -26,6 +29,101 @@ function requireSession() {
 
 const userEmail = requireSession();
 
+// Image cache functions
+function loadImageCache() {
+  const raw = localStorage.getItem(IMAGE_CACHE_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+function saveImageCache(cache) {
+  localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(cache));
+}
+
+// Helper function to try different image extensions
+function tryImageExtensions(imgElement, basePath, currentExtIndex = 0) {
+  const extensions = ['png', 'jpg', 'jpeg'];
+  if (currentExtIndex >= extensions.length) {
+    // All extensions failed, use dummy
+    imgElement.src = './assets/cars/dummy.png';
+    return;
+  }
+  
+  imgElement.src = `${basePath}.${extensions[currentExtIndex]}`;
+  imgElement.onerror = () => {
+    tryImageExtensions(imgElement, basePath, currentExtIndex + 1);
+  };
+}
+
+// Make it globally available for onerror handlers
+window.tryImageExtensions = tryImageExtensions;
+
+// New image loading algorithm
+function getCarImageUrl(manufacturer, model, callback) {
+  if (!manufacturer || !model) {
+    callback('./assets/cars/dummy.png');
+    return;
+  }
+  
+  const manufacturerLower = manufacturer.toLowerCase().trim();
+  const modelLower = model.toLowerCase().trim();
+  const cacheKey = `img_${manufacturerLower}_${modelLower}`;
+  
+  // Check cache first
+  const cache = loadImageCache();
+  if (cache[cacheKey]) {
+    callback(cache[cacheKey]);
+    return;
+  }
+  
+  // Generate random number 1-3
+  const randomNum = Math.floor(Math.random() * 3) + 1;
+  const basePath = `./assets/cars/${manufacturerLower}/${modelLower}/${randomNum}`;
+  
+  // Try loading with .png first
+  const img = new Image();
+  img.onload = () => {
+    const imageUrl = `${basePath}.png`;
+    cache[cacheKey] = imageUrl;
+    saveImageCache(cache);
+    callback(imageUrl);
+  };
+  
+  img.onerror = () => {
+    // Try .jpg
+    const jpgImg = new Image();
+    jpgImg.onload = () => {
+      const imageUrl = `${basePath}.jpg`;
+      cache[cacheKey] = imageUrl;
+      saveImageCache(cache);
+      callback(imageUrl);
+    };
+    
+    jpgImg.onerror = () => {
+      // Try .jpeg
+      const jpegImg = new Image();
+      jpegImg.onload = () => {
+        const imageUrl = `${basePath}.jpeg`;
+        cache[cacheKey] = imageUrl;
+        saveImageCache(cache);
+        callback(imageUrl);
+      };
+      
+      jpegImg.onerror = () => {
+        // All extensions failed, use dummy
+        cache[cacheKey] = './assets/cars/dummy.png';
+        saveImageCache(cache);
+        callback('./assets/cars/dummy.png');
+      };
+      
+      jpegImg.src = `${basePath}.jpeg`;
+    };
+    
+    jpgImg.src = `${basePath}.jpg`;
+  };
+  
+  img.src = `${basePath}.png`;
+}
+
 const loadingState = document.getElementById("loadingState");
 const detailsUI = document.getElementById("detailsUI");
 const carName = document.getElementById("carName");
@@ -47,19 +145,6 @@ let bookedRanges = [];
 function todayISO() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-}
-
-function getCarImage(manufacturer, model, drivetrain) {
-  const name = `${manufacturer} ${model}`.trim();
-  const map = {
-    "Toyota Corolla": drivetrain === "AWD" ? "corolla-awd.png" : "corolla-fwd.png",
-    "Toyota Highlander": drivetrain === "AWD" ? "highlander-awd.png" : "highlander-rwd.png",
-    "Dodge Challenger": "challenger.png",
-    "Honda Civic": "civic.png",
-    "KIA K4": "kia.png",
-    "Porsche 911": "porsche.png",
-  };
-  return `./assets/cars/${map[name] || "car1.png"}`;
 }
 
 function populateVehicleTable(car) {
@@ -131,8 +216,15 @@ async function loadCarDetails() {
     carAvail.textContent = "Available";
     carAvail.className = "pill ok";
 
-    carImg.src = getCarImage(manufacturer, model, drivetrain);
-    carImg.onerror = () => { carImg.onerror = null; carImg.src = "./assets/car1.png"; };
+    // Use new image loading algorithm
+    getCarImageUrl(manufacturer, model, (imageUrl) => {
+      carImg.src = imageUrl;
+    });
+    
+    // Fallback error handler
+    carImg.onerror = () => {
+      carImg.src = './assets/cars/dummy.png';
+    };
 
     populateVehicleTable(car);
     loadingState.style.display = "none";

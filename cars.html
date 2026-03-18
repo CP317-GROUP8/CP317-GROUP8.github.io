@@ -266,7 +266,6 @@
       <header>
         <div>
           <h1>Cars</h1>
-          <!-- ✅ FIXED: Dynamic count instead of "Live from SQL database" -->
           <div class="sub" id="carsSubtitle">
             <span id="availableCount">—</span> available vehicles • Updated in real-time
           </div>
@@ -414,7 +413,7 @@
             border-radius: 12px;
             margin-bottom: 20px;
           "
-          onerror="this.src = './assets/cars/placeholder.png'"
+          onerror="this.src = './assets/cars/dummy.png'"
         />
         <h2 id="modalTitle" style="margin: 0 0 4px"></h2>
         <span
@@ -470,6 +469,9 @@
       const isPreview = params.get("preview") === "1";
       const searchWhere = normalizeCity(params.get("where"));
 
+      // Image cache key for localStorage
+      const IMAGE_CACHE_KEY = 'carImageCache';
+
       function getWeekKey(date = new Date()) {
         const d = new Date(date);
         d.setHours(0, 0, 0, 0);
@@ -518,16 +520,61 @@
         ? localStorage.getItem("userEmail") || "preview@example.com"
         : requireSession();
 
-      const imageMap = {
-        "Dodge Challenger | AWD": "challenger.png",
-        "KIA K4 | RWD": "kia.png",
-        "Honda Civic | RWD": "civic.png",
-        "Porsche 911 | AWD": "porsche.png",
-        "Toyota Highlander | AWD": "highlander-awd.png",
-        "Toyota Highlander | RWD": "highlander-rwd.png",
-        "Toyota Corolla | FWD": "corolla-fwd.png",
-        "Toyota Corolla | AWD": "corolla-awd.png",
-      };
+      // New image loading algorithm
+      function getCarImageUrl(manufacturer, model) {
+        if (!manufacturer || !model) return './assets/cars/dummy.png';
+        
+        const manufacturerLower = manufacturer.toLowerCase().trim();
+        const modelLower = model.toLowerCase().trim();
+        const cacheKey = `img_${manufacturerLower}_${modelLower}`;
+        
+        // Check cache first
+        const cache = loadImageCache();
+        if (cache[cacheKey]) {
+          return cache[cacheKey];
+        }
+        
+        // Generate random number 1-3
+        const randomNum = Math.floor(Math.random() * 3) + 1;
+        
+        // Try different extensions
+        const extensions = ['png', 'jpg', 'jpeg'];
+        const basePath = `./assets/cars/${manufacturerLower}/${modelLower}/${randomNum}`;
+        
+        // For now, we'll construct the URL with .png as default
+        // The onerror handler will try other extensions and fallback to dummy.png
+        const imageUrl = `${basePath}.png`;
+        
+        // Cache the selected image
+        cache[cacheKey] = imageUrl;
+        saveImageCache(cache);
+        
+        return imageUrl;
+      }
+
+      function loadImageCache() {
+        const raw = localStorage.getItem(IMAGE_CACHE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      }
+
+      function saveImageCache(cache) {
+        localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(cache));
+      }
+
+      // Helper function to try different image extensions
+      function tryImageExtensions(imgElement, basePath, currentExtIndex = 0) {
+        const extensions = ['png', 'jpg', 'jpeg'];
+        if (currentExtIndex >= extensions.length) {
+          // All extensions failed, use dummy
+          imgElement.src = './assets/cars/dummy.png';
+          return;
+        }
+        
+        imgElement.src = `${basePath}.${extensions[currentExtIndex]}`;
+        imgElement.onerror = () => {
+          tryImageExtensions(imgElement, basePath, currentExtIndex + 1);
+        };
+      }
 
       function favStorageKey() {
         return `favs:${userEmail}`;
@@ -576,9 +623,10 @@
           ? `$${priceNum.toFixed(2)}/day`
           : `$${priceRaw}/day`;
         const name = `${manufacturer} ${model}`.trim();
-        const imgKey = `${name} | ${drivetrain}`;
-        const imgFile = imageMap[imgKey] || "placeholder.png";
-        const imgUrl = `./assets/cars/${imgFile}`;
+        
+        // Use new image loading algorithm
+        const imgUrl = getCarImageUrl(manufacturer, model);
+        
         const favKey = carKeyFromParts(
           manufacturer,
           model,
@@ -594,7 +642,6 @@
           city,
           isAvailable,
           priceText,
-          imgKey,
           imgUrl,
           priceNum: cleanPriceNum,
           favKey,
@@ -612,8 +659,26 @@
 
       function openModal(car) {
         const name = `${car.manufacturer} ${car.model}`.trim();
-        document.getElementById("modalImg").src = car.imgUrl;
-        document.getElementById("modalImg").alt = name;
+        
+        // Handle image with extension fallback
+        const modalImg = document.getElementById("modalImg");
+        const basePath = car.imgUrl.replace(/\.(png|jpg|jpeg)$/, '');
+        const manufacturerLower = car.manufacturer.toLowerCase().trim();
+        const modelLower = car.model.toLowerCase().trim();
+        const cacheKey = `img_${manufacturerLower}_${modelLower}`;
+        const cache = loadImageCache();
+        const cachedUrl = cache[cacheKey];
+        
+        if (cachedUrl) {
+          modalImg.src = cachedUrl;
+        } else {
+          const randomNum = Math.floor(Math.random() * 3) + 1;
+          const newBasePath = `./assets/cars/${manufacturerLower}/${modelLower}/${randomNum}`;
+          tryImageExtensions(modalImg, newBasePath);
+        }
+        
+        modalImg.alt = name;
+        
         document.getElementById("modalTitle").textContent = name;
         const tag = document.getElementById("modalTag");
         tag.textContent = car.isAvailable ? "Available" : "Unavailable";
@@ -696,7 +761,7 @@
             : (data.cars ?? data.vehicles ?? []);
           allCars = rawCars.map(normalizeCar);
           
-          // ✅ FIXED: Update subtitle with dynamic count
+          // Update subtitle with dynamic count
           if (subtitle) {
             if (searchWhere) {
               subtitle.innerHTML = `<span id="availableCount">${allCars.length}</span> cars in ${params.get("where")}`;
@@ -752,11 +817,28 @@
               openModal(car);
             });
           }
+          
+          // Handle image loading with extension fallback
+          const manufacturerLower = car.manufacturer.toLowerCase().trim();
+          const modelLower = car.model.toLowerCase().trim();
+          const cacheKey = `img_${manufacturerLower}_${modelLower}`;
+          const cache = loadImageCache();
+          const cachedUrl = cache[cacheKey];
+          
+          let imgHtml;
+          if (cachedUrl) {
+            imgHtml = `<img src="${cachedUrl}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">`;
+          } else {
+            const randomNum = Math.floor(Math.random() * 3) + 1;
+            const basePath = `./assets/cars/${manufacturerLower}/${modelLower}/${randomNum}`;
+            imgHtml = `<img src="${basePath}.png" alt="${name}" onerror="tryImageExtensions(this, '${basePath}', 0)">`;
+          }
+          
           card.innerHTML = `
       <div class="favBtn" data-fav-key="${car.favKey}" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: transform 0.2s; user-select: none;">
         ${heartIcon}
       </div>
-      <img src="${car.imgUrl}" alt="${car.imgKey}" onerror="this.src='./assets/cars/placeholder.png'">
+      ${imgHtml}
       <div class="cardBody">
         <div class="headerRow">
           <div class="headerLeft">
@@ -917,6 +999,9 @@
           });
         updatePriceLabel();
       }
+
+      // Make tryImageExtensions available globally for onerror handlers
+      window.tryImageExtensions = tryImageExtensions;
 
       wireUI();
       loadCars();
