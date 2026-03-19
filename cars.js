@@ -35,6 +35,12 @@ const IMAGE_MANIFEST = {
   'bmw/x5':             [{ num: 1, ext: 'jpeg' }],
   'subaru/crosstrek':   [{ num: 1, ext: 'jpeg' }],
   'subaru/forester':  [{ num: 1, ext: 'jpeg' }],
+  'ford/mustang':           [{ num: 1, ext: 'jpeg' }],
+  'ford/mustang mach-e':    [{ num: 1, ext: 'jpeg' }],
+  'ford/f-150 lightning':   [{ num: 1, ext: 'jpeg' }],
+  'genesis/gv70':           [{ num: 1, ext: 'jpeg' }],
+  'lexus/rx 350 hybrid':    [{ num: 1, ext: 'jpeg' }],
+  'lexus/es':               [{ num: 1, ext: 'jpeg' }],
 };
 
 function requireSession() {
