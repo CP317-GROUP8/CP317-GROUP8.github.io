@@ -27,6 +27,7 @@ const IMAGE_MANIFEST = {
   'nissan/sentra':      [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
   'porsche/911':        [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
   'rivian/r1s':         [{ num: 1, ext: 'jpeg' }],
+  'rivian/r1t':         [{ num: 2, ext: 'jpeg' }],
   'subaru/brz':         [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
   'toyota/corolla':     [{ num: 1, ext: 'png'  }, { num: 2, ext: 'png'  }, { num: 3, ext: 'jpeg' }],
   'toyota/gr86':        [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
