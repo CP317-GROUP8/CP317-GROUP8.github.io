@@ -312,7 +312,6 @@
       </div>
     </div>
 
-    <script src="images.js"></script>
     <script>
       const API = window.location.hostname === "localhost"
         ? "http://localhost:10000"
@@ -321,10 +320,63 @@
       const params    = new URLSearchParams(window.location.search);
       const isPreview = params.get("preview") === "1";
 
-      // ── define normalizeCity BEFORE using it ──
       function normalizeCity(v) { return String(v || "").trim().toLowerCase().replace(/,.*$/, ""); }
 
       const searchWhere = normalizeCity(params.get("where"));
+
+      // ── IMAGE MANIFEST ──
+      const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
+
+      const IMAGE_MANIFEST = {
+        'honda/civic':       [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+        'toyota/corolla':    [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
+        'toyota/highlander': [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
+        'porsche/911':       [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+        'kia/k4':            [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+        'dodge/challenger':  [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}]
+      };
+
+      function loadImageAssignments() {
+        const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      }
+
+      function saveImageAssignments(a) {
+        localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(a));
+      }
+
+      function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
+        if (!vehicleId || !manufacturer || !model) return './assets/cars/dummy.png';
+        const modelKey = `${manufacturer.toLowerCase().trim()}/${model.toLowerCase().trim()}`;
+        const assignments = loadImageAssignments();
+
+        if (assignments[vehicleId]) return assignments[vehicleId];
+
+        const available = IMAGE_MANIFEST[modelKey] || [];
+
+        // Not in manifest → use Unsplash (free, no API key)
+        if (available.length === 0) {
+          const query = encodeURIComponent(`${manufacturer} ${model} car`);
+          const url = `https://source.unsplash.com/seed/${encodeURIComponent(vehicleId)}/600x400/?${query}`;
+          assignments[vehicleId] = url;
+          saveImageAssignments(assignments);
+          return url;
+        }
+
+        // In manifest → pick from local assets
+        const usedUrls = new Set(
+          Object.entries(assignments)
+            .filter(([vid]) => vid !== vehicleId)
+            .map(([, url]) => url)
+            .filter(url => url.includes(`/assets/cars/${modelKey}/`))
+        );
+        const pool = available.filter(i => !usedUrls.has(`./assets/cars/${modelKey}/${i.num}.${i.ext}`));
+        const chosen = (pool.length ? pool : available)[Math.floor(Math.random() * (pool.length || available.length))];
+        const url = `./assets/cars/${modelKey}/${chosen.num}.${chosen.ext}`;
+        assignments[vehicleId] = url;
+        saveImageAssignments(assignments);
+        return url;
+      }
 
       // ── POPULARITY ──
       function getWeekKey(date = new Date()) {
@@ -439,14 +491,18 @@
 
           const card = document.createElement("div");
           card.className = "card";
-          if (car.isAvailable) { card.classList.add("clickable"); card.style.cursor = "pointer"; card.addEventListener("click", e => { if (e.target.closest("a, button")) return; openModal(car); }); }
+          if (car.isAvailable) {
+            card.classList.add("clickable");
+            card.style.cursor = "pointer";
+            card.addEventListener("click", e => { if (e.target.closest("a, button")) return; openModal(car); });
+          }
 
           card.innerHTML = `
             <div class="favBtn" data-fav-key="${car.favKey}"
               style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.9);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;transition:transform 0.2s;user-select:none;">
               ${isFav ? "❤️" : "🤍"}
             </div>
-            <img src="./assets/cars/dummy.png" data-vid="${car.id}" data-mfr="${car.manufacturer}" data-mdl="${car.model}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
+            <img src="${car.imgUrl}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
             <div class="cardBody">
               <div class="headerRow">
                 <div class="headerLeft">
@@ -463,10 +519,6 @@
             </div>`;
 
           grid.appendChild(card);
-
-          // Load image via images.js (Unsplash fallback for unknown cars)
-          const imgEl = card.querySelector('img[data-vid]');
-          if (imgEl) setImageOnElement(imgEl, car.id, car.manufacturer, car.model);
         });
 
         // Fav buttons
