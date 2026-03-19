@@ -15,6 +15,7 @@
         transition: background 0.2s, color 0.2s;
       }
 
+
       .container { max-width: 1400px; margin: auto; padding: 40px; }
 
       header { display: flex; justify-content: space-between; align-items: center; }
@@ -30,6 +31,7 @@
         gap: 16px;
       }
 
+
       button {
         padding: 12px 18px;
         border-radius: 14px;
@@ -37,6 +39,7 @@
         cursor: pointer;
         transition: filter 0.15s;
       }
+
 
       button:hover { filter: brightness(0.95); }
 
@@ -48,6 +51,7 @@
         color: var(--ink, #0d1117);
       }
 
+
       .searchBox {
         height: 46px;
         border-radius: 14px;
@@ -58,6 +62,7 @@
         color: var(--ink, #0d1117);
       }
 
+
       .searchBox::placeholder { color: var(--muted, #8891a0); }
 
       .grid {
@@ -65,6 +70,7 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 24px;
       }
+
 
       .card {
         background: var(--surface, white);
@@ -75,12 +81,14 @@
         border: 1px solid var(--border, transparent);
       }
 
+
       .card img {
         width: 100%;
         height: 220px;
         object-fit: cover;
         background: var(--surface2, #ddd);
       }
+
 
       .cardBody { padding: 18px; }
 
@@ -99,6 +107,7 @@
         margin: 8px 0;
       }
 
+
       .available   { background: #dcfce7; color: #166534; }
       .unavailable { background: var(--danger-light, #fee2e2); color: var(--danger, #991b1b); }
 
@@ -115,6 +124,7 @@
         font-weight: 600;
       }
 
+
       .viewBtn { background: var(--accent, #4f46e5); color: white; }
 
       .bookBtn {
@@ -123,7 +133,9 @@
         background: var(--surface, white);
       }
 
+
       /* ── FILTER PANEL ── */
+
       #filterPanel {
         display: none;
         margin: 10px 0 22px;
@@ -135,6 +147,7 @@
         border: 1px solid var(--border, rgba(148,163,184,0.35));
         box-shadow: 0 16px 45px rgba(15,23,42,0.1);
       }
+
 
       #filterPanel select {
         height: 44px;
@@ -148,10 +161,12 @@
         transition: box-shadow 0.15s ease, border-color 0.15s ease;
       }
 
+
       #filterPanel select:focus {
         border-color: rgba(79,70,229,0.55);
         box-shadow: 0 0 0 4px rgba(79,70,229,0.15);
       }
+
 
       #filterPanel input[type="range"] {
         width: 260px;
@@ -160,6 +175,7 @@
         background: var(--border, rgba(148,163,184,0.35));
         outline: none;
       }
+
 
       #filterPanel input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
@@ -171,6 +187,7 @@
         cursor: pointer;
       }
 
+
       #filterPanel input[type="range"]::-moz-range-thumb {
         width: 18px; height: 18px;
         border-radius: 999px;
@@ -179,11 +196,13 @@
         cursor: pointer;
       }
 
+
       #clearFilters {
         border: 1px solid var(--border, rgba(148,163,184,0.55));
         background: var(--surface, rgba(255,255,255,0.85));
         color: var(--ink, #0d1117);
       }
+
 
       .card.clickable:hover {
         transform: translateY(-4px);
@@ -191,7 +210,9 @@
         transition: all 0.2s ease;
       }
 
+
       /* ── MODAL ── */
+
       #vehicleModal {
         display: none;
         position: fixed;
@@ -201,6 +222,7 @@
         align-items: center;
         justify-content: center;
       }
+
 
       .modalInner {
         background: var(--surface, white);
@@ -215,6 +237,7 @@
         border: 1px solid var(--border, transparent);
       }
 
+
       .modalClose {
         position: absolute;
         top: 16px; right: 16px;
@@ -225,6 +248,7 @@
         color: var(--muted, #64748b);
         padding: 4px 8px;
       }
+
 
       #modalTitle { margin: 0 0 4px; color: var(--ink, #0d1117); }
 
@@ -237,6 +261,7 @@
         .topRow { flex-direction: column; align-items: stretch; }
         .searchBox { width: 100%; }
       }
+
     </style>
   </head>
 
@@ -312,6 +337,7 @@
       </div>
     </div>
 
+    <script src="images.js"></script>
     <script>
       const API = window.location.hostname === "localhost"
         ? "http://localhost:10000"
@@ -321,16 +347,7 @@
       const isPreview   = params.get("preview") === "1";
       const searchWhere = normalizeCity(params.get("where"));
 
-      const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
-
-      const IMAGE_MANIFEST = {
-        'honda/civic':       [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
-        'toyota/corolla':    [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
-        'toyota/highlander': [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
-        'porsche/911':       [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
-        'kia/k4':            [{num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
-        'dodge/challenger':  [{num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}]
-      };
+      // ── IMAGE FUNCTIONS handled by images.js ──
 
       // ── POPULARITY ──
       function getWeekKey(date = new Date()) {
@@ -339,6 +356,7 @@
         d.setDate(d.getDate() + diffToMonday);
         return d.toISOString().slice(0,10);
       }
+
       function popularityStorageKey() { return `popularity:${getWeekKey()}`; }
       function loadPopularityMap() { const raw = localStorage.getItem(popularityStorageKey()); const obj = raw ? JSON.parse(raw) : {}; return obj && typeof obj === "object" ? obj : {}; }
       function savePopularityMap(map) { localStorage.setItem(popularityStorageKey(), JSON.stringify(map)); }
@@ -354,42 +372,13 @@
           ["userEmail","loggedInAt","isAdmin"].forEach(k => localStorage.removeItem(k));
           window.location.replace("index.html"); throw new Error("Session expired");
         }
+
         return email;
       }
+
       const userEmail = isPreview ? localStorage.getItem("userEmail") || "preview@example.com" : requireSession();
 
-      // ── IMAGE ASSIGNMENTS ──
-      function loadImageAssignments() { const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY); return raw ? JSON.parse(raw) : {}; }
-      function saveImageAssignments(a) { localStorage.setItem(IMAGE_ASSIGNMENTS_KEY, JSON.stringify(a)); }
-
-      function validateAndClearImageAssignments() {
-        const assignments = loadImageAssignments();
-        const validPaths = new Set();
-        Object.entries(IMAGE_MANIFEST).forEach(([k, imgs]) => imgs.forEach(img => validPaths.add(`./assets/cars/${k}/${img.num}.${img.ext}`)));
-        let hasInvalid = false;
-        Object.entries(assignments).forEach(([vid, url]) => { if (!validPaths.has(url)) { delete assignments[vid]; hasInvalid = true; } });
-        if (hasInvalid) saveImageAssignments(assignments);
-      }
-      validateAndClearImageAssignments();
-
-      function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
-        if (!vehicleId || !manufacturer || !model) return './assets/cars/dummy.png';
-        const modelKey = `${manufacturer.toLowerCase().trim()}/${model.toLowerCase().trim()}`;
-        const assignments = loadImageAssignments();
-        if (assignments[vehicleId]) {
-          const validPaths = new Set((IMAGE_MANIFEST[modelKey] || []).map(i => `./assets/cars/${modelKey}/${i.num}.${i.ext}`));
-          if (validPaths.has(assignments[vehicleId])) return assignments[vehicleId];
-          delete assignments[vehicleId]; saveImageAssignments(assignments);
-        }
-        const available = IMAGE_MANIFEST[modelKey] || [];
-        if (!available.length) return './assets/cars/dummy.png';
-        const usedUrls = new Set(Object.entries(assignments).filter(([vid]) => vid !== vehicleId).map(([,url]) => url).filter(url => url.includes(`/assets/cars/${modelKey}/`)));
-        const pool = available.filter(i => !usedUrls.has(`./assets/cars/${modelKey}/${i.num}.${i.ext}`));
-        const chosen = (pool.length ? pool : available)[Math.floor(Math.random() * (pool.length || available.length))];
-        const url = `./assets/cars/${modelKey}/${chosen.num}.${chosen.ext}`;
-        assignments[vehicleId] = url; saveImageAssignments(assignments);
-        return url;
-      }
+      // Image functions provided by images.js (loaded before this script)
 
       // ── FAVOURITES ──
       function favStorageKey() { return `favs:${userEmail}`; }
@@ -418,6 +407,7 @@
         const favKey       = carKeyFromParts(manufacturer, model, drivetrain, cleanPriceNum ?? NaN);
         return { id, manufacturer, model, type, drivetrain, city, isAvailable, priceText, imgUrl, priceNum: cleanPriceNum, favKey };
       }
+
 
       function carDetailsHref(vehicleId) { if (!vehicleId) return "#"; return `car-details.html?id=${encodeURIComponent(vehicleId)}${isPreview ? "&preview=1" : ""}`; }
       function carBookHref(vehicleId)    { return carDetailsHref(vehicleId); }
@@ -448,6 +438,7 @@
         document.getElementById("modalBookBtn").setAttribute("data-vehicle-id", car.id || "");
         document.getElementById("vehicleModal").style.display = "flex";
       }
+
 
       function closeModal() { document.getElementById("vehicleModal").style.display = "none"; }
 
@@ -486,7 +477,7 @@
               style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.9);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;transition:transform 0.2s;user-select:none;">
               ${isFav ? "❤️" : "🤍"}
             </div>
-            <img src="${car.imgUrl}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
+            <img src="./assets/cars/dummy.png" data-vid="${car.id}" data-mfr="${car.manufacturer}" data-mdl="${car.model}" alt="${name}" onerror="this.src='./assets/cars/dummy.png'">
             <div class="cardBody">
               <div class="headerRow">
                 <div class="headerLeft">
@@ -503,6 +494,10 @@
             </div>`;
 
           grid.appendChild(card);
+
+          // Load image with Wikipedia fallback
+          const imgEl = card.querySelector('img[data-vid]');
+          if (imgEl) setImageOnElement(imgEl, car.id, car.manufacturer, car.model);
         });
 
         // Fav buttons
@@ -526,6 +521,7 @@
         });
       }
 
+
       // ── FILTERS ──
       function getSearchQuery()  { return (document.getElementById("searchInput")?.value  || "").trim().toLowerCase(); }
       function getSelectedType() { return (document.getElementById("filterType")?.value   || "").trim(); }
@@ -539,6 +535,7 @@
         const max = Number(slider.max), val = Number(slider.value);
         label.textContent = (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) ? "Any" : `$${val}`;
       }
+
 
       function applyAllFilters() {
         const q          = getSearchQuery();
@@ -556,6 +553,7 @@
         renderCars(filteredCars);
       }
 
+
       // ── LOAD ──
       async function loadCars() {
         const grid     = document.getElementById("carsGrid");
@@ -572,6 +570,7 @@
               ? `<span id="availableCount">${allCars.length}</span> cars in ${params.get("where")}`
               : `<span id="availableCount">${allCars.length}</span> available vehicles • Updated in real-time`;
           }
+
           const prices   = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
           const maxPrice = prices.length ? Math.max(...prices) : 2000;
           const slider   = document.getElementById("filterPrice");
@@ -581,6 +580,7 @@
           console.error(e);
           document.getElementById("carsGrid").innerHTML = `<div style="color:var(--danger,#b91c1c);">Failed to load cars.</div>`;
         }
+
       }
 
       // ── WIRE UI ──
