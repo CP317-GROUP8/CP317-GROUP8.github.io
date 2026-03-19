@@ -52,7 +52,6 @@
     }
 
     .header-logo span { color: var(--accent); }
-
     .header-nav { display: flex; gap: 8px; align-items: center; }
 
     .nav-btn {
@@ -149,7 +148,6 @@
       font-family: 'DM Serif Display', serif;
       font-size: 30px;
       color: white;
-      margin-bottom: 14px;
       box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
     }
 
@@ -222,7 +220,6 @@
     }
 
     .info-item:last-child { border-bottom: none; }
-
     .info-label { font-size: 13px; color: var(--muted); font-weight: 500; }
     .info-value { font-size: 14px; font-weight: 600; color: var(--ink); text-align: right; max-width: 200px; word-break: break-word; }
 
@@ -246,7 +243,6 @@
     }
 
     .danger-title { font-size: 13px; font-weight: 700; color: var(--danger); text-transform: uppercase; letter-spacing: 0.07em; }
-
     .danger-body { padding: 20px 24px; }
     .danger-desc { font-size: 13px; color: var(--ink2); margin-bottom: 14px; line-height: 1.6; }
 
@@ -301,7 +297,6 @@
     }
 
     .booking-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
     .booking-pill-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 
     .pill {
@@ -345,12 +340,7 @@
     .view-all-btn:hover { background: var(--accent-light); color: var(--accent); border-color: #c7d2fe; }
 
     /* ── EMPTY / LOADING ── */
-    .empty-state {
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-
+    .empty-state { padding: 40px 20px; text-align: center; color: var(--muted); }
     .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
     .empty-state p { font-size: 14px; }
 
@@ -390,10 +380,7 @@
     }
     .modal-overlay.open .modal { transform: translateY(0); }
 
-    .modal-title {
-      font-family: 'DM Serif Display', serif; font-size: 22px;
-      color: var(--ink); margin-bottom: 6px;
-    }
+    .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
     .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
 
     .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
@@ -422,6 +409,7 @@
     }
     .btn-cancel:hover { background: var(--border); }
 
+    /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--ink); color: white; padding: 12px 22px; border-radius: 12px;
@@ -432,6 +420,7 @@
     .toast.success { background: var(--success); }
     .toast.error   { background: var(--danger); }
 
+    /* ── EDIT BUTTON ── */
     .edit-btn {
       padding: 7px 14px; border-radius: 10px; border: 1px solid var(--border);
       background: var(--surface2); font-family: 'DM Sans', sans-serif;
@@ -439,6 +428,42 @@
       transition: all 0.15s;
     }
     .edit-btn:hover { background: var(--accent-light); color: var(--accent); border-color: #c7d2fe; }
+
+    /* ── PROFILE PICTURE UPLOAD ── */
+    .avatar-upload-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .avatar-img {
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+      border: 3px solid white;
+      display: none;
+    }
+
+    .avatar-upload-btn {
+      position: absolute; bottom: 0; right: 0;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); border: 2px solid white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 12px; line-height: 1;
+      transition: transform 0.15s;
+    }
+    .avatar-upload-btn:hover { transform: scale(1.15); }
+
+    #avatarFileInput { display: none; }
+
+    .avatar-uploading {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: rgba(79,70,229,0.7);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 11px; font-weight: 700;
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .avatar-uploading.show { opacity: 1; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
@@ -473,14 +498,22 @@
         <!-- Profile Card -->
         <div class="card">
 
-          <!-- Profile card header with Edit button -->
+          <!-- Card header with Edit button -->
           <div class="card-header" style="border-bottom:none; padding-bottom:0;">
             <span class="card-title">Profile</span>
             <button class="edit-btn" onclick="openEditModal()">✏️ Edit</button>
           </div>
 
           <div class="avatar-wrap">
-            <div class="avatar" id="avatarEl">?</div>
+            <!-- Avatar with photo upload -->
+            <div class="avatar-upload-wrap">
+              <div class="avatar" id="avatarEl" style="display:flex;">?</div>
+              <img id="avatarImg" class="avatar-img" src="" alt="Profile picture" />
+              <div class="avatar-uploading" id="avatarUploading">⏳</div>
+              <label class="avatar-upload-btn" for="avatarFileInput" title="Change photo">📷</label>
+              <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" />
+            </div>
+
             <div class="profile-name" id="profileName">
               <div class="skeleton" style="width:140px;height:22px;"></div>
             </div>
@@ -582,48 +615,21 @@
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATION -->
+  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script>
     const API_BASE = "https://server-side-zqaz.onrender.com";
     const SESSION_MS = 12 * 60 * 60 * 1000;
-
-    // Image cache keys
     const IMAGE_ASSIGNMENTS_KEY = 'carImageAssignments';
 
-    // Define all possible image combinations that exist in your assets
     const IMAGE_MANIFEST = {
-      'honda/civic': [
-        { num: 1, ext: 'jpeg' },
-        { num: 2, ext: 'jpeg' },
-        { num: 3, ext: 'jpeg' }
-      ],
-      'toyota/corolla': [
-        { num: 1, ext: 'png' },
-        { num: 2, ext: 'png' },
-        { num: 3, ext: 'jpeg' }
-      ],
-      'toyota/highlander': [
-        { num: 1, ext: 'png' },
-        { num: 2, ext: 'png' },
-        { num: 3, ext: 'jpeg' }
-      ],
-      'porsche/911': [
-        { num: 1, ext: 'jpeg' },
-        { num: 2, ext: 'jpeg' },
-        { num: 3, ext: 'jpeg' }
-      ],
-      'kia/k4': [
-        { num: 1, ext: 'jpeg' },
-        { num: 2, ext: 'jpeg' },
-        { num: 3, ext: 'jpeg' }
-      ],
-      'dodge/challenger': [
-        { num: 1, ext: 'png' },
-        { num: 2, ext: 'png' },
-        { num: 3, ext: 'jpeg' }
-      ]
+      'honda/civic':       [{ num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+      'toyota/corolla':    [{ num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
+      'toyota/highlander': [{ num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}],
+      'porsche/911':       [{ num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+      'kia/k4':            [{ num:1,ext:'jpeg'},{num:2,ext:'jpeg'},{num:3,ext:'jpeg'}],
+      'dodge/challenger':  [{ num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}]
     };
 
     // ── SESSION ──
@@ -632,7 +638,7 @@
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
       if (!email || !loggedInAt) { window.location.replace("index.html"); throw new Error("No session"); }
       if (Date.now() - loggedInAt > SESSION_MS) {
-        ["userEmail","loggedInAt","isAdmin","userData"].forEach(k => localStorage.removeItem(k));
+        ["userEmail","loggedInAt","isAdmin","userData","profilePicture"].forEach(k => localStorage.removeItem(k));
         window.location.replace("index.html");
         throw new Error("Session expired");
       }
@@ -641,7 +647,7 @@
 
     const userEmail = requireSession();
 
-    // ── IMAGE ASSIGNMENT FUNCTIONS ──
+    // ── IMAGE ASSIGNMENTS ──
     function loadImageAssignments() {
       const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
       return raw ? JSON.parse(raw) : {};
@@ -652,70 +658,35 @@
     }
 
     function getOrCreateImageAssignment(vehicleId, manufacturer, model) {
-      if (!vehicleId || !manufacturer || !model) {
-        return './assets/cars/dummy.png';
-      }
-
-      const manufacturerLower = manufacturer.toLowerCase().trim();
-      const modelLower = model.toLowerCase().trim();
-      const modelKey = `${manufacturerLower}/${modelLower}`;
-
+      if (!vehicleId || !manufacturer || !model) return './assets/cars/dummy.png';
+      const modelKey = `${manufacturer.toLowerCase().trim()}/${model.toLowerCase().trim()}`;
       const assignments = loadImageAssignments();
 
       if (assignments[vehicleId]) {
-        const validPaths = new Set();
-        const availableImages = IMAGE_MANIFEST[modelKey] || [];
-        availableImages.forEach(img => {
-          validPaths.add(`./assets/cars/${modelKey}/${img.num}.${img.ext}`);
-        });
-
-        if (validPaths.has(assignments[vehicleId])) {
-          return assignments[vehicleId];
-        } else {
-          delete assignments[vehicleId];
-          saveImageAssignments(assignments);
-        }
+        const validPaths = new Set((IMAGE_MANIFEST[modelKey] || []).map(i => `./assets/cars/${modelKey}/${i.num}.${i.ext}`));
+        if (validPaths.has(assignments[vehicleId])) return assignments[vehicleId];
+        delete assignments[vehicleId];
+        saveImageAssignments(assignments);
       }
 
-      const availableImages = IMAGE_MANIFEST[modelKey] || [];
-      if (availableImages.length === 0) {
-        return './assets/cars/dummy.png';
-      }
+      const available = IMAGE_MANIFEST[modelKey] || [];
+      if (!available.length) return './assets/cars/dummy.png';
 
-      const assignedImagesForModel = new Set();
-      Object.entries(assignments).forEach(([vid, imageUrl]) => {
-        if (vid !== vehicleId && imageUrl.includes(`/assets/cars/${modelKey}/`)) {
-          assignedImagesForModel.add(imageUrl);
-        }
-      });
+      const usedUrls = new Set(Object.entries(assignments)
+        .filter(([vid]) => vid !== vehicleId)
+        .map(([, url]) => url)
+        .filter(url => url.includes(`/assets/cars/${modelKey}/`)));
 
-      const unassignedImages = availableImages.filter(img => {
-        const imageUrl = `./assets/cars/${modelKey}/${img.num}.${img.ext}`;
-        return !assignedImagesForModel.has(imageUrl);
-      });
-
-      let selectedImageUrl;
-
-      if (unassignedImages.length > 0) {
-        const randomIndex = Math.floor(Math.random() * unassignedImages.length);
-        const selected = unassignedImages[randomIndex];
-        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
-      } else {
-        const randomIndex = Math.floor(Math.random() * availableImages.length);
-        const selected = availableImages[randomIndex];
-        selectedImageUrl = `./assets/cars/${modelKey}/${selected.num}.${selected.ext}`;
-      }
-
-      assignments[vehicleId] = selectedImageUrl;
+      const pool = available.filter(i => !usedUrls.has(`./assets/cars/${modelKey}/${i.num}.${i.ext}`));
+      const chosen = (pool.length ? pool : available)[Math.floor(Math.random() * (pool.length || available.length))];
+      const url = `./assets/cars/${modelKey}/${chosen.num}.${chosen.ext}`;
+      assignments[vehicleId] = url;
       saveImageAssignments(assignments);
-
-      return selectedImageUrl;
+      return url;
     }
 
     // ── HELPERS ──
-    function formatMoney(val) {
-      return `$${Number(val || 0).toFixed(2)}`;
-    }
+    function formatMoney(val) { return `$${Number(val || 0).toFixed(2)}`; }
 
     function formatDate(dateStr) {
       if (!dateStr) return "—";
@@ -727,14 +698,84 @@
       return ((first?.[0] || "") + (last?.[0] || "")).toUpperCase() || "?";
     }
 
+    // ── TOAST ──
+    function showToast(msg, type = "success") {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
+    // ── PROFILE PICTURE ──
+    function setAvatarImage(base64) {
+      const img = document.getElementById("avatarImg");
+      const initials = document.getElementById("avatarEl");
+      img.src = base64;
+      img.style.display = "block";
+      initials.style.display = "none";
+      localStorage.setItem("profilePicture", base64);
+    }
+
+    function clearAvatarImage() {
+      document.getElementById("avatarImg").style.display = "none";
+      document.getElementById("avatarEl").style.display = "flex";
+    }
+
+    async function loadProfilePicture() {
+      try {
+        const res = await fetch(`${API_BASE}/me/profile-picture`, {
+          headers: { "X-User-Email": userEmail }
+        });
+        const data = await res.json();
+        if (data.profilePicture) {
+          setAvatarImage(data.profilePicture);
+        } else {
+          clearAvatarImage();
+          localStorage.removeItem("profilePicture");
+        }
+      } catch {}
+    }
+
+    async function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) return showToast("Please select an image file.", "error");
+      if (file.size > 2 * 1024 * 1024) return showToast("Image must be under 2MB.", "error");
+
+      document.getElementById("avatarUploading").classList.add("show");
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target.result;
+        try {
+          const res = await fetch(`${API_BASE}/me/profile-picture`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "X-User-Email": userEmail },
+            body: JSON.stringify({ base64Image })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Upload failed");
+          setAvatarImage(base64Image);
+          showToast("✅ Profile picture updated!");
+        } catch (err) {
+          showToast(err.message, "error");
+        } finally {
+          document.getElementById("avatarUploading").classList.remove("show");
+          event.target.value = "";
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
     // ── POPULATE PROFILE ──
     function populateProfile(user) {
-      const first = user.firstName || user["First Name"] || "";
-      const last  = user.lastName  || user["Last Name"]  || "";
-      const email = user.email     || user["Email Address"] || userEmail;
+      const first   = user.firstName || user["First Name"] || "";
+      const last    = user.lastName  || user["Last Name"]  || "";
+      const email   = user.email     || user["Email Address"] || userEmail;
       const isAdmin = Number(user.administrator ?? user["Administrator"]) === 1;
-      const spent = user.totalSpent ?? user["Total Amount Spent"] ?? 0;
-      const userId = user.userId   || user["User ID"] || "—";
+      const spent   = user.totalSpent ?? user["Total Amount Spent"] ?? 0;
+      const userId  = user.userId    || user["User ID"] || "—";
 
       document.getElementById("avatarEl").textContent = getInitials(first, last);
       document.getElementById("profileName").textContent = `${first} ${last}`.trim() || "User";
@@ -749,7 +790,6 @@
       const username = `${prefix}-${(first || "user").toLowerCase()}-${userId}@`;
       document.getElementById("usernameEl").textContent = username;
       document.getElementById("infoUsername").textContent = username;
-
       document.getElementById("statSpent").textContent = formatMoney(spent);
       document.getElementById("infoFirst").textContent = first || "—";
       document.getElementById("infoLast").textContent  = last  || "—";
@@ -774,13 +814,11 @@
         return;
       }
 
-      const recent = rows.slice(0, 5);
-      body.innerHTML = recent.map(b => {
-        const vehicleId = b.vehicleId || b["Vehicle ID"] || "";
-        const manufacturer = b.manufacturer || b["Manufacturer"] || "";
-        const model = b.model || b["Model"] || "";
+      body.innerHTML = rows.slice(0, 5).map(b => {
+        const vehicleId    = b.vehicleId    || b["Vehicle ID"]    || "";
+        const manufacturer = b.manufacturer || b["Manufacturer"]  || "";
+        const model        = b.model        || b["Model"]         || "";
         const name = `${manufacturer} ${model}`.trim() || "Unknown Vehicle";
-
         const imgSrc = getOrCreateImageAssignment(vehicleId, manufacturer, model);
 
         return `
@@ -791,7 +829,7 @@
               <div class="booking-meta">${formatDate(b.fromDate)} → ${formatDate(b.toDate)}</div>
               <div class="booking-pill-row">
                 <span class="pill">${b.vehicleType || b["Vehicle Type"] || "—"}</span>
-                <span class="pill">${b.drivetrain || b["Drivetrain"] || "—"}</span>
+                <span class="pill">${b.drivetrain  || b["Drivetrain"]  || "—"}</span>
                 <span class="pill pill-accent">Sale #${b.saleId || b["Sale ID"] || ""}</span>
               </div>
             </div>
@@ -806,38 +844,33 @@
 
     // ── LOAD DATA ──
     async function loadAll() {
+      // Show cached profile immediately
       const cached = localStorage.getItem("userData");
-      if (cached) {
-        try { populateProfile(JSON.parse(cached)); } catch {}
-      }
+      if (cached) { try { populateProfile(JSON.parse(cached)); } catch {} }
+
+      // Show cached profile picture immediately, then fetch fresh
+      const cachedPic = localStorage.getItem("profilePicture");
+      if (cachedPic) setAvatarImage(cachedPic);
+      loadProfilePicture();
 
       try {
-        const bRes = await fetch(`${API_BASE}/me/bookings`, {
-          headers: { "X-User-Email": userEmail }
-        });
+        const bRes = await fetch(`${API_BASE}/me/bookings`, { headers: { "X-User-Email": userEmail } });
         const bData = await bRes.json().catch(() => ({}));
         if (!bRes.ok) throw new Error(bData.error || "Failed to load bookings");
-        const rows = Array.isArray(bData.rows) ? bData.rows : [];
-
-        populateBookings(rows);
-
+        populateBookings(Array.isArray(bData.rows) ? bData.rows : []);
         if (!cached) {
           populateProfile({ email: userEmail, firstName: "", lastName: "", administrator: localStorage.getItem("isAdmin") === "true" ? 1 : 0 });
         }
-
       } catch (err) {
         document.getElementById("bookingsBody").innerHTML = `
-          <div class="empty-state">
-            <div class="icon">⚠️</div>
-            <p>${err.message}</p>
-          </div>`;
+          <div class="empty-state"><div class="icon">⚠️</div><p>${err.message}</p></div>`;
       }
     }
 
     // ── LOGOUT ──
     function logout() {
       if (!confirm("Sign out of your account?")) return;
-      ["userEmail", "loggedInAt", "isAdmin", "userData"].forEach(k => localStorage.removeItem(k));
+      ["userEmail","loggedInAt","isAdmin","userData","profilePicture"].forEach(k => localStorage.removeItem(k));
       window.location.replace("index.html");
     }
 
@@ -856,13 +889,6 @@
       if (e.target === this) closeEditModal();
     });
 
-    function showToast(msg, type = "success") {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.className = `toast ${type} show`;
-      setTimeout(() => t.classList.remove("show"), 3000);
-    }
-
     async function saveProfile() {
       const firstName = document.getElementById("editFirst").value.trim();
       const lastName  = document.getElementById("editLast").value.trim();
@@ -880,7 +906,6 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to save");
-
         populateProfile(data.user);
         closeEditModal();
         showToast("✅ Profile updated successfully!");
