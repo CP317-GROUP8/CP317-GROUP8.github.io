@@ -30,7 +30,6 @@
       min-height: 100vh;
     }
 
-    /* ── HEADER ── */
     .header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -44,326 +43,150 @@
       z-index: 100;
     }
 
-    .header-logo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      color: var(--ink);
-      text-decoration: none;
-    }
-
+    .header-logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); text-decoration: none; }
     .header-logo span { color: var(--accent); }
     .header-nav { display: flex; gap: 8px; align-items: center; }
 
     .nav-btn {
-      padding: 8px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--ink2);
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.15s;
+      padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; color: var(--ink2); cursor: pointer;
+      text-decoration: none; transition: all 0.15s;
     }
-
     .nav-btn:hover { background: var(--surface2); border-color: #c8cdd6; }
     .nav-btn.active { background: var(--accent-light); border-color: #c7d2fe; color: var(--accent); }
 
-    /* ── LAYOUT ── */
-    .page {
-      max-width: 1060px;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
-    }
+    .page { max-width: 1060px; margin: 0 auto; padding: 40px 24px 80px; }
 
     .page-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 38px;
-      color: var(--ink);
-      margin-bottom: 4px;
-      animation: fadeUp 0.4s ease both;
+      font-family: 'DM Serif Display', serif; font-size: 38px; color: var(--ink);
+      margin-bottom: 4px; animation: fadeUp 0.4s ease both;
     }
 
-    .page-sub {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 36px;
-      animation: fadeUp 0.4s 0.05s ease both;
-    }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; animation: fadeUp 0.4s 0.05s ease both; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 24px;
-      align-items: start;
-    }
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
 
-    /* ── CARD ── */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      animation: fadeUp 0.4s 0.1s ease both;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden; animation: fadeUp 0.4s 0.1s ease both;
     }
 
     .card-header {
-      padding: 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
     }
 
-    .card-title {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--muted);
-    }
-
+    .card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
     .card-body { padding: 24px; }
 
-    /* ── PROFILE SECTION ── */
     .avatar-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 32px 24px 24px;
-      border-bottom: 1px solid var(--border);
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 24px 24px; border-bottom: 1px solid var(--border); text-align: center;
     }
 
     .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), #7c3aed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'DM Serif Display', serif;
-      font-size: 30px;
-      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 30px; color: white;
       box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
     }
 
-    .profile-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      color: var(--ink);
-    }
-
-    .profile-email {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-      word-break: break-all;
-    }
+    .profile-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); }
+    .profile-email { font-size: 13px; color: var(--muted); margin-top: 4px; word-break: break-all; }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 10px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+      padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
     }
-
     .badge-admin { background: #fef3c7; color: #92400e; }
     .badge-member { background: var(--accent-light); color: var(--accent); }
 
-    /* ── STAT ROW ── */
-    .stat-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      border-top: 1px solid var(--border);
-    }
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-top: 1px solid var(--border); }
+    .stat-cell { background: var(--surface); padding: 18px 20px; text-align: center; }
+    .stat-value { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--ink); }
+    .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
 
-    .stat-cell {
-      background: var(--surface);
-      padding: 18px 20px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-family: 'DM Serif Display', serif;
-      font-size: 24px;
-      color: var(--ink);
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-top: 2px;
-    }
-
-    /* ── INFO LIST ── */
     .info-list { display: flex; flex-direction: column; gap: 0; }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .info-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
     .info-item:last-child { border-bottom: none; }
     .info-label { font-size: 13px; color: var(--muted); font-weight: 500; }
     .info-value { font-size: 14px; font-weight: 600; color: var(--ink); text-align: right; max-width: 200px; word-break: break-word; }
 
-    /* ── DANGER ZONE ── */
     .danger-zone {
-      border: 1px solid #fecaca;
-      border-radius: 20px;
-      overflow: hidden;
-      background: var(--surface);
-      margin-top: 24px;
-      animation: fadeUp 0.4s 0.15s ease both;
+      border: 1px solid #fecaca; border-radius: 20px; overflow: hidden;
+      background: var(--surface); margin-top: 24px; animation: fadeUp 0.4s 0.15s ease both;
     }
-
-    .danger-header {
-      padding: 16px 24px;
-      border-bottom: 1px solid #fecaca;
-      background: #fff5f5;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .danger-header { padding: 16px 24px; border-bottom: 1px solid #fecaca; background: #fff5f5; display: flex; align-items: center; gap: 8px; }
     .danger-title { font-size: 13px; font-weight: 700; color: var(--danger); text-transform: uppercase; letter-spacing: 0.07em; }
     .danger-body { padding: 20px 24px; }
     .danger-desc { font-size: 13px; color: var(--ink2); margin-bottom: 14px; line-height: 1.6; }
-
     .logout-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #fecaca;
-      background: var(--danger-light);
-      color: var(--danger);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s;
+      width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #fecaca;
+      background: var(--danger-light); color: var(--danger);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
     }
-
     .logout-btn:hover { background: #fee2e2; }
 
-    /* ── BOOKINGS ── */
+    /* ── LOYALTY POINTS ── */
+    .loyalty-card {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 20px; padding: 24px; color: white;
+      margin-top: 24px; animation: fadeUp 0.4s 0.16s ease both;
+      position: relative; overflow: hidden;
+    }
+    .loyalty-card::before {
+      content: ''; position: absolute; width: 200px; height: 200px;
+      border-radius: 50%; background: rgba(255,255,255,0.06);
+      top: -60px; right: -60px;
+    }
+    .loyalty-card::after {
+      content: ''; position: absolute; width: 120px; height: 120px;
+      border-radius: 50%; background: rgba(255,255,255,0.04);
+      bottom: -30px; left: -30px;
+    }
+    .loyalty-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; margin-bottom: 6px; }
+    .loyalty-points { font-family: 'DM Serif Display', serif; font-size: 42px; line-height: 1; margin-bottom: 4px; }
+    .loyalty-pts-label { font-size: 13px; opacity: 0.75; margin-bottom: 16px; }
+    .loyalty-tier-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .loyalty-tier { font-size: 15px; font-weight: 700; }
+    .loyalty-next { font-size: 12px; opacity: 0.7; }
+    .loyalty-bar-bg { height: 6px; background: rgba(255,255,255,0.2); border-radius: 999px; overflow: hidden; margin-bottom: 6px; }
+    .loyalty-bar-fill { height: 100%; background: white; border-radius: 999px; transition: width 1s ease; }
+    .loyalty-perks { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 12px; opacity: 0.85; line-height: 1.6; }
+
     .bookings-card { animation: fadeUp 0.4s 0.12s ease both; }
 
-    .booking-item {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .booking-item { display: flex; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
     .booking-item:last-child { border-bottom: none; }
-
-    .booking-thumb {
-      width: 72px;
-      height: 54px;
-      border-radius: 10px;
-      object-fit: cover;
-      background: var(--surface2);
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-    }
-
+    .booking-thumb { width: 72px; height: 54px; border-radius: 10px; object-fit: cover; background: var(--surface2); flex-shrink: 0; border: 1px solid var(--border); }
     .booking-info { flex: 1; min-width: 0; }
-
-    .booking-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
+    .booking-name { font-size: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .booking-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
     .booking-pill-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-
-    .pill {
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--ink2);
-    }
-
+    .pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--surface2); border: 1px solid var(--border); color: var(--ink2); }
     .pill-accent { background: var(--accent-light); color: var(--accent); border-color: #c7d2fe; }
-
-    .booking-price {
-      font-family: 'DM Serif Display', serif;
-      font-size: 18px;
-      color: var(--accent);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .booking-price { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--accent); white-space: nowrap; flex-shrink: 0; }
 
     .view-all-btn {
-      display: block;
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink2);
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      transition: all 0.15s;
+      display: block; width: 100%; margin-top: 20px; padding: 12px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--surface2);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--ink2); cursor: pointer; text-align: center; text-decoration: none; transition: all 0.15s;
     }
-
     .view-all-btn:hover { background: var(--accent-light); color: var(--accent); border-color: #c7d2fe; }
 
-    /* ── EMPTY / LOADING ── */
     .empty-state { padding: 40px 20px; text-align: center; color: var(--muted); }
     .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
     .empty-state p { font-size: 14px; }
 
-    /* ── SKELETON ── */
-    .skeleton {
-      background: linear-gradient(90deg, #f0f2f5 25%, #e4e8ee 50%, #f0f2f5 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 8px;
-      height: 16px;
-    }
+    .skeleton { background: linear-gradient(90deg, #f0f2f5 25%, #e4e8ee 50%, #f0f2f5 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; height: 16px; }
 
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── EDIT MODAL ── */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(13,17,23,0.55);
       backdrop-filter: blur(4px); z-index: 200;
@@ -371,7 +194,6 @@
       opacity: 0; pointer-events: none; transition: opacity 0.2s;
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
-
     .modal {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 20px; padding: 32px; width: 100%; max-width: 400px;
@@ -379,10 +201,8 @@
       transform: translateY(16px); transition: transform 0.2s;
     }
     .modal-overlay.open .modal { transform: translateY(0); }
-
     .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
     .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-
     .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
     .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
     .field input {
@@ -391,25 +211,13 @@
       background: var(--surface2); outline: none; transition: border-color 0.15s;
     }
     .field input:focus { border-color: var(--accent); background: var(--surface); }
-
     .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
-    .btn-save {
-      flex: 1; padding: 12px; border-radius: 12px; border: none;
-      background: var(--accent); color: white;
-      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: opacity 0.15s;
-    }
+    .btn-save { flex: 1; padding: 12px; border-radius: 12px; border: none; background: var(--accent); color: white; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
     .btn-save:hover { opacity: 0.88; }
     .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-cancel {
-      padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border);
-      background: var(--surface2); color: var(--ink2);
-      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: background 0.15s;
-    }
+    .btn-cancel { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); color: var(--ink2); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
     .btn-cancel:hover { background: var(--border); }
 
-    /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--ink); color: white; padding: 12px 22px; border-radius: 12px;
@@ -420,52 +228,21 @@
     .toast.success { background: var(--success); }
     .toast.error   { background: var(--danger); }
 
-    /* ── EDIT BUTTON ── */
     .edit-btn {
       padding: 7px 14px; border-radius: 10px; border: 1px solid var(--border);
       background: var(--surface2); font-family: 'DM Sans', sans-serif;
-      font-size: 12px; font-weight: 600; color: var(--ink2); cursor: pointer;
-      transition: all 0.15s;
+      font-size: 12px; font-weight: 600; color: var(--ink2); cursor: pointer; transition: all 0.15s;
     }
     .edit-btn:hover { background: var(--accent-light); color: var(--accent); border-color: #c7d2fe; }
 
-    /* ── PROFILE PICTURE UPLOAD ── */
-    .avatar-upload-wrap {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 14px;
-    }
-
-    .avatar-img {
-      width: 80px; height: 80px; border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
-      border: 3px solid white;
-      display: none;
-    }
-
-    .avatar-upload-btn {
-      position: absolute; bottom: 0; right: 0;
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--accent); border: 2px solid white;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 12px; line-height: 1;
-      transition: transform 0.15s;
-    }
+    .avatar-upload-wrap { position: relative; display: inline-block; margin-bottom: 14px; }
+    .avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3); border: 3px solid white; display: none; }
+    .avatar-upload-btn { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); border: 2px solid white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; line-height: 1; transition: transform 0.15s; }
     .avatar-upload-btn:hover { transform: scale(1.15); }
-
     #avatarFileInput { display: none; }
-
-    .avatar-uploading {
-      position: absolute; inset: 0; border-radius: 50%;
-      background: rgba(79,70,229,0.7);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 11px; font-weight: 700;
-      opacity: 0; transition: opacity 0.2s; pointer-events: none;
-    }
+    .avatar-uploading { position: absolute; inset: 0; border-radius: 50%; background: rgba(79,70,229,0.7); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
     .avatar-uploading.show { opacity: 1; }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .grid { grid-template-columns: 1fr; }
       .page-title { font-size: 28px; }
@@ -475,8 +252,6 @@
   </style>
 </head>
 <body>
-
-
 
   <main class="page">
     <h1 class="page-title">My Account</h1>
@@ -488,15 +263,12 @@
       <div>
         <!-- Profile Card -->
         <div class="card">
-
-          <!-- Card header with Edit button -->
           <div class="card-header" style="border-bottom:none; padding-bottom:0;">
             <span class="card-title">Profile</span>
             <button class="edit-btn" onclick="openEditModal()">✏️ Edit</button>
           </div>
 
           <div class="avatar-wrap">
-            <!-- Avatar with photo upload -->
             <div class="avatar-upload-wrap">
               <div class="avatar" id="avatarEl" style="display:flex;">?</div>
               <img id="avatarImg" class="avatar-img" src="" alt="Profile picture" />
@@ -504,7 +276,6 @@
               <label class="avatar-upload-btn" for="avatarFileInput" title="Change photo">📷</label>
               <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" />
             </div>
-
             <div class="profile-name" id="profileName">
               <div class="skeleton" style="width:140px;height:22px;"></div>
             </div>
@@ -528,30 +299,12 @@
 
           <div class="card-body">
             <div class="info-list">
-              <div class="info-item">
-                <span class="info-label">Username</span>
-                <span class="info-value" id="infoUsername">—</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">First Name</span>
-                <span class="info-value" id="infoFirst">—</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Last Name</span>
-                <span class="info-value" id="infoLast">—</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Email</span>
-                <span class="info-value" id="infoEmail">—</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Account Type</span>
-                <span class="info-value" id="infoRole">—</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">User ID</span>
-                <span class="info-value" id="infoId">—</span>
-              </div>
+              <div class="info-item"><span class="info-label">Username</span><span class="info-value" id="infoUsername">—</span></div>
+              <div class="info-item"><span class="info-label">First Name</span><span class="info-value" id="infoFirst">—</span></div>
+              <div class="info-item"><span class="info-label">Last Name</span><span class="info-value" id="infoLast">—</span></div>
+              <div class="info-item"><span class="info-label">Email</span><span class="info-value" id="infoEmail">—</span></div>
+              <div class="info-item"><span class="info-label">Account Type</span><span class="info-value" id="infoRole">—</span></div>
+              <div class="info-item"><span class="info-label">User ID</span><span class="info-value" id="infoId">—</span></div>
             </div>
           </div>
         </div>
@@ -566,6 +319,21 @@
             <p class="danger-desc">You will be returned to the login page. Your session will be cleared.</p>
             <button class="logout-btn" onclick="logout()">Sign Out of Account</button>
           </div>
+        </div>
+
+        <!-- ✅ Loyalty Points Card -->
+        <div class="loyalty-card">
+          <div class="loyalty-label">🏆 Loyalty Points</div>
+          <div class="loyalty-points" id="loyaltyPoints">0</div>
+          <div class="loyalty-pts-label">points earned</div>
+          <div class="loyalty-tier-row">
+            <div class="loyalty-tier" id="loyaltyTier">🥉 Bronze</div>
+            <div class="loyalty-next" id="loyaltyNext"></div>
+          </div>
+          <div class="loyalty-bar-bg">
+            <div class="loyalty-bar-fill" id="loyaltyBar" style="width:0%"></div>
+          </div>
+          <div class="loyalty-perks" id="loyaltyPerks"></div>
         </div>
       </div>
 
@@ -623,7 +391,6 @@
       'dodge/challenger':  [{ num:1,ext:'png' },{num:2,ext:'png' },{num:3,ext:'jpeg'}]
     };
 
-    // ── SESSION ──
     function requireSession() {
       const email = localStorage.getItem("userEmail");
       const loggedInAt = Number(localStorage.getItem("loggedInAt") || "0");
@@ -638,7 +405,6 @@
 
     const userEmail = requireSession();
 
-    // ── IMAGE ASSIGNMENTS ──
     function loadImageAssignments() {
       const raw = localStorage.getItem(IMAGE_ASSIGNMENTS_KEY);
       return raw ? JSON.parse(raw) : {};
@@ -652,22 +418,18 @@
       if (!vehicleId || !manufacturer || !model) return './assets/cars/dummy.png';
       const modelKey = `${manufacturer.toLowerCase().trim()}/${model.toLowerCase().trim()}`;
       const assignments = loadImageAssignments();
-
       if (assignments[vehicleId]) {
         const validPaths = new Set((IMAGE_MANIFEST[modelKey] || []).map(i => `./assets/cars/${modelKey}/${i.num}.${i.ext}`));
         if (validPaths.has(assignments[vehicleId])) return assignments[vehicleId];
         delete assignments[vehicleId];
         saveImageAssignments(assignments);
       }
-
       const available = IMAGE_MANIFEST[modelKey] || [];
       if (!available.length) return './assets/cars/dummy.png';
-
       const usedUrls = new Set(Object.entries(assignments)
         .filter(([vid]) => vid !== vehicleId)
         .map(([, url]) => url)
         .filter(url => url.includes(`/assets/cars/${modelKey}/`)));
-
       const pool = available.filter(i => !usedUrls.has(`./assets/cars/${modelKey}/${i.num}.${i.ext}`));
       const chosen = (pool.length ? pool : available)[Math.floor(Math.random() * (pool.length || available.length))];
       const url = `./assets/cars/${modelKey}/${chosen.num}.${chosen.ext}`;
@@ -676,7 +438,6 @@
       return url;
     }
 
-    // ── HELPERS ──
     function formatMoney(val) { return `$${Number(val || 0).toFixed(2)}`; }
 
     function formatDate(dateStr) {
@@ -689,7 +450,6 @@
       return ((first?.[0] || "") + (last?.[0] || "")).toUpperCase() || "?";
     }
 
-    // ── TOAST ──
     function showToast(msg, type = "success") {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -697,7 +457,6 @@
       setTimeout(() => t.classList.remove("show"), 3000);
     }
 
-    // ── PROFILE PICTURE ──
     function setAvatarImage(base64) {
       const img = document.getElementById("avatarImg");
       const initials = document.getElementById("avatarEl");
@@ -714,28 +473,19 @@
 
     async function loadProfilePicture() {
       try {
-        const res = await fetch(`${API_BASE}/me/profile-picture`, {
-          headers: { "X-User-Email": userEmail }
-        });
+        const res = await fetch(`${API_BASE}/me/profile-picture`, { headers: { "X-User-Email": userEmail } });
         const data = await res.json();
-        if (data.profilePicture) {
-          setAvatarImage(data.profilePicture);
-        } else {
-          clearAvatarImage();
-          localStorage.removeItem("profilePicture");
-        }
+        if (data.profilePicture) setAvatarImage(data.profilePicture);
+        else { clearAvatarImage(); localStorage.removeItem("profilePicture"); }
       } catch {}
     }
 
     async function handleAvatarUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       if (!file.type.startsWith("image/")) return showToast("Please select an image file.", "error");
       if (file.size > 2 * 1024 * 1024) return showToast("Image must be under 2MB.", "error");
-
       document.getElementById("avatarUploading").classList.add("show");
-
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64Image = e.target.result;
@@ -759,7 +509,35 @@
       reader.readAsDataURL(file);
     }
 
-    // ── POPULATE PROFILE ──
+    // ── LOYALTY POINTS ──────────────────────────────────────────────────────
+    const TIERS = [
+      { name: "🥉 Bronze",   min: 0,    max: 499,      perks: "5% discount on next booking · Free cancellation window" },
+      { name: "🥈 Silver",   min: 500,  max: 999,      perks: "10% discount · Priority support · Free cancellation" },
+      { name: "🥇 Gold",     min: 1000, max: 2499,     perks: "15% discount · Free upgrades · Dedicated support line" },
+      { name: "💎 Platinum", min: 2500, max: Infinity, perks: "20% discount · Free upgrades · VIP concierge · Exclusive vehicles" },
+    ];
+
+    function updateLoyaltyCard(totalSpent) {
+      const points  = Math.floor(Number(totalSpent || 0)); // $1 spent = 1 point
+      const tierIdx = TIERS.findIndex(t => points >= t.min && points <= t.max);
+      const tier    = TIERS[tierIdx] || TIERS[0];
+      const next    = TIERS[tierIdx + 1];
+
+      document.getElementById("loyaltyPoints").textContent = points.toLocaleString();
+      document.getElementById("loyaltyTier").textContent   = tier.name;
+      document.getElementById("loyaltyPerks").textContent  = "✨ Your perks: " + tier.perks;
+
+      if (next) {
+        const pct = ((points - tier.min) / (next.min - tier.min)) * 100;
+        document.getElementById("loyaltyBar").style.width  = `${Math.min(pct, 100)}%`;
+        document.getElementById("loyaltyNext").textContent = `${next.min - points} pts to ${next.name}`;
+      } else {
+        document.getElementById("loyaltyBar").style.width  = "100%";
+        document.getElementById("loyaltyNext").textContent = "Max tier reached! 🎉";
+      }
+    }
+
+    // ── POPULATE PROFILE ────────────────────────────────────────────────────
     function populateProfile(user) {
       const first   = user.firstName || user["First Name"] || "";
       const last    = user.lastName  || user["Last Name"]  || "";
@@ -788,10 +566,12 @@
       document.getElementById("infoRole").textContent  = isAdmin ? "Administrator" : "Member";
       document.getElementById("infoId").textContent    = `#${userId}`;
 
+      // ✅ Update loyalty points card
+      updateLoyaltyCard(spent);
+
       localStorage.setItem("userData", JSON.stringify(user));
     }
 
-    // ── POPULATE BOOKINGS ──
     function populateBookings(rows) {
       const body = document.getElementById("bookingsBody");
       document.getElementById("statBookings").textContent = rows.length;
@@ -833,13 +613,11 @@
       }
     }
 
-    // ── LOAD DATA ──
+    // ── LOAD DATA ────────────────────────────────────────────────────────────
     async function loadAll() {
-      // Show cached profile immediately
       const cached = localStorage.getItem("userData");
       if (cached) { try { populateProfile(JSON.parse(cached)); } catch {} }
 
-      // Show cached profile picture immediately, then fetch fresh
       const cachedPic = localStorage.getItem("profilePicture");
       if (cachedPic) setAvatarImage(cachedPic);
       loadProfilePicture();
@@ -858,23 +636,19 @@
       }
     }
 
-    // ── LOGOUT ──
     function logout() {
       if (!confirm("Sign out of your account?")) return;
       ["userEmail","loggedInAt","isAdmin","userData","profilePicture"].forEach(k => localStorage.removeItem(k));
       window.location.replace("index.html");
     }
 
-    // ── EDIT PROFILE MODAL ──
     function openEditModal() {
       document.getElementById("editFirst").value = document.getElementById("infoFirst").textContent.replace("—","").trim();
       document.getElementById("editLast").value  = document.getElementById("infoLast").textContent.replace("—","").trim();
       document.getElementById("editModal").classList.add("open");
     }
 
-    function closeEditModal() {
-      document.getElementById("editModal").classList.remove("open");
-    }
+    function closeEditModal() { document.getElementById("editModal").classList.remove("open"); }
 
     document.getElementById("editModal").addEventListener("click", function(e) {
       if (e.target === this) closeEditModal();
@@ -884,11 +658,9 @@
       const firstName = document.getElementById("editFirst").value.trim();
       const lastName  = document.getElementById("editLast").value.trim();
       if (!firstName && !lastName) return showToast("Please enter at least one name.", "error");
-
       const btn = document.getElementById("saveBtn");
       btn.disabled = true;
       btn.textContent = "Saving…";
-
       try {
         const res = await fetch(`${API_BASE}/me/profile`, {
           method: "PUT",
@@ -911,6 +683,6 @@
     loadAll();
   </script>
   <script src="navbar.js"></script>
-<script src="darkm.js"></script>
+  <script src="darkm.js"></script>
 </body>
 </html>
