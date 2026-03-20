@@ -43,7 +43,7 @@ const IMAGE_MANIFEST = {
         'tesla/model y':               [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
         'toyota/highlander hybrid':    [{ num: 1, ext: 'png'  }, { num: 2, ext: 'png'  }, { num: 3, ext: 'jpeg' }, { num: 4, ext: 'jpeg' }],
         'toyota/hilux':                [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
-        'toyota/rav4 plug-in hybrid': [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }, { num: 4, ext: 'jpeg' }],
+        'toyota/rav4 plug-in hybrid': [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 4, ext: 'jpeg' }],
         'toyota/sienna':               [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }, { num: 4, ext: 'jpeg' }],
         'toyota/supra':                [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }, { num: 4, ext: 'jpeg' }],
         'vauxhall/frontera':           [{ num: 1, ext: 'jpeg' }, { num: 2, ext: 'jpeg' }, { num: 3, ext: 'jpeg' }],
