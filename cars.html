@@ -510,6 +510,10 @@
       </div>
 
       <div class="grid" id="carsGrid"></div>
+      <div id="loadMoreWrap" style="display:none;justify-content:center;align-items:center;gap:14px;margin-top:24px;flex-wrap:wrap;">
+        <div id="resultsMeta" class="sub"></div>
+        <button id="loadMoreBtn" class="secondary" type="button">Load More</button>
+      </div>
     </div>
 
     <!-- VEHICLE MODAL -->
@@ -663,6 +667,33 @@
       function loadPopularityMap() { const raw = localStorage.getItem(popularityStorageKey()); const obj = raw ? JSON.parse(raw) : {}; return obj && typeof obj === "object" ? obj : {}; }
       function savePopularityMap(map) { localStorage.setItem(popularityStorageKey(), JSON.stringify(map)); }
       function bumpPopularity(vehicleId, amount) { if (!vehicleId) return; const map = loadPopularityMap(); map[String(vehicleId)] = Number(map[String(vehicleId)] || 0) + Number(amount || 0); savePopularityMap(map); }
+      async function postMetricInteraction(vehicleId, eventType) {
+        if (!vehicleId) return;
+        try {
+          await fetch(`${API}/metrics/interaction`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ vehicleId: Number(vehicleId), eventType }),
+          });
+        } catch (err) {
+          console.warn(`Metric interaction failed for ${eventType}:`, err);
+        }
+      }
+      async function postFavouriteMetric(vehicleId, isFavourite) {
+        if (!vehicleId) return;
+        try {
+          await fetch(`${API}/metrics/favourites`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-User-Email": userEmail,
+            },
+            body: JSON.stringify({ vehicleId: Number(vehicleId), isFavourite }),
+          });
+        } catch (err) {
+          console.warn("Favourite metric failed:", err);
+        }
+      }
 
       const SESSION_MS = 12 * 60 * 60 * 1000;
       function requireSession() {
@@ -679,7 +710,10 @@
       function saveFavsSet(set) { localStorage.setItem(favStorageKey(), JSON.stringify([...set])); }
       function carKeyFromParts(manufacturer, model, drivetrain, priceNum) { const p = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "NA"; return `${manufacturer}|${model}|${drivetrain}|${p}`; }
 
-      let allCars = [], filteredCars = [];
+      let allCars = [];
+      let totalCars = 0;
+      const PAGE_SIZE = 24;
+      let currentPage = 1;
 
       // ── COMPARE STATE ──────────────────────────────────────────────────────
       let compareList = []; // max 2 cars
@@ -862,18 +896,25 @@
 
       document.getElementById("modalViewBtn").addEventListener("click", function(e) {
         const vehicleId = this.getAttribute("data-vehicle-id") || "";
-        if (!vehicleId) return; e.preventDefault(); bumpPopularity(vehicleId, 2); window.location.assign(carDetailsHref(vehicleId));
+        if (!vehicleId) return; e.preventDefault(); bumpPopularity(vehicleId, 2); postMetricInteraction(vehicleId, "view"); window.location.assign(carDetailsHref(vehicleId));
       });
       document.getElementById("modalBookBtn").addEventListener("click", function(e) {
         const vehicleId = this.getAttribute("data-vehicle-id") || "";
-        if (!vehicleId) return; e.preventDefault(); bumpPopularity(vehicleId, 4); window.location.assign(carBookHref(vehicleId));
+        if (!vehicleId) return; e.preventDefault(); bumpPopularity(vehicleId, 4); postMetricInteraction(vehicleId, "book_click"); window.location.assign(carBookHref(vehicleId));
       });
 
       // ── RENDER ──
       function renderCars(cars) {
         const grid = document.getElementById("carsGrid");
+        const loadMoreWrap = document.getElementById("loadMoreWrap");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
+        const resultsMeta = document.getElementById("resultsMeta");
         grid.innerHTML = "";
-        if (!cars.length) { grid.innerHTML = `<div style="color:var(--muted,#555);">No cars match your search/filters.</div>`; return; }
+        if (!cars.length) {
+          if (loadMoreWrap) loadMoreWrap.style.display = "none";
+          grid.innerHTML = `<div style="color:var(--muted,#555);">No cars match your search/filters.</div>`;
+          return;
+        }
 
         cars.forEach(car => {
           const tagClass = car.isAvailable ? "available" : "unavailable";
@@ -894,7 +935,7 @@
           }
 
           card.innerHTML = `
-            <div class="favBtn" data-fav-key="${car.favKey}"
+            <div class="favBtn" data-fav-key="${car.favKey}" data-vehicle-id="${car.id || ""}"
               style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.9);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;transition:transform 0.2s;user-select:none;">
               ${isFav ? "❤️" : "🤍"}
             </div>
@@ -923,27 +964,36 @@
           btn.addEventListener("click", e => {
             e.preventDefault(); e.stopPropagation();
             const key = btn.getAttribute("data-fav-key"); if (!key) return;
+            const vehicleId = btn.getAttribute("data-vehicle-id") || "";
             const favs = loadFavsSet();
-            if (favs.has(key)) { favs.delete(key); btn.innerHTML = "🤍"; }
-            else { favs.add(key); btn.innerHTML = "❤️"; btn.style.transform = "scale(1.2)"; setTimeout(() => btn.style.transform = "scale(1)", 200); }
+            if (favs.has(key)) { favs.delete(key); btn.innerHTML = "🤍"; postFavouriteMetric(vehicleId, false); }
+            else { favs.add(key); btn.innerHTML = "❤️"; btn.style.transform = "scale(1.2)"; setTimeout(() => btn.style.transform = "scale(1)", 200); postFavouriteMetric(vehicleId, true); }
             saveFavsSet(favs);
           });
         });
 
         // View / Book links
         grid.querySelectorAll(".viewBtn").forEach(link => {
-          link.addEventListener("click", e => { const vid = link.getAttribute("data-vehicle-id") || ""; if (!vid) return; e.preventDefault(); e.stopPropagation(); bumpPopularity(vid, 2); window.location.assign(carDetailsHref(vid)); });
+          link.addEventListener("click", e => { const vid = link.getAttribute("data-vehicle-id") || ""; if (!vid) return; e.preventDefault(); e.stopPropagation(); bumpPopularity(vid, 2); postMetricInteraction(vid, "view"); window.location.assign(carDetailsHref(vid)); });
         });
         grid.querySelectorAll(".bookBtn").forEach(link => {
-          link.addEventListener("click", e => { const vid = link.getAttribute("data-vehicle-id") || ""; if (!vid) return; e.preventDefault(); e.stopPropagation(); bumpPopularity(vid, 4); window.location.assign(carBookHref(vid)); });
+          link.addEventListener("click", e => { const vid = link.getAttribute("data-vehicle-id") || ""; if (!vid) return; e.preventDefault(); e.stopPropagation(); bumpPopularity(vid, 4); postMetricInteraction(vid, "book_click"); window.location.assign(carBookHref(vid)); });
         });
 
-        // ✅ Compare buttons
+        if (loadMoreWrap && loadMoreBtn && resultsMeta) {
+          const shown = cars.length;
+          const total = totalCars || cars.length;
+          resultsMeta.textContent = `Showing ${shown} of ${total} cars`;
+          loadMoreWrap.style.display = "flex";
+          loadMoreBtn.style.display = shown < total ? "inline-block" : "none";
+        }
+
+        // Compare buttons
         grid.querySelectorAll(".compareBtn").forEach(btn => {
           btn.addEventListener("click", e => {
             e.preventDefault(); e.stopPropagation();
             const id = btn.getAttribute("data-compare-id");
-            const car = filteredCars.find(c => c.id === id) || allCars.find(c => c.id === id);
+            const car = cars.find(c => c.id === id) || allCars.find(c => c.id === id);
             if (car) toggleCompare(car);
           });
         });
@@ -963,47 +1013,86 @@
         label.textContent = (!Number.isFinite(val) || !Number.isFinite(max) || val >= max) ? "Any" : `$${val}`;
       }
 
+      function buildCarsEndpoint(page) {
+        const endpointParams = new URLSearchParams();
+        const q = getSearchQuery();
+        const type = getSelectedType();
+        const drive = getSelectedDrive();
+        const maxPrice = getMaxPrice();
+
+        if (searchWhere) endpointParams.set("where", params.get("where"));
+        if (q) endpointParams.set("q", q);
+        if (type) endpointParams.set("type", type);
+        if (drive) endpointParams.set("drive", drive);
+        if (Number.isFinite(maxPrice)) endpointParams.set("maxPrice", String(maxPrice));
+        endpointParams.set("page", String(page));
+        endpointParams.set("pageSize", String(PAGE_SIZE));
+        return `${API}/cars?${endpointParams.toString()}`;
+      }
+
+      async function fetchCarsPage(page, { append = false } = {}) {
+        const grid = document.getElementById("carsGrid");
+        const subtitle = document.getElementById("carsSubtitle");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+        if (!append) {
+          grid.innerHTML = `<div style="color:var(--muted,#555);">Loading cars…</div>`;
+        } else if (loadMoreBtn) {
+          loadMoreBtn.disabled = true;
+          loadMoreBtn.textContent = "Loading...";
+        }
+
+        try {
+          const res = await fetch(buildCarsEndpoint(page));
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Could not load cars");
+
+          const rawCars = Array.isArray(data?.rows) ? data.rows : [];
+          const nextCars = rawCars.map(normalizeCar);
+          totalCars = Number(data?.total || nextCars.length);
+          currentPage = Number(data?.page || page);
+          allCars = append ? [...allCars, ...nextCars] : nextCars;
+
+          if (subtitle) {
+            subtitle.innerHTML = searchWhere
+              ? `<span id="availableCount">${totalCars}</span> cars in ${params.get("where")}`
+              : `<span id="availableCount">${totalCars}</span> available vehicles • Updated in real-time`;
+          }
+
+          const slider = document.getElementById("filterPrice");
+          const responseMaxPrice = Number(data?.maxPrice || 0);
+          if (slider && !append) {
+            const safeMax = responseMaxPrice > 0 ? responseMaxPrice : 2000;
+            slider.max = String(Math.ceil(safeMax / 50) * 50);
+            if (Number(slider.value || 0) > Number(slider.max || 0)) {
+              slider.value = slider.max;
+            }
+          }
+          updatePriceLabel();
+          renderCars(allCars);
+        } catch (e) {
+          console.error(e);
+          grid.innerHTML = `<div style="color:var(--danger,#b91c1c);">Failed to load cars.</div>`;
+        } finally {
+          if (loadMoreBtn) {
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.textContent = "Load More";
+          }
+        }
+      }
+
       function applyAllFilters() {
-        const q          = getSearchQuery();
-        const typeFilter = getSelectedType().toLowerCase();
-        const driveFilter= getSelectedDrive().toLowerCase();
-        const maxPrice   = getMaxPrice();
-        filteredCars = allCars.filter(c => {
-          if (q) { const title = `${c.manufacturer} ${c.model}`.toLowerCase(); const city = normalizeCity(c.city); if (!(title.includes(q) || city.includes(normalizeCity(q)) || (c.type||"").toLowerCase().includes(q) || (c.drivetrain||"").toLowerCase().includes(q))) return false; }
-          if (searchWhere && !normalizeCity(c.city).includes(searchWhere)) return false;
-          if (typeFilter  && (c.type      ||"").toLowerCase() !== typeFilter)  return false;
-          if (driveFilter && (c.drivetrain||"").toLowerCase() !== driveFilter) return false;
-          if (Number.isFinite(c.priceNum) && c.priceNum > maxPrice) return false;
-          return true;
-        });
-        renderCars(filteredCars);
+        fetchCarsPage(1);
       }
 
       // ── LOAD ──
       async function loadCars() {
-        const grid     = document.getElementById("carsGrid");
-        const subtitle = document.getElementById("carsSubtitle");
-        grid.innerHTML = `<div style="color:var(--muted,#555);">Loading cars…</div>`;
-        try {
-          const endpoint = searchWhere ? `${API}/cars?where=${encodeURIComponent(params.get("where"))}` : `${API}/cars`;
-          const res  = await fetch(endpoint);
-          const data = await res.json();
-          const rawCars = Array.isArray(data) ? data : (data.cars ?? data.vehicles ?? []);
-          allCars = rawCars.map(normalizeCar);
-          if (subtitle) {
-            subtitle.innerHTML = searchWhere
-              ? `<span id="availableCount">${allCars.length}</span> cars in ${params.get("where")}`
-              : `<span id="availableCount">${allCars.length}</span> available vehicles • Updated in real-time`;
-          }
-          const prices   = allCars.map(c => c.priceNum).filter(n => Number.isFinite(n));
-          const maxPrice = prices.length ? Math.max(...prices) : 2000;
-          const slider   = document.getElementById("filterPrice");
-          if (slider) { slider.max = String(Math.ceil(maxPrice / 50) * 50); slider.value = slider.max; updatePriceLabel(); }
-          applyAllFilters();
-        } catch(e) {
-          console.error(e);
-          document.getElementById("carsGrid").innerHTML = `<div style="color:var(--danger,#b91c1c);">Failed to load cars.</div>`;
+        const slider = document.getElementById("filterPrice");
+        if (slider) {
+          slider.value = slider.max;
+          updatePriceLabel();
         }
+        await fetchCarsPage(1);
       }
 
       // ── WIRE UI ──
@@ -1014,6 +1103,9 @@
         document.getElementById("filterType") ?.addEventListener("change", applyAllFilters);
         document.getElementById("filterDrive")?.addEventListener("change", applyAllFilters);
         document.getElementById("filterPrice")?.addEventListener("input",  () => { updatePriceLabel(); applyAllFilters(); });
+        document.getElementById("loadMoreBtn")?.addEventListener("click", () => {
+          fetchCarsPage(currentPage + 1, { append: true });
+        });
         document.getElementById("clearFilters")?.addEventListener("click", () => {
           const s = document.getElementById("searchInput"), t = document.getElementById("filterType"), d = document.getElementById("filterDrive"), p = document.getElementById("filterPrice");
           if (s) s.value = ""; if (t) t.value = ""; if (d) d.value = ""; if (p) p.value = p.max;

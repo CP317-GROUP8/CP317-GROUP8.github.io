@@ -1,4 +1,6 @@
-const API_BASE = "https://server-side-zqaz.onrender.com";
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:10000"
+  : "https://server-side-zqaz.onrender.com";
 const SESSION_MS = 12 * 60 * 60 * 1000;
 
 const params = new URLSearchParams(location.search);
@@ -96,6 +98,19 @@ function requireSession() {
 }
 
 const userEmail = requireSession();
+
+async function trackInteraction(eventType) {
+  if (!id) return;
+  try {
+    await fetch(`${API_BASE}/metrics/interaction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vehicleId: Number(id), eventType }),
+    });
+  } catch (err) {
+    console.warn(`Metric request failed for ${eventType}:`, err);
+  }
+}
 
 // Load image assignments from localStorage
 function loadImageAssignments() {
@@ -281,6 +296,7 @@ async function loadCarDetails() {
     populateVehicleTable(car);
     loadingState.style.display = "none";
     detailsUI.style.display = "block";
+    trackInteraction("view");
   } catch (err) {
     loadingState.textContent = `Failed to load details: ${err.message}`;
     bookBtn.disabled = true;
@@ -356,4 +372,3 @@ fromDateEl.addEventListener("change", () => {
 
 loadCarDetails();
 bookBtn.addEventListener("click", bookCar);
-
