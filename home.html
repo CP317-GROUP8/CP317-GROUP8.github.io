@@ -6,269 +6,61 @@
 <title>Car Rental</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-* {
-  box-sizing: border-box;
-  font-family: Inter, system-ui;
-}
-
-body {
-  margin: 0;
-  background: var(--bg, linear-gradient(180deg,#eef2ff,#f8fafc));
-  color: var(--ink, #0d1117);
-  transition: background 0.2s, color 0.2s;
-}
-
-.container {
-  max-width: 1400px;
-  margin: auto;
-  padding: 50px 40px;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  position: relative;
-  z-index: 2;
-}
-
+* { box-sizing: border-box; font-family: Inter, system-ui; }
+body { margin: 0; background: var(--bg, linear-gradient(180deg,#eef2ff,#f8fafc)); color: var(--ink, #0d1117); transition: background 0.2s, color 0.2s; }
+.container { max-width: 1400px; margin: auto; padding: 50px 40px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; z-index: 2; }
 h1 { font-size: 52px; margin: 0; color: var(--ink, #0d1117); }
-
 .subtitle { color: var(--muted, #555); margin-top: 6px; }
-
 .header-btns { display: flex; gap: 10px; align-items: center; }
-
-.hero {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 420px;
-  margin-bottom: 40px;
-}
-
-.searchCard {
-  background: var(--surface, white);
-  padding: 36px;
-  border-radius: 22px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.08);
-  max-width: 760px;
-  width: 100%;
-  z-index: 2;
-}
-
+.hero { position: relative; display: flex; justify-content: center; align-items: center; min-height: 420px; margin-bottom: 40px; }
+.searchCard { background: var(--surface, white); padding: 36px; border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.08); max-width: 760px; width: 100%; z-index: 2; }
 .searchCard h2 { margin-top: 0; color: var(--ink, #0d1117); }
 .searchCard p  { color: var(--ink2, #555); }
-
-.inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-  margin: 24px 0;
-}
-
-input {
-  height: 56px;
-  border-radius: 14px;
-  border: 1px solid var(--border, #ddd);
-  padding: 0 16px;
-  font-size: 16px;
-  background: var(--surface2, #f4f6f9);
-  color: var(--ink, #0d1117);
-}
-
+.inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 24px 0; }
+input { height: 56px; border-radius: 14px; border: 1px solid var(--border, #ddd); padding: 0 16px; font-size: 16px; background: var(--surface2, #f4f6f9); color: var(--ink, #0d1117); }
 input::placeholder { color: var(--muted, #8891a0); }
-
 .buttons { display: flex; gap: 14px; }
-
-button {
-  padding: 14px 26px;
-  border-radius: 14px;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  transition: filter 0.15s;
-}
-
+button { padding: 14px 26px; border-radius: 14px; border: none; font-size: 16px; cursor: pointer; transition: filter 0.15s; }
 button:hover { filter: brightness(0.95); }
-
 .primary { background: var(--accent, #4f46e5); color: white; }
-
-.secondary {
-  background: var(--surface, white);
-  border: 1px solid var(--border, #ccc);
-  color: var(--ink, #0d1117);
-}
-
-.sectionTitle {
-  margin: 40px 0 20px;
-  font-size: 26px;
-  color: var(--ink, #0d1117);
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-
-/* ── FEATURED CARDS ── */
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-
-.f-card {
-  background: var(--surface, white);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,.06);
-  border: 1px solid var(--border, transparent);
-  transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
-}
+.secondary { background: var(--surface, white); border: 1px solid var(--border, #ccc); color: var(--ink, #0d1117); }
+.sectionTitle { margin: 40px 0 20px; font-size: 26px; color: var(--ink, #0d1117); }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.featured-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.f-card { background: var(--surface, white); border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.06); border: 1px solid var(--border, transparent); transition: transform 0.2s; display: flex; flex-direction: column; }
 .f-card:hover { transform: translateY(-4px); }
-.f-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: var(--surface2, #ddd);
-}
+.f-card img { width: 100%; height: 200px; object-fit: cover; background: var(--surface2, #ddd); }
 .f-cardBody { padding: 20px; flex: 1; display: flex; flex-direction: column; }
 .f-cardBody h3 { margin: 0 0 4px; color: var(--ink, #0d1117); font-size: 18px; }
 .f-cardBody .f-meta { font-size: 13px; color: var(--muted, #666); margin-bottom: 12px; }
 .f-cardBody .f-price { font-size: 16px; font-weight: 600; color: var(--ink, #0d1117); margin-bottom: 16px; }
 .f-actions { display: flex; gap: 10px; margin-top: auto; }
-.f-actions a {
-  flex: 1;
-  text-align: center;
-  padding: 10px 0;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-  transition: filter 0.15s;
-}
+.f-actions a { flex: 1; text-align: center; padding: 10px 0; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; transition: filter 0.15s; }
 .f-actions a:hover { filter: brightness(0.95); }
 .f-btn-primary { background: var(--accent, #4f46e5); color: white; }
-.f-btn-secondary { background: var(--surface2, #f4f6f9); color: var(--ink, #0d1117);border: 1px solid var(--border, #ccc);}
-
-
-.card {
-  background: var(--surface, white);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,.06);
-  border: 1px solid var(--border, transparent);
-}
-
-.card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: var(--surface2, #ddd);
-}
-
+.f-btn-secondary { background: var(--surface2, #f4f6f9); color: var(--ink, #0d1117); border: 1px solid var(--border, #ccc); }
+.card { background: var(--surface, white); border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.06); border: 1px solid var(--border, transparent); }
+.card img { width: 100%; height: 200px; object-fit: cover; background: var(--surface2, #ddd); }
 .cardContent { padding: 20px; }
 .cardContent h3 { margin: 0; color: var(--ink, #0d1117); }
 .cardContent p  { color: var(--ink2, #555); }
 .cardContent a  { color: var(--accent, #4f46e5); text-decoration: none; font-weight: 600; }
-
-.circle {
-  position: absolute;
-  width: 900px;
-  height: 900px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #a78bfa, #60a5fa 45%, transparent 70%);
-  top: -520px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;
-  opacity: 0.6;
-}
-
-/* ── TESTIMONIALS ── */
-.testimonialCard {
-  background: var(--surface, white);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.06);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid var(--border, transparent);
-}
-
-.testimonialCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,.1);
-}
-
+.circle { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #a78bfa, #60a5fa 45%, transparent 70%); top: -520px; left: 50%; transform: translateX(-50%); z-index: -1; opacity: 0.6; }
+.testimonialCard { background: var(--surface, white); border-radius: 20px; padding: 30px; box-shadow: 0 12px 30px rgba(0,0,0,.06); display: flex; flex-direction: column; gap: 15px; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid var(--border, transparent); }
+.testimonialCard:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,.1); }
 .testimonial-stars { color: #fbbf24; font-size: 20px; letter-spacing: 2px; }
-
-.testimonial-text {
-  font-size: 16px;
-  color: var(--ink2, #4b5563);
-  line-height: 1.6;
-  font-style: italic;
-  flex-grow: 1;
-}
-
+.testimonial-text { font-size: 16px; color: var(--ink2, #4b5563); line-height: 1.6; font-style: italic; flex-grow: 1; }
 .testimonial-author { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
-
-.testimonial-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--accent-light, #eef2ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: var(--accent, #4f46e5);
-  font-size: 18px;
-}
-
+.testimonial-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--accent-light, #eef2ff); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--accent, #4f46e5); font-size: 18px; }
 .testimonial-name { font-weight: 600; color: var(--ink, #111827); font-size: 16px; margin: 0; }
 .testimonial-role { font-size: 14px; color: var(--muted, #6b7280); margin: 0; }
-
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-
-/* ── PROMO BANNER ── */
-.promo-banner {
-  background: linear-gradient(90deg, #4f46e5, #ec4899);
-  color: white;
-  text-align: center;
-  padding: 12px 20px;
-  font-size: 15px;
-  font-weight: 600;
-  display: none;
-  position: relative;
-  z-index: 10;
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 1100px) {
-  .cards { grid-template-columns: repeat(2, 1fr); }
-  .featured-grid { grid-template-columns: repeat(2, 1fr); }
-  .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 900px) {
-  .inputs { grid-template-columns: 1fr; }
-  .cards { grid-template-columns: 1fr; }
-  .featured-grid { grid-template-columns: 1fr; }
-  .testimonials-grid { grid-template-columns: 1fr; }
-  .header-btns { flex-direction: column; gap: 6px; }
-}
+.testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.promo-banner { background: linear-gradient(90deg, #4f46e5, #ec4899); color: white; text-align: center; padding: 12px 20px; font-size: 15px; font-weight: 600; display: none; position: relative; z-index: 10; }
+/* ── Calendar icon visible in dark mode ── */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+@media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, 1fr); } .featured-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .inputs { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr; } .featured-grid { grid-template-columns: 1fr; } .testimonials-grid { grid-template-columns: 1fr; } .header-btns { flex-direction: column; gap: 6px; } }
 </style>
 </head>
 
@@ -312,43 +104,23 @@ button:hover { filter: brightness(0.95); }
   <div class="cards">
     <div class="card">
       <img src="assets/car2.png">
-      <div class="cardContent">
-        <h3>Browse Cars</h3>
-        <p>View vehicles from database.</p>
-        <a href="cars.html?preview=1&v=5">Go to Cars →</a>
-      </div>
+      <div class="cardContent"><h3>Browse Cars</h3><p>View vehicles from database.</p><a href="cars.html?preview=1&v=5">Go to Cars →</a></div>
     </div>
     <div class="card">
       <img src="assets/car3.png">
-      <div class="cardContent">
-        <h3>Car of the week!</h3>
-        <p>See this week's popular cars.</p>
-        <a href="popular.html?preview=1&v=1">View Popular →</a>
-      </div>
+      <div class="cardContent"><h3>Car of the week!</h3><p>See this week's popular cars.</p><a href="popular.html?preview=1&v=1">View Popular →</a></div>
     </div>
     <div class="card">
       <img src="assets/car4.png">
-      <div class="cardContent">
-        <h3>My Favourites</h3>
-        <p>View Your Favourites</p>
-        <a href="Favourites.html?preview=1&v=2">Go to Favourites →</a>
-      </div>
+      <div class="cardContent"><h3>My Favourites</h3><p>View Your Favourites</p><a href="Favourites.html?preview=1&v=2">Go to Favourites →</a></div>
     </div>
     <div class="card">
       <img src="assets/cars/porsche.png" onerror="this.src='assets/car2.png'">
-      <div class="cardContent">
-        <h3>My Bookings</h3>
-        <p>View your rental history.</p>
-        <a href="my-bookings.html?preview=1">View Bookings →</a>
-      </div>
+      <div class="cardContent"><h3>My Bookings</h3><p>View your rental history.</p><a href="my-bookings.html?preview=1">View Bookings →</a></div>
     </div>
     <div class="card">
       <img src="assets/cars/challenger.png" onerror="this.src='assets/car2.png'">
-      <div class="cardContent">
-        <h3>My Account</h3>
-        <p>View your profile and booking history.</p>
-        <a href="account.html?preview=1">Go to Account →</a>
-      </div>
+      <div class="cardContent"><h3>My Account</h3><p>View your profile and booking history.</p><a href="account.html?preview=1">Go to Account →</a></div>
     </div>
   </div>
 
@@ -360,10 +132,7 @@ button:hover { filter: brightness(0.95); }
       <div class="testimonial-text">"The booking process was incredibly smooth. I found the perfect car for my weekend getaway in minutes. Highly recommended!"</div>
       <div class="testimonial-author">
         <div class="testimonial-avatar">SJ</div>
-        <div>
-          <p class="testimonial-name">Sarah Jenkins</p>
-          <p class="testimonial-role">Rented a Honda Civic</p>
-        </div>
+        <div><p class="testimonial-name">Sarah Jenkins</p><p class="testimonial-role">Rented a Honda Civic</p></div>
       </div>
     </div>
     <div class="testimonialCard">
@@ -371,10 +140,7 @@ button:hover { filter: brightness(0.95); }
       <div class="testimonial-text">"Excellent customer service and the vehicle was in pristine condition. The drop-off was hassle-free. Will definitely rent again."</div>
       <div class="testimonial-author">
         <div class="testimonial-avatar">MR</div>
-        <div>
-          <p class="testimonial-name">Michael Ramirez</p>
-          <p class="testimonial-role">Rented a Toyota Highlander</p>
-        </div>
+        <div><p class="testimonial-name">Michael Ramirez</p><p class="testimonial-role">Rented a Toyota Highlander</p></div>
       </div>
     </div>
     <div class="testimonialCard">
@@ -382,10 +148,7 @@ button:hover { filter: brightness(0.95); }
       <div class="testimonial-text">"I needed a car last minute for a business trip. This platform made it so easy to find a reliable vehicle at a great price."</div>
       <div class="testimonial-author">
         <div class="testimonial-avatar">EL</div>
-        <div>
-          <p class="testimonial-name">Emily Lee</p>
-          <p class="testimonial-role">Rented a Toyota Corolla</p>
-        </div>
+        <div><p class="testimonial-name">Emily Lee</p><p class="testimonial-role">Rented a Toyota Corolla</p></div>
       </div>
     </div>
   </div>
