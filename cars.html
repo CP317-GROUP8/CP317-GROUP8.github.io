@@ -118,10 +118,13 @@
 
       .viewBtn { background: var(--accent, #4f46e5); color: white; }
 
-      .bookBtn {
-        border: 1px solid #22c55e;
-        color: #22c55e;
-        background: transparent;
+      /* ✅ FIXED: explicit color so it never gets overridden by theme inheritance */
+      .bookBtn,
+      a.bookBtn,
+      a.linkBtn.bookBtn {
+        border: 1px solid #22c55e !important;
+        color: #22c55e !important;
+        background: transparent !important;
       }
 
       /* ✅ Compare button */
